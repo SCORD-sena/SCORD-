@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Estadísticas SCORD - Admin</title>
+ <link rel="stylesheet" href="/scord_crud/Css/InicioJugador.css">
+
+  <!-- Bootstrap 5.2.3 -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
+</head>
+<body class="bg-light">
+
+ <header class="header bg-white shadow-sm py-3">
+  <nav class="navbar container d-flex align-items-center justify-content-between flex-wrap">
+    <!-- Logo y título -->
+    <div class="d-flex align-items-center">
+      <img src="/scord_crud/img/logo.jpg" alt="Logo SCORD" class="me-2" style="height: 50px;" />
+      <h4 class="mb-0 text-danger fw-bold">SCORD</h4>
+    </div>
+
+    <!-- Icono hamburguesa -->
+    <label class="labe_hamburguesa d-md-none" for="menu_hamburguesa">
+      <svg xmlns="http://www.w3.org/2000/svg" width="35" height="35" fill="#e63946" viewBox="0 0 16 16">
+        <path fill-rule="evenodd"
+          d="M2.5 12a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5zm0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5zm0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5z" />
+      </svg>
+    </label>
+
+    <!-- Checkbox oculto -->
+    <input class="menu_hamburguesa d-none" type="checkbox" id="menu_hamburguesa" />
+
+    <!-- Menú de enlaces -->
+    <ul class="ul_links nav flex-md-row flex-column">
+      <li class="nav-item"><a href="InicioAdmin.html" class="nav-link text-black ">Inicio</a></li>
+          <li class="nav-item"><a href="CrEntrenadorAdmin.html" class="nav-link text-black">Cronograma Admin</a></li>
+          <li class="nav-item"><a href="PerfilJugadorAdmin.html" class="nav-link text-black">Perfil Jugador</a></li>
+          <li class="nav-item"><a href="PerEntrenadorAdmin.html" class="nav-link text-black">Perfil Entrenador</a></li>
+          <li class="nav-item"><a href="EstJJugadorAdmin.html" class="nav-link text-danger">Evaluar Jugadores</a></li>
+          <li class="nav-item"><a href="AgregarUsu.php" class="nav-link text-black">Agregar Usuario</a></li>
+          <li class="nav-item"><a href="Datos.php" class="nav-link text-black">Datos</a></li>
+          <li class="nav-item"><a href="CerrarSesion.html" class="nav-link btn btn-outline-danger btn-sm">Cerrar Sesión</a></li>
+  </nav>
+</header>
+
+      <!-- Contenido principal -->
+  <main class="container my-5">
+    <h2 class="text-center text-danger mb-4">Comparación de Jugadores</h2>
+    <p class="text-center mb-4">Compare estadísticas entre jugadores para identificar fortalezas, áreas de mejora y crear estrategias más efectivas.</p>
+
+    <!-- Selección de jugadores -->
+    <div class="row justify-content-center mb-4">
+      <div class="col-md-5">
+        <label class="form-label fw-semibold">Jugador 1</label>
+        <select class="form-select">
+          <option selected>Seleccionar jugador...</option>
+          <option>George Sanchez</option>
+          <option>Juan Pérez</option>
+          <option>Miguel Fernández</option>
+          <option>Luis Rodríguez</option>
+          <option>Diego Sánchez</option>
+        </select>
+      </div>
+      <div class="col-md-5">
+        <label class="form-label fw-semibold">Jugador 2</label>
+        <select class="form-select">
+          <option selected>Seleccionar jugador...</option>
+          <option>Carlos Martínez</option>
+          <option>Juan Pérez</option>
+          <option>Miguel Fernández</option>
+          <option>Luis Rodríguez</option>
+          <option>Diego Sánchez</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Tabla comparativa -->
+    <div class="table-responsive">
+      <table class="table table-bordered table-striped text-center">
+        <thead class="table-danger">
+          <tr>
+            <th>Estadística</th>
+            <th>Jugador 1</th>
+            <th>Jugador 2</th>
+            <th>Diferencia</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>🎯 Goles</td><td>10</td><td>25</td><td class="text-danger">-15</td></tr>
+          <tr><td>👨‍🦲 Goles de cabeza</td><td>2</td><td>5<td class="text-danger">-3</td></tr>
+          <tr><td>🤝 Asistencias</td><td>15</td><td>10</td><td class="text-success">+5</td></tr>
+          <tr><td>🎯 Tiros a puerta</td><td>24</td><td>10</td><td class="text-success">+14</td></tr>
+          <tr><td>🚩 Fueras de juego</td><td>20</td><td>4</td><td class="text-success">+16</td></tr>
+          <tr><td>⏱️ Partidos jugados</td><td>20</td><td>38</td><td class="text-danger">-18</td></tr>
+          <tr><td>🟨 Tarjetas Amarillas</td><td>2</td><td>4</td><td class="text-warning">-2</td></tr>
+          <tr><td>🟥 Tarjetas Rojas</td><td>0</td><td>0</td><td class="text">0</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="bg-dark text-white py-4">
+    <div class="container">
+      <div class="row text-center text-md-start justify-content-center">
+        <div class="col-md-4 mb-3">
+          <h3 class="text-danger">SCORD</h3>
+          <p>Sistema de control y organización deportiva</p>
+        </div>
+        <div class="col-md-4 mb-3">
+          <h3 class="text-danger">Escuela Quilmes</h3>
+          <p>Formando talentos para el futuro</p>
+        </div>
+      </div>
+      <hr class="border-light">
+      <p class="text-center mb-0 small">&copy; 2025 SCORD | Escuela de Fútbol Quilmes | Todos los derechos reservados</p>
+    </div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
