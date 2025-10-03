@@ -1,0 +1,242 @@
+   
+                                          /* CONSULTAS */
+  
+  /* 1)Reporte de rendimiento individual por jugador */
+  SELECT 
+    j.idJugadores, CONCAT(p.Nombre1, ' ', p.Apellido1) AS NombreJugador, c.Descripcion AS Categoria,
+    SUM(r.Goles) AS TotalGoles,
+    SUM(r.Asistencias) AS TotalAsistencias,
+    SUM(r.TirosApuerta) AS TotalTirosArco,
+    SUM(r.TarjetasRojas) AS TotalRojas,
+    SUM(r.TarjetasAmarillas) AS TotalAmarillas,
+    -- Goles por asistencia
+    IF(SUM(r.Asistencias) > 0, ROUND(SUM(r.Goles)/SUM(r.Asistencias), 2), NULL) AS GolesPorAsistencia,
+    -- Evaluación de disciplina
+    IF(SUM(r.TarjetasRojas) + SUM(r.TarjetasAmarillas) > 20, 'Revisar Disciplina', 'Buena Disciplina') AS EstadoDisciplina
+
+FROM RendimientosPartidos r
+INNER JOIN Jugadores j ON r.idJugadores = j.idJugadores
+INNER JOIN Personas p ON j.NumeroDeDocumento = p.NumeroDeDocumento
+INNER JOIN Categorias c ON j.idCategorias = c.idCategorias
+GROUP BY j.idJugadores;
+
+
+/* 2) Obtener el cronograma de actividades del mes actual  */
+
+SELECT 
+    FechaDeEventos,TipoDeEventos,CanchaPartido,Ubicacion,SedeEntrenamiento,Descripcion,
+    -- Días restantes para el evento
+    DATEDIFF(FechaDeEventos, CURDATE()) AS DiasRestantes
+FROM Cronogramas
+WHERE MONTH(FechaDeEventos) = MONTH(CURDATE())
+  AND YEAR(FechaDeEventos) = YEAR(CURDATE());
+  
+  
+ /* 3)Comparación entre dos jugadores (por ID) */
+   SELECT j.idJugadores, CONCAT(p.Nombre1, ' ', p.Apellido1) AS NombreCompleto,
+  SUM(r.Goles) AS TotalGoles,
+  SUM(r.Asistencias) AS TotalAsistencias,
+  SUM(r.TirosApuerta) AS TirosAlArco,
+  SUM(r.TarjetasAmarillas) AS Amarillas,
+  SUM(r.TarjetasRojas) AS Rojas,
+  CASE 
+    WHEN SUM(r.Goles) >= 10 THEN 'Goleador'
+    WHEN SUM(r.Asistencias) >= 10 THEN 'Asistidor'
+    ELSE 'Puede mejorar'
+  END AS TipoJugador
+FROM Jugadores j
+INNER JOIN Personas p ON j.NumeroDeDocumento = p.NumeroDeDocumento
+INNER JOIN RendimientosPartidos r ON j.idJugadores = r.idJugadores
+WHERE j.idJugadores IN (302, 326, 306)
+GROUP BY j.idJugadores;
+  
+  
+  /* 4)Jugadores próximos a cumplir 18 años */
+  SELECT 
+  p.NumeroDeDocumento, CONCAT(p.Nombre1, ' ', p.Apellido1) AS NombreCompleto,p.FechaDeNacimiento,
+  DATE_ADD(p.FechaDeNacimiento, INTERVAL 18 YEAR) AS FechaCumple18,
+  DATEDIFF(DATE_ADD(p.FechaDeNacimiento, INTERVAL 18 YEAR), CURDATE()) AS DiasPara18,
+  IF(DATEDIFF(DATE_ADD(p.FechaDeNacimiento, INTERVAL 18 YEAR), CURDATE()) <= 0,
+     'Ya es mayor de edad',
+     'Próximo a cumplir 18') AS Estado
+FROM Personas p
+INNER JOIN Jugadores j ON p.NumeroDeDocumento = j.NumeroDeDocumento
+WHERE DATEDIFF(DATE_ADD(p.FechaDeNacimiento, INTERVAL 18 YEAR), CURDATE()) BETWEEN -800 AND 364
+ORDER BY DiasPara18 ASC;
+
+/* 5)Saber en que categoría está a cargo cada entrenador */
+
+SELECT 
+  e.idEntrenadores, CONCAT(p.Nombre1, ' ', p.Apellido1) AS NombreEntrenador, e.AnosDeExperiencia, e.cargo, c.descripcion AS CategoriaAcargo
+FROM EntrenadoresCategorias ec
+INNER JOIN Entrenadores e ON ec.idEntrenadores = e.idEntrenadores
+INNER JOIN Categorias c ON ec.idCategorias = c.idCategorias
+INNER JOIN Personas p ON e.NumeroDeDocumento = p.NumeroDeDocumento;
+
+
+/* 6)Saber los encuentros y si fueron locales o visitantes */
+
+SELECT 
+  pe.idPartido, eq.NombreSEquipos, eq.sub as categoria, 
+  CASE 
+    WHEN pe.EsLocal = 1 THEN 'Local'
+    ELSE 'Visitante'
+  END AS TipoEquipo
+FROM PartidosEquipos pe
+INNER JOIN Equipos eq ON pe.idEquipo = eq.idEquipo
+ORDER BY pe.idPartido, pe.EsLocal DESC;
+
+
+/* 7) Saber los goles que hicieron en una competencia*/
+
+SELECT 
+    CONCAT(P.Nombre1, ' ', P.Apellido1) AS NombreJugador,
+    R.Goles,
+    PA.idPartido,
+    CO.NombreCompe AS Competencia
+FROM RendimientosPartidos R
+INNER JOIN Jugadores J ON J.idJugadores = R.idJugadores
+INNER JOIN Personas P ON P.NumeroDeDocumento = J.NumeroDeDocumento
+INNER JOIN Partidos PA ON PA.idPartido = R.idPartido
+INNER JOIN Competencias CO ON CO.idCompetencias = PA.idCompetencias
+WHERE R.Goles >= 3;
+
+
+
+/* 8)Promedio de goles, asistencias y minutos jugados por cada categoría*/
+
+SELECT 
+    C.Descripcion AS Categoria,   
+    round(AVG(R.Goles),1 )AS PromedioGoles,
+    round(AVG(R.Asistencias),1) AS PromedioAsistencias,
+    round(AVG(R.MinutosJugados),1) AS PromedioMinutos
+FROM RendimientosPartidos R
+INNER JOIN Jugadores J ON J.idJugadores = R.idJugadores
+INNER JOIN Categorias C ON C.idCategorias = J.idCategorias
+GROUP BY C.Descripcion;
+
+
+/* 9)Listar jugadores*/
+SELECT 
+    P.NumeroDeDocumento,
+    CONCAT(P.Nombre1, ' ', P.Nombre2, ' ', P.Apellido1, ' ', P.Apellido2) AS NombreCompleto,
+    P.Genero, P.FechaDeNacimiento, J.Dorsal, J.Posicion, C.Descripcion AS Categoria,CO.NombreCompe AS Competencia,CO.Año
+FROM Jugadores J
+INNER JOIN Personas P ON P.NumeroDeDocumento = J.NumeroDeDocumento
+INNER JOIN Categorias C ON C.idCategorias = J.idCategorias
+INNER JOIN Partidos PA ON PA.idPartido = J.idPartido
+INNER JOIN PartidosEquipos PE ON PE.idPartido = PA.idPartido
+INNER JOIN Equipos E ON E.idEquipo = PE.idEquipo
+INNER JOIN Competencias CO ON CO.idCompetencias = PA.idCompetencias;
+
+
+/* 10) Entrenadores con los jugadores que estén en su categoría  */
+
+SELECT 
+    CONCAT(PE.Nombre1, ' ', PE.Apellido1) AS Entrenador,
+    C.Descripcion AS Categoria,
+    CONCAT(PJ.Nombre1, ' ', PJ.Apellido1) AS Jugador
+FROM Entrenadores E
+INNER JOIN Personas PE ON PE.NumeroDeDocumento = E.NumeroDeDocumento
+INNER JOIN EntrenadoresCategorias EC ON EC.idEntrenadores = E.idEntrenadores
+INNER JOIN Categorias C ON C.idCategorias = EC.idCategorias
+INNER JOIN Jugadores J ON J.idCategorias = C.idCategorias
+INNER JOIN Personas PJ ON PJ.NumeroDeDocumento = J.NumeroDeDocumento;
+
+
+                        /* SUBCONSULTAS */
+
+/* 1)Saber el juagdor MVP en cada categoría */
+
+SELECT 
+  Categoria, NombreCompleto, idJugador, MAX(PuntajeMVP) AS MejorPuntaje
+FROM (
+  SELECT 
+    c.descripcion AS Categoria, CONCAT(p.Nombre1, ' ', p.Apellido1) AS NombreCompleto, j.idJugadores AS idJugador,
+    SUM(r.Goles * 4 + r.Asistencias * 3 + r.TirosApuerta * 1 - r.TarjetasAmarillas * 2 - r.TarjetasRojas * 3) AS PuntajeMVP
+  FROM Jugadores j
+  INNER JOIN Personas p ON j.NumeroDeDocumento = p.NumeroDeDocumento
+  INNER JOIN Categorias c ON j.idCategorias = c.idCategorias
+  INNER JOIN RendimientosPartidos r ON j.idJugadores = r.idJugadores
+  GROUP BY j.idJugadores, c.descripcion, p.Nombre1, p.Apellido1
+) AS Subconsulta
+GROUP BY Categoria;
+
+/* 2) Mostrar el nombre y la cantidad de goles de cada jugador, junto con el promedio general de goles */
+
+SELECT 
+    CONCAT(P.Nombre1, ' ', P.Apellido1) AS NombreJugador,
+    (SELECT SUM(Goles) FROM RendimientosPartidos R WHERE R.idJugadores = J.idJugadores) AS TotalGoles,
+    (SELECT AVG(Goles) FROM RendimientosPartidos) AS PromedioGolesGeneral
+FROM Jugadores J
+INNER JOIN Personas P ON P.NumeroDeDocumento = J.NumeroDeDocumento;
+
+/* 3)  Jugadores con 0 tarjetas rojas*/
+
+SELECT 
+  j.idJugadores,
+  CONCAT(p.Nombre1, ' ', p.Nombre2, ' ', p.Apellido1, ' ', p.Apellido2) AS NombreCompleto,
+  p.NumeroDeDocumento,
+  p.Genero,
+  p.FechaDeNacimiento,
+  j.Posicion,
+  j.Dorsal,
+  c.Descripcion AS Categoria,
+  0 AS TarjetasRojas
+FROM Jugadores j
+INNER JOIN Personas p ON p.NumeroDeDocumento = j.NumeroDeDocumento
+INNER JOIN Categorias c ON c.idCategorias = j.idCategorias
+WHERE j.idJugadores NOT IN (
+  SELECT idJugadores
+  FROM RendimientosPartidos
+  WHERE TarjetasRojas > 0
+)
+ORDER BY NombreCompleto;
+
+/* 4) Jugadores que tienen 4 amarillas y están condicionados */
+
+SELECT 
+  j.idJugadores,
+  CONCAT(p.Nombre1, ' ', p.Apellido1) AS NombreJugador,
+  j.Dorsal,
+  j.Posicion,
+  c.Descripcion AS Categoria,
+  COALESCE((
+    SELECT SUM(r.TarjetasRojas + r.TarjetasAmarillas)
+    FROM RendimientosPartidos r
+    WHERE r.idJugadores = j.idJugadores
+  ), 0) AS TotalTarjetas
+FROM Jugadores j
+INNER JOIN Personas p ON p.NumeroDeDocumento = j.NumeroDeDocumento
+INNER JOIN Categorias c ON c.idCategorias = j.idCategorias
+WHERE (
+  SELECT SUM(r.TarjetasRojas + r.TarjetasAmarillas)
+  FROM RendimientosPartidos r
+  WHERE r.idJugadores = j.idJugadores
+) =4;
+
+
+/* 5) Competencia en la que hicieron más goles */
+
+SELECT 
+  c.idCompetencias, c.NombreCompe, c.TipoCompetencia, c.Año, TotalGoles
+FROM Competencias c
+INNER JOIN (
+  SELECT 
+    p.idCompetencias,
+    SUM(r.Goles) AS TotalGoles
+  FROM Partidos p
+  INNER JOIN RendimientosPartidos r ON p.idPartido = r.idPartido
+  GROUP BY p.idCompetencias
+) AS Sub ON c.idCompetencias = Sub.idCompetencias
+WHERE TotalGoles = (
+  SELECT MAX(TotalGoles)
+  FROM (
+    SELECT 
+      p.idCompetencias,
+      SUM(r.Goles) AS TotalGoles
+    FROM Partidos p
+    INNER JOIN RendimientosPartidos r ON p.idPartido = r.idPartido
+    GROUP BY p.idCompetencias
+  ) AS Totales
+);
