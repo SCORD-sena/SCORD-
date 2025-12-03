@@ -1,3 +1,4 @@
+// ... (Importaciones en la parte superior del archivo)
 import 'package:flutter/material.dart';
 import '../models/jugador_model.dart'; 
 import '../models/categoria_model.dart';
@@ -5,7 +6,7 @@ import '../models/tipo_documento_model.dart';
 import '../models/persona_model.dart';
 import '../services/jugador_service.dart';
 import '../utils/validator.dart';
-
+// ...
 
 class PerfilJugadorAdminScreen extends StatefulWidget {
   const PerfilJugadorAdminScreen({super.key});
@@ -80,9 +81,7 @@ class _PerfilJugadorAdminScreenState extends State<PerfilJugadorAdminScreen> {
     });
   }
   
-  // 🆕 Función auxiliar para reemplazar SmartDialog.showToast con SnackBar
   void _showSnackBar(String message, {bool isError = false}) {
-    // Necesitamos asegurar que el contexto sea válido para mostrar la SnackBar
     if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
@@ -93,14 +92,12 @@ class _PerfilJugadorAdminScreenState extends State<PerfilJugadorAdminScreen> {
     );
   }
 
-  // Fetches
   Future<void> _fetchInitialData() async {
     setState(() => _loading = true);
     try {
       final jugadores = _jugadorService.fetchJugadores();
       final categorias = _jugadorService.fetchCategorias();
       final tiposDocumento = _jugadorService.fetchTiposDocumento();
-      
       final results = await Future.wait([jugadores, categorias, tiposDocumento]);
       
       setState(() {
@@ -108,7 +105,6 @@ class _PerfilJugadorAdminScreenState extends State<PerfilJugadorAdminScreen> {
         _categorias = results[1] as List<Categoria>;
         _tiposDocumento = results[2] as List<TipoDocumento>;
       });
-
     } catch (e) {
       _showSnackBar('Error al cargar datos iniciales: ${e.toString()}', isError: true);
     } finally {
@@ -116,7 +112,6 @@ class _PerfilJugadorAdminScreenState extends State<PerfilJugadorAdminScreen> {
     }
   }
 
-  // Habilitar edición
   void _activarEdicion() {
     if (_jugadorSeleccionado == null) {
       _showSnackBar('Por favor selecciona un jugador primero', isError: true);
@@ -125,7 +120,6 @@ class _PerfilJugadorAdminScreenState extends State<PerfilJugadorAdminScreen> {
 
     final persona = _jugadorSeleccionado!.persona;
 
-    // Llenar Controllers y variables de estado
     _controllers['numeroDocumento']!.text = persona.numeroDeDocumento;
     _controllers['primerNombre']!.text = persona.nombre1;
     _controllers['segundoNombre']!.text = persona.nombre2 ?? '';
@@ -157,22 +151,19 @@ class _PerfilJugadorAdminScreenState extends State<PerfilJugadorAdminScreen> {
     });
   }
 
-  // Cancelar edición
   void _cancelarEdicion() {
     setState(() {
       _modoEdicion = false;
     });
   }
   
-  // Guardar Cambios
   Future<void> _guardarCambios() async {
-    final validationMessages = _validateForm().toSet().toList(); // Asegurar set y list
+    final validationMessages = _validateForm().toSet().toList();
     if (validationMessages.isNotEmpty) {
       _showSnackBar(validationMessages.join('\n'), isError: true);
       return;
     }
     
-    // 🆕 Reemplazamos SmartDialog.show por showDialog nativo
     final confirm = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
@@ -201,14 +192,10 @@ class _PerfilJugadorAdminScreenState extends State<PerfilJugadorAdminScreen> {
         ],
       ),
     );
-
     if (confirm != true) return;
 
     setState(() => _loading = true);
-
     try {
-      // ✅ CORRECCIÓN DE ERROR 'PERSONA': Se asume que Persona es una clase de modelo,
-      // no un método, y que se importa correctamente desde jugador_model.dart.
       final personaData = Persona(
         idPersonas: _jugadorSeleccionado!.persona.idPersonas, 
         numeroDeDocumento: _controllers['numeroDocumento']!.text,
@@ -224,13 +211,11 @@ class _PerfilJugadorAdminScreenState extends State<PerfilJugadorAdminScreen> {
         correo: _controllers['correo']!.text,
         epsSisben: _controllers['epsSisben']!.text.isEmpty ? null : _controllers['epsSisben']!.text,
       );
-
       await _jugadorService.updatePersona(
         _jugadorSeleccionado!.persona.idPersonas, 
         personaData, 
         contrasena: _controllers['contrasena']!.text.isNotEmpty ? _controllers['contrasena']!.text : null
       );
-      
       final jugadorData = Jugador(
         idJugadores: _jugadorSeleccionado!.idJugadores,
         idPersonas: _jugadorSeleccionado!.idPersonas,
@@ -246,7 +231,6 @@ class _PerfilJugadorAdminScreenState extends State<PerfilJugadorAdminScreen> {
         idCategorias: _selectedCategoriaId!,
         persona: personaData, 
       );
-      
       await _jugadorService.updateJugador(_jugadorSeleccionado!.idJugadores, jugadorData);
 
       _showSnackBar('Los datos se actualizaron correctamente.');
@@ -264,36 +248,26 @@ class _PerfilJugadorAdminScreenState extends State<PerfilJugadorAdminScreen> {
     }
   }
 
-  // Validar formulario (Devuelve una lista de mensajes de error)
   List<String> _validateForm() {
     final List<String> errors = [];
     
-    // Aquí puedes rellenar la lógica de validación usando Validator.dart
-    // (Esta lógica es idéntica a la que tenías, pero sin SmartDialog)
-
-    // Ejemplo de validación
     if (_controllers['numeroDocumento']!.text.isEmpty) {
         errors.add('El número de documento es obligatorio.');
     }
-    // ... [Otras validaciones del formulario] ...
     
-    // Simplemente llamamos a la validación del GlobalKey.
     if (_formKey.currentState?.validate() == false) {
       errors.add('Hay errores en los campos marcados.');
     }
 
-    // Usamos toSet().toList() para eliminar errores duplicados (por si Validator tiene problemas)
-    return errors.toSet().toList(); 
+    return errors.toSet().toList();
   }
 
-  // Eliminar Jugador
   Future<void> _eliminarJugador() async {
     if (_jugadorSeleccionado == null) {
       _showSnackBar('Por favor selecciona un jugador primero', isError: true);
       return;
     }
 
-    // 🆕 Reemplazamos SmartDialog.show por showDialog nativo
     final confirm = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
@@ -314,12 +288,10 @@ class _PerfilJugadorAdminScreenState extends State<PerfilJugadorAdminScreen> {
     );
 
     if (confirm != true) return;
-
     try {
       await _jugadorService.deleteJugador(_jugadorSeleccionado!.idJugadores);
       
       _showSnackBar('El jugador se eliminó correctamente');
-
       setState(() {
         _jugadorSeleccionado = null;
         _modoEdicion = false;
@@ -343,12 +315,23 @@ class _PerfilJugadorAdminScreenState extends State<PerfilJugadorAdminScreen> {
     return edad.toString();
   }
 
-  Widget _buildListItem(String label, Widget child) {
+  // ✅ CORRECCIÓN: Usar el parámetro nombrado 'trailing' correctamente
+  Widget _buildListItem(String label, Widget trailing) {
     return ListTile(
       visualDensity: VisualDensity.compact,
-      contentPadding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 0.0),
-      title: Text(label, style: const TextStyle(color: Colors.red, fontWeight: FontWeight.bold)),
-      trailing: child,
+      contentPadding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 4.0),
+      title: Text(
+        label, 
+        style: const TextStyle(
+          color: Colors.red, 
+          fontWeight: FontWeight.bold,
+          fontSize: 14,
+        ),
+      ),
+      trailing: SizedBox(
+        width: 200, // ✅ Ancho fijo para el trailing
+        child: trailing,
+      ),
     );
   }
   
@@ -357,7 +340,7 @@ class _PerfilJugadorAdminScreenState extends State<PerfilJugadorAdminScreen> {
       padding: const EdgeInsets.symmetric(vertical: 8.0),
       child: Center(
         child: Text(
-          title, 
+          title,
           style: const TextStyle(
             fontSize: 18, 
             fontWeight: FontWeight.bold, 
@@ -368,14 +351,78 @@ class _PerfilJugadorAdminScreenState extends State<PerfilJugadorAdminScreen> {
     );
   }
 
+  Widget _buildDrawerItem(BuildContext context, String title, IconData icon, String routeName) {
+    return ListTile(
+      leading: Icon(icon, color: Colors.red),
+      title: Text(title, style: const TextStyle(fontSize: 16)),
+      onTap: () {
+        Navigator.of(context).pop();
+        
+        if (routeName == '/Logout') {
+          // Lógica de deslogueo
+        } else if (ModalRoute.of(context)?.settings.name != routeName) {
+           Navigator.of(context).pushNamed(routeName); 
+        }
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final persona = _jugadorSeleccionado?.persona;
-
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Perfil del Jugador'),
+        title: const Text(
+          'SCORD - Perfil Jugador',
+          style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold),
+        ),
+        backgroundColor: Colors.white,
+        elevation: 1,
+        centerTitle: false,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.person_add, color: Colors.green),
+            onPressed: () {
+              Navigator.of(context).pushNamed('/AgregarJugador');
+            },
+            tooltip: 'Agregar Jugador',
+          ),
+          const SizedBox(width: 8),
+        ],
       ),
+
+      drawer: Drawer(
+        child: ListView(
+          padding: EdgeInsets.zero,
+          children: <Widget>[
+            const DrawerHeader(
+              decoration: BoxDecoration(
+                color: Colors.red,
+              ),
+              child: Text(
+                'Menú de Navegación',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold
+                ),
+              ),
+            ),
+            
+            _buildDrawerItem(context, 'Inicio', Icons.home, '/Inicio'),
+            _buildDrawerItem(context, 'Cronograma', Icons.calendar_month, '/Cronograma'),
+            _buildDrawerItem(context, 'Perfil Jugador', Icons.person_pin, '/PerfilJugadorAdmin'),
+            _buildDrawerItem(context, 'Estadísticas Jugadores', Icons.bar_chart, '/EstadisticasJugadores'),
+            _buildDrawerItem(context, 'Perfil Entrenador', Icons.sports_gymnastics, '/PerfilEntrenador'),
+            _buildDrawerItem(context, 'Evaluar Jugadores', Icons.rule, '/EvaluarJugadores'),
+
+            const Divider(),
+            
+            _buildDrawerItem(context, 'Cerrar Sesión', Icons.logout, '/Logout'),
+          ],
+        ),
+      ),
+      
       body: _loading 
         ? const Center(child: CircularProgressIndicator())
         : SingleChildScrollView(
@@ -385,23 +432,22 @@ class _PerfilJugadorAdminScreenState extends State<PerfilJugadorAdminScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  // === Botones de Acción ===
                   Wrap(
                     spacing: 8.0,
                     runSpacing: 8.0,
                     alignment: WrapAlignment.center,
                     children: [
                       ElevatedButton.icon(
-  onPressed: () {
-    Navigator.of(context).pushNamed('/AgregarJugador');
-  },
-  icon: const Icon(Icons.add),
-  label: const Text('Agregar Jugador'),
-  style: ElevatedButton.styleFrom(
-    backgroundColor: Colors.green, 
-    foregroundColor: Colors.white
-  ),
-),
+                        onPressed: () {
+                          Navigator.of(context).pushNamed('/AgregarJugador');
+                        },
+                        icon: const Icon(Icons.add),
+                        label: const Text('Agregar Jugador'),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.green, 
+                          foregroundColor: Colors.white
+                        ),
+                      ),
                       
                       if (!_modoEdicion) ...[
                         ElevatedButton.icon(
@@ -435,7 +481,6 @@ class _PerfilJugadorAdminScreenState extends State<PerfilJugadorAdminScreen> {
                   
                   const Divider(height: 32),
 
-                  // === Filtros y Foto de Perfil ===
                   Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -444,7 +489,6 @@ class _PerfilJugadorAdminScreenState extends State<PerfilJugadorAdminScreen> {
                           padding: const EdgeInsets.only(right: 16.0),
                           child: Column(
                             children: [
-                              // Selector de Categoría
                               DropdownButtonFormField<String>(
                                 decoration: const InputDecoration(labelText: 'Seleccionar Categoría'),
                                 value: _categoriaSeleccionada,
@@ -464,7 +508,6 @@ class _PerfilJugadorAdminScreenState extends State<PerfilJugadorAdminScreen> {
                                 },
                               ),
                               const SizedBox(height: 16),
-                              // Selector de Jugador
                               DropdownButtonFormField<int>(
                                 decoration: const InputDecoration(labelText: 'Seleccionar Jugador'),
                                 value: _jugadorSeleccionado?.idJugadores,
@@ -484,10 +527,8 @@ class _PerfilJugadorAdminScreenState extends State<PerfilJugadorAdminScreen> {
                                 },
                               ),
                               const SizedBox(height: 24),
-                              // Foto de Perfil
                               ClipOval(
                                 child: Image.asset(
-                                  // Asegúrate de que esta ruta sea correcta y que el archivo exista en tu carpeta assets
                                   'assets/Foto_Perfil.webp', 
                                   width: 150,
                                   height: 150,
@@ -499,12 +540,10 @@ class _PerfilJugadorAdminScreenState extends State<PerfilJugadorAdminScreen> {
                         ),
                       ),
                       
-                      // Columna Derecha de Contacto y Tutores (Vista/Edición)
                       Expanded(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.stretch,
                           children: [
-                            // === Información de Contacto ===
                             _buildSectionTitle('📞 Información de Contacto'),
                             Card(
                               elevation: 0,
@@ -535,7 +574,6 @@ class _PerfilJugadorAdminScreenState extends State<PerfilJugadorAdminScreen> {
                               ),
                             ),
                             const SizedBox(height: 16),
-                            // === Información de Tutores ===
                             _buildSectionTitle('👨‍👩‍👦 Información de Tutores'),
                             Card(
                               elevation: 0,
@@ -564,11 +602,9 @@ class _PerfilJugadorAdminScreenState extends State<PerfilJugadorAdminScreen> {
 
                   const Divider(height: 32),
 
-                  // === Información Personal y Deportiva (Fila Inferior) ===
                   Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // Columna Izquierda: Personal
                       Expanded(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -596,9 +632,7 @@ class _PerfilJugadorAdminScreenState extends State<PerfilJugadorAdminScreen> {
                                     'Fecha de Nacimiento:', 
                                     _modoEdicion 
                                       ? _buildDateField('fechaNacimiento') 
-                                      : Text(persona?.fechaDeNacimiento != null ? 
-                                          '${persona!.fechaDeNacimiento.day.toString().padLeft(2, '0')}/${persona.fechaDeNacimiento.month.toString().padLeft(2, '0')}/${persona.fechaDeNacimiento.year}'
-                                          : '-')),
+                                      : Text(persona?.fechaDeNacimiento != null ? '${persona!.fechaDeNacimiento.day.toString().padLeft(2, '0')}/${persona.fechaDeNacimiento.month.toString().padLeft(2, '0')}/${persona.fechaDeNacimiento.year}' : '-')),
                                   _buildListItem(
                                     'Documento:', 
                                     _modoEdicion 
@@ -625,7 +659,6 @@ class _PerfilJugadorAdminScreenState extends State<PerfilJugadorAdminScreen> {
                         ),
                       ),
                       
-                      // Columna Derecha: Deportiva
                       Expanded(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -646,109 +679,190 @@ class _PerfilJugadorAdminScreenState extends State<PerfilJugadorAdminScreen> {
                                     _modoEdicion 
                                       ? _buildEditableField('posicion', 'Posición', validator: (v) => Validator.validateRequired(v, 'Posición')) 
                                       : Text(_jugadorSeleccionado?.posicion ?? '-')),
-                                  _buildListItem(
-                                    'Estatura:', 
-                                    _modoEdicion 
-                                      ? _buildEditableField('estatura', 'Estatura (cm)', keyboardType: TextInputType.number, validator: Validator.validateEstatura) 
-                                      : Text(_jugadorSeleccionado != null ? '${_jugadorSeleccionado!.estatura} cm' : '-')),
-                                  _buildListItem(
-                                    'UPZ:', 
-                                    _modoEdicion 
-                                      ? _buildEditableField('upz', 'UPZ (Opcional)', isOptional: true) 
-                                      : Text(_jugadorSeleccionado?.upz ?? '-')),
-                                  _buildListItem(
-                                    'Categoría:', 
-                                    _modoEdicion 
-                                      ? _buildCategoriaDropdown() 
-                                      : Text(_categorias.firstWhere((c) => c.idCategorias == _jugadorSeleccionado?.idCategorias, orElse: () => Categoria(idCategorias: 0, descripcion: '-')).descripcion)),
-                                ],
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-          ),
-    );
-  }
-
-  Widget _buildEditableField(String key, String label, {bool isOptional = false, TextInputType keyboardType = TextInputType.text, bool isPassword = false, String? Function(String?)? validator}) {
-    return SizedBox(width: 150, child: TextFormField(controller: _controllers[key], keyboardType: keyboardType, obscureText: isPassword,
-        decoration: InputDecoration(labelText: label, suffixText: isOptional ? '(Opcional)' : null, isDense: true, contentPadding: const EdgeInsets.symmetric(vertical: 8, horizontal: 8), border: const OutlineInputBorder()),
-        validator: (value) { if (validator != null) { final error = validator(value); return error; } return null; },
+_buildListItem(
+'Estatura:',
+_modoEdicion
+? _buildEditableField('estatura', 'Estatura (cm)', keyboardType: TextInputType.number, validator: Validator.validateEstatura)
+: Text(_jugadorSeleccionado != null ? '${_jugadorSeleccionado!.estatura} cm' : '-')),
+_buildListItem(
+'UPZ:',
+_modoEdicion
+? _buildEditableField('upz', 'UPZ (Opcional)', isOptional: true)
+: Text(_jugadorSeleccionado?.upz ?? '-')),
+_buildListItem(
+'Categoría:',
+_modoEdicion
+? _buildCategoriaDropdown()
+: Text(_categorias.firstWhere((c) => c.idCategorias == _jugadorSeleccionado?.idCategorias, orElse: () => Categoria(idCategorias: 0, descripcion: '-')).descripcion)),
+],
+),
+),
+],
+),
+),
+],
+),
+],
+),
+),
+),
+);
+}
+// ✅ CORRECCIÓN: Removed SizedBox wrapper, let parent ListTile handle sizing
+Widget _buildEditableField(
+String key,
+String label,
+{
+bool isOptional = false,
+TextInputType keyboardType = TextInputType.text,
+bool isPassword = false,
+String? Function(String?)? validator
+}
+) {
+return TextFormField(
+controller: _controllers[key],
+keyboardType: keyboardType,
+obscureText: isPassword,
+decoration: InputDecoration(
+labelText: label,
+suffixText: isOptional ? '(Opcional)' : null,
+isDense: true,
+contentPadding: const EdgeInsets.symmetric(vertical: 8, horizontal: 8),
+border: const OutlineInputBorder()
+),
+validator: (value) {
+if (validator != null) {
+final error = validator(value);
+return error;
+}
+return null;
+},
+);
+}
+Widget _buildTutorNameField() {
+return Column(
+crossAxisAlignment: CrossAxisAlignment.stretch,
+children: [
+_buildEditableField('nomTutor1', 'Nom. Tutor 1', validator: (v) => Validator.validateRequired(v, 'Nombre Tutor 1')),
+const SizedBox(height: 4),
+_buildEditableField('apeTutor1', 'Ape. Tutor 1', validator: (v) => Validator.validateRequired(v, 'Apellido Tutor 1')),
+const SizedBox(height: 4),
+_buildEditableField('nomTutor2', 'Nom. Tutor 2', isOptional: true),
+const SizedBox(height: 4),
+_buildEditableField('apeTutor2', 'Ape. Tutor 2', isOptional: true),
+],
+);
+}
+Widget _buildNameField() {
+return Column(
+crossAxisAlignment: CrossAxisAlignment.stretch,
+children: [
+_buildEditableField('primerNombre', 'Primer Nombre', validator: (v) => Validator.validateRequired(v, 'Primer Nombre')),
+const SizedBox(height: 4),
+_buildEditableField('segundoNombre', 'Segundo Nombre', isOptional: true),
+],
+);
+}
+Widget _buildApellidoField() {
+return Column(
+crossAxisAlignment: CrossAxisAlignment.stretch,
+children: [
+_buildEditableField('primerApellido', 'Primer Apellido', validator: (v) => Validator.validateRequired(v, 'Primer Apellido')),
+const SizedBox(height: 4),
+_buildEditableField('segundoApellido', 'Segundo Apellido', isOptional: true),
+],
+);
+}
+Widget _buildTipoDocumentoDropdown() {
+return DropdownButtonFormField<int>(
+value: _selectedTipoDocumentoId,
+hint: const Text('Tipo Doc.'),
+decoration: const InputDecoration(
+isDense: true,
+contentPadding: EdgeInsets.symmetric(vertical: 8, horizontal: 8),
+border: OutlineInputBorder(),
+),
+items: _tiposDocumento.map((td) => DropdownMenuItem(
+value: td.idTiposDeDocumentos,
+child: Text(td.descripcion)
+)).toList(),
+onChanged: (value) {
+setState(() {
+_selectedTipoDocumentoId = value;
+});
+},
+);
+}
+Widget _buildGeneroDropdown() {
+return DropdownButtonFormField<String>(
+value: _selectedGenero,
+hint: const Text('Género'),
+decoration: const InputDecoration(
+isDense: true,
+contentPadding: EdgeInsets.symmetric(vertical: 8, horizontal: 8),
+border: OutlineInputBorder(),
+),
+items: const [
+DropdownMenuItem(value: 'M', child: Text('Masculino')),
+DropdownMenuItem(value: 'F', child: Text('Femenino'))
+],
+onChanged: (value) {
+setState(() {
+_selectedGenero = value;
+});
+},
+);
+}
+Widget _buildCategoriaDropdown() {
+return DropdownButtonFormField<int>(
+value: _selectedCategoriaId,
+hint: const Text('Categoría'),
+decoration: const InputDecoration(
+isDense: true,
+contentPadding: EdgeInsets.symmetric(vertical: 8, horizontal: 8),
+border: OutlineInputBorder(),
+),
+items: _categorias.map((cat) => DropdownMenuItem(
+value: cat.idCategorias,
+child: Text(cat.descripcion)
+)).toList(),
+onChanged: (value) {
+setState(() {
+_selectedCategoriaId = value;
+});
+},
+);
+}
+Widget _buildDateField(String key) {
+Future<void> _selectDate() async {
+final DateTime? picked = await showDatePicker(
+context: context,
+initialDate: _selectedFechaNacimiento ?? DateTime.now(),
+firstDate: DateTime(1900),
+lastDate: DateTime.now()
+);
+if (picked != null && picked != _selectedFechaNacimiento) {
+setState(() {
+_selectedFechaNacimiento = picked;
+_controllers[key]!.text = picked.toIso8601String().split('T')[0];
+});
+}
+}
+return GestureDetector(
+  onTap: _selectDate, 
+  child: AbsorbPointer(
+    child: TextFormField(
+      controller: _controllers[key],
+      decoration: const InputDecoration(
+        labelText: 'dd/mm/aaaa', 
+        suffixIcon: Icon(Icons.calendar_today), 
+        isDense: true, 
+        contentPadding: EdgeInsets.symmetric(vertical: 8, horizontal: 8), 
+        border: OutlineInputBorder()
       ),
-    );
-  }
-
-  Widget _buildTutorNameField() {
-    return Column(crossAxisAlignment: CrossAxisAlignment.end, children: [
-        _buildEditableField('nomTutor1', 'Nom. Tutor 1', validator: (v) => Validator.validateRequired(v, 'Nombre Tutor 1')),
-        _buildEditableField('apeTutor1', 'Ape. Tutor 1', validator: (v) => Validator.validateRequired(v, 'Apellido Tutor 1')),
-        _buildEditableField('nomTutor2', 'Nom. Tutor 2', isOptional: true),
-        _buildEditableField('apeTutor2', 'Ape. Tutor 2', isOptional: true),
-      ],
-    );
-  }
-  
-  Widget _buildNameField() {
-    return Column(crossAxisAlignment: CrossAxisAlignment.end, children: [
-        _buildEditableField('primerNombre', 'Primer Nombre', validator: (v) => Validator.validateRequired(v, 'Primer Nombre')),
-        _buildEditableField('segundoNombre', 'Segundo Nombre', isOptional: true),
-      ],
-    );
-  }
-
-  Widget _buildApellidoField() {
-    return Column(crossAxisAlignment: CrossAxisAlignment.end, children: [
-        _buildEditableField('primerApellido', 'Primer Apellido', validator: (v) => Validator.validateRequired(v, 'Primer Apellido')),
-        _buildEditableField('segundoApellido', 'Segundo Apellido', isOptional: true),
-      ],
-    );
-  }
-
-  Widget _buildTipoDocumentoDropdown() {
-    return DropdownButton<int>(value: _selectedTipoDocumentoId, hint: const Text('Tipo Doc.'),
-      items: _tiposDocumento.map((td) => DropdownMenuItem(value: td.idTiposDeDocumentos, child: Text(td.descripcion))).toList(),
-      onChanged: (value) { setState(() { _selectedTipoDocumentoId = value; }); },
-    );
-  }
-
-  Widget _buildGeneroDropdown() {
-    return DropdownButton<String>(value: _selectedGenero, hint: const Text('Género'),
-      items: const [ DropdownMenuItem(value: 'M', child: Text('Masculino')), DropdownMenuItem(value: 'F', child: Text('Femenino')) ],
-      onChanged: (value) { setState(() { _selectedGenero = value; }); },
-    );
-  }
-
-  Widget _buildCategoriaDropdown() {
-    return DropdownButton<int>(value: _selectedCategoriaId, hint: const Text('Categoría'),
-      items: _categorias.map((cat) => DropdownMenuItem(value: cat.idCategorias, child: Text(cat.descripcion))).toList(),
-      onChanged: (value) { setState(() { _selectedCategoriaId = value; }); },
-    );
-  }
-
-  Widget _buildDateField(String key) {
-    Future<void> _selectDate() async {
-      final DateTime? picked = await showDatePicker(context: context, initialDate: _selectedFechaNacimiento ?? DateTime.now(), firstDate: DateTime(1900), lastDate: DateTime.now());
-      if (picked != null && picked != _selectedFechaNacimiento) {
-        setState(() {
-          _selectedFechaNacimiento = picked;
-          _controllers[key]!.text = picked.toIso8601String().split('T')[0];
-        });
-      }
-    }
-
-    return GestureDetector(onTap: _selectDate, child: AbsorbPointer(child: SizedBox(width: 150,
-          child: TextFormField(controller: _controllers[key],
-            decoration: const InputDecoration(labelText: 'dd/mm/aaaa', suffixIcon: Icon(Icons.calendar_today), isDense: true, contentPadding: EdgeInsets.symmetric(vertical: 8, horizontal: 8), border: OutlineInputBorder()),
-            validator: (v) => Validator.validateRequired(v, 'Fecha de Nacimiento'),
-          ),
-        ),
-      ),
-    );
-  }
+      validator: (v) => Validator.validateRequired(v, 'Fecha de Nacimiento'),
+    ),
+  ),
+);
+}
 }
