@@ -1,0 +1,76 @@
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 20px;
+    background-color: #f5f5f5;
+}
+
+header {
+    background-color: #f00;
+    color: white;
+    padding: 20px;
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+h1, h2, h3 {
+    color: black;
+}
+
+/* Menú principal */
+.menu {
+    margin-bottom: 20px;
+}
+
+.menu-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.menu-links button {
+    background-color: #f00;
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.menu-links button:hover {
+    background-color: #f00;
+}
+
+/* Información del entrenador */
+.informacion {
+    background-color: white;
+    padding: 20px;
+    margin-bottom: 20px;
+    border-radius: 5px;
+}
+
+/* Datos estadísticos */
+.datos.entrenador {
+    background-color: white;
+    padding: 20px;
+    border-radius: 5px;
+}
+
+.datos.entrenador ul {
+    list-style-type: none;
+    padding-left: 20px;
+}
+
+.datos.entrenador li {
+    margin-bottom: 8px;
+    position: relative;
+    padding-left: 15px;
+}
+
+.datos.entrenador li:before {
+    content: "•";
+    position: absolute;
+    left: 0;
+    color: #f00;
+}
