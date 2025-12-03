@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pantalla de sesión</title>
+  <link rel="stylesheet" href="iniciosesion.css">
+</head>
+<body>
+
+  <div class="tabla-login">
+    <div class="login-container" id="loginContainer">
+      
+      <div class="login-header">
+        <span class="icon">👤</span>
+        <p>Por favor inicie su sesión en la plataforma</p>
+      </div>
+
+      <form id="loginForm" class="login-form">
+        <label for="usuario">Usuario / Correo electrónico</label>
+        <input type="text" id="usuario" name="usuario" placeholder="Introduce tu usuario o correo">
+
+        <label for="password">Contraseña</label>
+        <input type="password" id="password" name="password" placeholder="Introduce tu contraseña">
+
+        <button type="submit">Iniciar sesión</button>
+
+        <div class="links">
+          <a href="#" id="forgotLink">Olvidé mi contraseña</a>
+          <a href="#" id="createLink">Crear cuenta</a>
+        </div>
+      </form>
+
+      <p id="mensaje" class="mensaje"></p>
+    </div>
+
+    
+    <div class="login-container" id="forgotPasswordContainer" style="display: none;">
+      <div class="login-header">
+        <span class="icon">🔑</span>
+        <p>Recupera tu contraseña</p>
+      </div>
+
+      <form id="forgotForm" class="login-form">
+        <label for="email">Correo electrónico</label>
+        <input type="email" id="email" name="email" placeholder="Introduce tu correo electrónico">
+
+        <label for="code">Código de verificación (6 dígitos)</label>
+        <input type="text" id="code" name="code" placeholder="Introduce el código recibido" maxlength="6">
+
+        <button type="submit">Verificar código</button>
+        <button type="button" id="resendCode">Reenviar código</button>
+
+        <div class="links">
+          <a href="#" id="backToLogin">Volver a iniciar sesión</a>
+        </div>
+      </form>
+
+      <p id="forgotMessage" class="mensaje"></p>
+    </div>
+
+  
+    <div class="login-container" id="createAccountContainer" style="display: none;">
+      <div class="login-header">
+        <span class="icon">📝</span>
+        <p>Crea tu cuenta</p>
+      </div>
+
+      <form id="createForm" class="login-form">
+        <label for="newUsername">Nombre de usuario</label>
+        <input type="text" id="newUsername" name="newUsername" placeholder="Introduce tu nombre de usuario">
+
+        <label for="newEmail">Correo electrónico</label>
+        <input type="email" id="newEmail" name="newEmail" placeholder="Introduce tu correo electrónico">
+
+        <label for="newPhone">Número de teléfono</label>
+        <input type="tel" id="newPhone" name="newPhone" placeholder="Introduce tu número de teléfono">
+
+        <label for="newPassword">Contraseña</label>
+        <input type="password" id="newPassword" name="newPassword" placeholder="Introduce tu contraseña">
+
+        <label for="confirmPassword">Confirmar contraseña</label>
+        <input type="password" id="confirmPassword" name="confirmPassword" placeholder="Confirma tu contraseña">
+
+        <button type="submit">Crear cuenta</button>
+
+        <div class="links">
+          <a href="#" id="backToLoginCreate">Volver a iniciar sesión</a>
+        </div>
+      </form>
+
+      <p id="createMessage" class="mensaje"></p>
+    </div>
+  </div>
+
+  <script>
+    const form = document.getElementById('loginForm');
+    const forgotPasswordContainer = document.getElementById('forgotPasswordContainer');
+    const createAccountContainer = document.getElementById('createAccountContainer');
+    const loginContainer = document.getElementById('loginContainer');
+    const mensaje = document.getElementById('mensaje');
+    const forgotMessage = document.getElementById('forgotMessage');
+    const createMessage = document.getElementById('createMessage');
+
+  
+    document.getElementById('forgotLink').addEventListener('click', (e) => {
+      e.preventDefault();
+      loginContainer.style.display = 'none';
+      forgotPasswordContainer.style.display = 'block';
+    });
+
+    document.getElementById('createLink').addEventListener('click', (e) => {
+      e.preventDefault();
+      loginContainer.style.display = 'none';
+      createAccountContainer.style.display = 'block';
+    });
+
+    document.getElementById('backToLogin').addEventListener('click', (e) => {
+      e.preventDefault();
+      forgotPasswordContainer.style.display = 'none';
+      loginContainer.style.display = 'block';
+    });
+
+    document.getElementById('backToLoginCreate').addEventListener('click', (e) => {
+      e.preventDefault();
+      createAccountContainer.style.display = 'none';
+      loginContainer.style.display = 'block';
+    });
+
+    
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+
+      const usuario = document.getElementById('usuario').value.trim();
+      const password = document.getElementById('password').value.trim();
+
+      if (usuario === '' || password === '') {
+        mensaje.style.color = 'red';
+        mensaje.textContent = 'Por favor complete todos los campos';
+      } else {
+        mensaje.style.color = 'green';
+        mensaje.textContent = '¡Sesión iniciada!';
+      }
+    });
+
+    
+    const forgotForm = document.getElementById('forgotForm');
+    forgotForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+
+      const email = document.getElementById('email').value.trim();
+      const code = document.getElementById('code').value.trim();
+
+      if (email === '' || code === '') {
+        forgotMessage.style.color = 'red';
+        forgotMessage.textContent = 'Por favor complete todos los campos';
+      } else {
+        forgotMessage.style.color = 'green';
+        forgotMessage.textContent = '¡Código verificado! Ahora puedes cambiar tu contraseña.';
+      }
+    });
+
+    
+    document.getElementById('resendCode').addEventListener('click', () => {
+      forgotMessage.style.color = 'blue';
+      forgotMessage.textContent = 'Código reenviado. Revisa tu correo electrónico.';
+    });
+
+    
+    const createForm = document.getElementById('createForm');
+    createForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+
+      const newUsername = document.getElementById('newUsername').value.trim();
+      const newEmail = document.getElementById('newEmail').value.trim();
+      const newPhone = document.getElementById('newPhone').value.trim();
+      const newPassword = document.getElementById('newPassword').value.trim();
+      const confirmPassword = document.getElementById('confirmPassword').value.trim();
+
+      if (newUsername === '' || newEmail === '' || newPhone === '' || newPassword === '' || confirmPassword === '') {
+        createMessage.style.color = 'red';
+        createMessage.textContent = 'Por favor complete todos los campos';
+      } else if (newPassword !== confirmPassword) {
+        createMessage.style.color = 'red';
+        createMessage.textContent = 'Las contraseñas no coinciden';
+      } else {
+        createMessage.style.color = 'green';
+        createMessage.textContent = 'Cuenta creada con éxito. ¡Ya puedes iniciar sesión!';
+      }
+    });
+  </script>
+</body>
+</html>
