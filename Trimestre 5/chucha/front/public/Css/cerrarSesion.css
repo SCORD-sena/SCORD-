@@ -1,0 +1,158 @@
+body {
+    font-family: 'Arial', sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f8f9fa;
+    color: #333;
+    line-height: 1.6;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-height: 100vh;
+}
+
+header {
+    background-color: #fff;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    padding: 10px 0;
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    width: 100%;
+}
+
+.header {
+    display: flex;
+    align-items: center;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+.header img {
+    height: 50px;
+    margin-right: 15px;
+    transition: transform 0.3s ease;
+}
+
+.header img:hover {
+    transform: scale(1.1);
+}
+
+.header h4 {
+    font-size: 28px;
+    margin: 0;
+    color: #f00;
+    font-weight: bold;
+    letter-spacing: 1px;
+}
+
+h1 {
+    font-size: 32px;
+    margin: 100px 0 50px;
+    color: #333;
+    text-align: center;
+}
+
+button {
+    background-color: #f00;
+    border: none;
+    border-radius: 5px;
+    padding: 0;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    margin-bottom: 100px;
+}
+
+button:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 6px 10px rgba(0, 0, 0, 0.15);
+}
+
+button a {
+    display: block;
+    padding: 12px 30px;
+    color: white;
+    text-decoration: none;
+    font-size: 18px;
+    font-weight: bold;
+}
+
+/* Footer */
+footer {
+    background-color: #333;
+    color: white;
+    padding: 20px 0;
+    text-align: center;
+    width: 100%;
+    margin-top: auto;
+}
+
+.footer-contenido {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+.footer-contenido h3 {
+    color: #f00;
+    margin-bottom: 10px;
+    font-size: 20px;
+}
+
+.footer-info {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    flex-wrap: wrap;
+}
+
+.footer-info div {
+    flex: 1;
+    min-width: 200px;
+}
+
+.footer-derechos {
+    margin-top: 20px;
+    padding-top: 15px;
+    border-top: 1px solid #555;
+    font-size: 14px;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    h1 {
+        font-size: 28px;
+        margin: 80px 0 40px;
+    }
+    
+    button a {
+        padding: 10px 25px;
+        font-size: 16px;
+    }
+    
+    button {
+        margin-bottom: 80px;
+    }
+}
+
+@media (max-width: 480px) {
+    .header h4 {
+        font-size: 22px;
+    }
+    
+    h1 {
+        font-size: 24px;
+        margin: 60px 0 30px;
+        padding: 0 20px;
+    }
+    
+    button {
+        margin-bottom: 60px;
+    }
+    
+    .footer-info {
+        flex-direction: column;
+        text-align: center;
+    }
+}
