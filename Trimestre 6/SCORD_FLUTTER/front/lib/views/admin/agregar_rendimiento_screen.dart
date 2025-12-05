@@ -257,7 +257,7 @@ void initState() {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('SCORD - Agregar Estadística', style: TextStyle(color: Color(0xffe63946), fontWeight: FontWeight.bold)),
+        title: const Text('SCORD', style: TextStyle(color: Color(0xffe63946), fontWeight: FontWeight.bold)),
         backgroundColor: Colors.white,
         elevation: 1,
         iconTheme: const IconThemeData(color: Color(0xffe63946)),
@@ -364,7 +364,7 @@ void initState() {
                     children: [
                       buildTextField('⚽ Goles', golesController, required: true),
                       buildTextField('🎯 Asistencias', asistenciasController, required: true),
-                      buildTextField('⏱️ Minutos Jugados', minutosJugadosController, required: true, max: 120),
+                      buildTextField('⏱ Minutos Jugados', minutosJugadosController, required: true, max: 120),
                       buildTextField('⚽ Goles de Cabeza', golesDeCabezaController),
                       buildTextField('🎯 Tiros a puerta', tirosApuertaController),
                     ],
@@ -418,11 +418,13 @@ void initState() {
       ),
       bottomNavigationBar: Container(
         color: Colors.black87,
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 12.0),
         child: const Text(
           '© 2025 SCORD | Escuela de Fútbol Quilmes | Todos los derechos reservados',
           textAlign: TextAlign.center,
-          style: TextStyle(color: Colors.white70, fontSize: 12),
+          style: TextStyle(color: Colors.white70, fontSize: 10),
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
         ),
       ),
     );

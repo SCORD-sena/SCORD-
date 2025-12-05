@@ -106,11 +106,19 @@ Future<void> iniciarSesion() async {
   }
 }
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.white,
-      body: Column(
+Widget build(BuildContext context) {
+  return Scaffold(
+    body: Container(
+      // -------- FONDO UNIFICADO PARA TODO --------
+      decoration: const BoxDecoration(
+        image: DecorationImage(
+          image: AssetImage("assets/FondoLoginFlutter.png"),
+          fit: BoxFit.cover,
+        ),
+      ),
+      child: Column(
         children: [
+          // -------- HEADER (ahora sin fondo propio) --------
           Container(
             padding: const EdgeInsets.all(20),
             child: Row(
@@ -128,6 +136,8 @@ Future<void> iniciarSesion() async {
               ],
             ),
           ),
+
+          // -------- CONTENIDO (sin decoration propia) --------
           Expanded(
             child: Center(
               child: SingleChildScrollView(
@@ -150,9 +160,13 @@ Future<void> iniciarSesion() async {
                       const Text(
                         "Iniciar Sesión",
                         style: TextStyle(
-                            fontSize: 26, fontWeight: FontWeight.bold),
+                          fontSize: 26,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                       const SizedBox(height: 20),
+
+                      // -------- ERROR --------
                       if (error.isNotEmpty)
                         Container(
                           padding: const EdgeInsets.all(12),
@@ -169,11 +183,14 @@ Future<void> iniciarSesion() async {
                                   error,
                                   style: const TextStyle(color: Colors.red),
                                 ),
-                              )
+                              ),
                             ],
                           ),
                         ),
+
                       const SizedBox(height: 20),
+
+                      // -------- CORREO --------
                       TextField(
                         controller: correo,
                         decoration: const InputDecoration(
@@ -182,6 +199,8 @@ Future<void> iniciarSesion() async {
                         ),
                       ),
                       const SizedBox(height: 15),
+
+                      // -------- CONTRASEÑA --------
                       TextField(
                         controller: contrasena,
                         obscureText: !showPass,
@@ -202,7 +221,10 @@ Future<void> iniciarSesion() async {
                           ),
                         ),
                       ),
+
                       const SizedBox(height: 20),
+
+                      // -------- BOTÓN LOGIN --------
                       SizedBox(
                         width: double.infinity,
                         child: ElevatedButton(
@@ -224,27 +246,35 @@ Future<void> iniciarSesion() async {
                                 ),
                         ),
                       ),
+
                       const SizedBox(height: 20),
+
+                      // -------- OLVIDÓ CONTRASEÑA --------
                       const Text(
                         "¿Olvidó su contraseña?",
                         style: TextStyle(color: Colors.grey),
-                      )
+                      ),
                     ],
                   ),
                 ),
               ),
             ),
           ),
+
+          // -------- FOOTER --------
           Container(
+            width: double.infinity,
             padding: const EdgeInsets.all(20),
             color: Colors.black,
             child: const Text(
               "© 2025 SCORD | Escuela de Fútbol Quilmes",
+              textAlign: TextAlign.center,
               style: TextStyle(color: Colors.white),
             ),
-          )
+          ),
         ],
       ),
-    );
-  }
+    ),
+  );
+}
 }

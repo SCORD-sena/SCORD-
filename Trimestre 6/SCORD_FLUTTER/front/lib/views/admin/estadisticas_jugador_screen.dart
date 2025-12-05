@@ -4,7 +4,7 @@ import '../../models/categoria_model.dart';
 import '../../models/jugador_model.dart';
 import '../../models/rendimiento_model.dart';
 import '../../services/rendimiento_service.dart';
-import '../../services/api_service.dart'; // ✅ AGREGADO
+import '../../services/api_service.dart';
 import '../../utils/validator.dart';
 import 'agregar_rendimiento_screen.dart';
 
@@ -17,7 +17,7 @@ class EstadisticasJugadorScreen extends StatefulWidget {
 
 class _EstadisticasJugadorScreenState extends State<EstadisticasJugadorScreen> {
   final RendimientoService _rendimientoService = RendimientoService();
-  final ApiService _apiService = ApiService(); // ✅ AGREGADO
+  final ApiService _apiService = ApiService();
   
   List<Jugador> jugadores = [];
   List<Categoria> categorias = [];
@@ -73,10 +73,9 @@ class _EstadisticasJugadorScreenState extends State<EstadisticasJugadorScreen> {
     }
   }
 
-  // ✅ MODIFICADO: Usar ApiService en lugar de http directamente
   Future<void> fetchJugadores() async {
     try {
-      final res = await _apiService.get('/jugadores'); // ✅ CAMBIADO
+      final res = await _apiService.get('/jugadores');
       
       if (res.statusCode == 200) {
         final jsonResponse = json.decode(res.body);
@@ -116,10 +115,9 @@ class _EstadisticasJugadorScreenState extends State<EstadisticasJugadorScreen> {
     }
   }
 
-  // ✅ MODIFICADO: Usar ApiService
   Future<void> fetchCategorias() async {
     try {
-      final res = await _apiService.get('/categorias'); // ✅ CAMBIADO
+      final res = await _apiService.get('/categorias');
       if (res.statusCode == 200) {
         final data = json.decode(res.body);
         setState(() {
@@ -363,12 +361,12 @@ class _EstadisticasJugadorScreenState extends State<EstadisticasJugadorScreen> {
 
   Widget buildInfoItem(String title, String value) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4.0),
+      padding: const EdgeInsets.symmetric(vertical: 6.0),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text('$title:', style: const TextStyle(fontWeight: FontWeight.bold)),
-          Flexible(child: Text(value, textAlign: TextAlign.right)),
+          Text('$title:', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
+          Flexible(child: Text(value, textAlign: TextAlign.right, style: const TextStyle(fontSize: 13))),
         ],
       ),
     );
@@ -379,17 +377,25 @@ class _EstadisticasJugadorScreenState extends State<EstadisticasJugadorScreen> {
 
     if (isEditable && modoEdicion) {
       return Padding(
-        padding: const EdgeInsets.symmetric(vertical: 4.0),
+        padding: const EdgeInsets.symmetric(vertical: 6.0),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text(label, style: const TextStyle(fontWeight: FontWeight.bold, color: Color(0xffe63946))),
+            Expanded(
+              flex: 2,
+              child: Text(label, style: const TextStyle(fontWeight: FontWeight.bold, color: Color(0xffe63946), fontSize: 13)),
+            ),
             SizedBox(
-              width: 80,
+              width: 70,
               child: TextField(
                 keyboardType: TextInputType.number,
                 textAlign: TextAlign.right,
-                decoration: const InputDecoration(border: OutlineInputBorder(), isDense: true, contentPadding: EdgeInsets.all(8)),
+                style: const TextStyle(fontSize: 13),
+                decoration: const InputDecoration(
+                  border: OutlineInputBorder(), 
+                  isDense: true, 
+                  contentPadding: EdgeInsets.symmetric(horizontal: 6, vertical: 6)
+                ),
                 controller: TextEditingController(text: formData[fieldName])
                   ..selection = TextSelection.collapsed(offset: formData[fieldName]?.length ?? 0),
                 onChanged: (value) => setState(() => formData[fieldName] = value),
@@ -411,12 +417,21 @@ class _EstadisticasJugadorScreenState extends State<EstadisticasJugadorScreen> {
     }
 
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4.0),
+      padding: const EdgeInsets.symmetric(vertical: 6.0),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(label, style: TextStyle(fontWeight: statAverageKey == null ? FontWeight.w600 : FontWeight.normal, color: Color(0xffe63946))),
-          Text(displayValue),
+          Expanded(
+            child: Text(
+              label, 
+              style: TextStyle(
+                fontWeight: statAverageKey == null ? FontWeight.w600 : FontWeight.normal, 
+                color: const Color(0xffe63946),
+                fontSize: 13
+              )
+            ),
+          ),
+          Text(displayValue, style: const TextStyle(fontSize: 13)),
         ],
       ),
     );
@@ -445,18 +460,24 @@ class _EstadisticasJugadorScreenState extends State<EstadisticasJugadorScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('SCORD - Estadísticas de Jugador', style: TextStyle(color: Color(0xffe63946), fontWeight: FontWeight.bold)),
+        title: const Text(
+          'SCORD - Estadísticas',
+          style: TextStyle(
+            color: Color(0xffe63946),
+            fontWeight: FontWeight.bold,
+            fontSize: 18
+          )
+        ),
         backgroundColor: Colors.white,
         elevation: 1,
+        iconTheme: const IconThemeData(color: Color(0xffe63946)),
       ),
       drawer: Drawer(
         child: ListView(
           padding: EdgeInsets.zero,
           children: <Widget>[
             const DrawerHeader(
-              decoration: BoxDecoration(
-                color: Colors.red,
-              ),
+              decoration: BoxDecoration(color: Colors.red),
               child: Text(
                 'Menú de Navegación',
                 style: TextStyle(
@@ -466,26 +487,26 @@ class _EstadisticasJugadorScreenState extends State<EstadisticasJugadorScreen> {
                 ),
               ),
             ),
-            
             _buildDrawerItem(context, 'Inicio', Icons.home, '/InicioAdmin'),
             _buildDrawerItem(context, 'Cronograma', Icons.calendar_month, '/Cronograma'),
             _buildDrawerItem(context, 'Perfil Jugador', Icons.person_pin, '/PerfilJugadorAdmin'),
             _buildDrawerItem(context, 'Estadísticas Jugadores', Icons.bar_chart, '/EstadisticasJugadores'),
             _buildDrawerItem(context, 'Perfil Entrenador', Icons.sports_gymnastics, '/PerfilEntrenador'),
             _buildDrawerItem(context, 'Evaluar Jugadores', Icons.rule, '/EvaluarJugadores'),
-
             const Divider(),
-            
             _buildDrawerItem(context, 'Cerrar Sesión', Icons.logout, '/Logout'),
           ],
         ),
       ),
       body: Column(
         children: [
+          // Botones más compactos
           Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            padding: const EdgeInsets.all(12.0),
+            child: Wrap(
+              spacing: 6,
+              runSpacing: 6,
+              alignment: WrapAlignment.center,
               children: [
                 ElevatedButton.icon(
                   onPressed: () async {
@@ -497,175 +518,263 @@ class _EstadisticasJugadorScreenState extends State<EstadisticasJugadorScreen> {
                       await fetchEstadisticasTotales(jugadorSeleccionado!.idJugadores);
                     }
                   },
-                  icon: const Icon(Icons.add, color: Colors.white),
-                  label: const Text('Agregar Estadísticas', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
-                  style: ElevatedButton.styleFrom(backgroundColor: Colors.green),
+                  icon: const Icon(Icons.add, color: Colors.white, size: 16),
+                  label: const Text(
+                    'Agregar',
+                    style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 12)
+                  ),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.green,
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                    minimumSize: const Size(0, 36),
+                  ),
                 ),
-                const SizedBox(width: 8),
 
                 if (!modoEdicion) ...[
                   ElevatedButton.icon(
                     onPressed: activarEdicion,
-                    icon: const Icon(Icons.edit, color: Colors.white),
-                    label: const Text('Editar', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
-                    style: ElevatedButton.styleFrom(backgroundColor: Colors.orange),
+                    icon: const Icon(Icons.edit, color: Colors.white, size: 16),
+                    label: const Text(
+                      'Editar',
+                      style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 12)
+                    ),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.orange,
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                      minimumSize: const Size(0, 36),
+                    ),
                   ),
-                  const SizedBox(width: 8),
                   ElevatedButton.icon(
                     onPressed: eliminarEstadistica,
-                    icon: const Icon(Icons.delete, color: Colors.white),
-                    label: const Text('Eliminar', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
-                    style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+                    icon: const Icon(Icons.delete, color: Colors.white, size: 16),
+                    label: const Text(
+                      'Eliminar',
+                      style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 12)
+                    ),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.red,
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                      minimumSize: const Size(0, 36),
+                    ),
                   ),
                 ] else ...[
                   ElevatedButton.icon(
                     onPressed: loading ? null : guardarCambios,
-                    icon: loading ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2)) : const Icon(Icons.save, color: Colors.white),
-                    label: Text(loading ? "Guardando..." : "Guardar Cambios", style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
-                    style: ElevatedButton.styleFrom(backgroundColor: Colors.green),
+                    icon: loading 
+                      ? const SizedBox(
+                          width: 16, 
+                          height: 16, 
+                          child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2)
+                        ) 
+                      : const Icon(Icons.save, color: Colors.white, size: 16),
+                    label: Text(
+                      loading ? "Guardando..." : "Guardar",
+                      style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 12)
+                    ),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.green,
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                      minimumSize: const Size(0, 36),
+                    ),
                   ),
-                  const SizedBox(width: 8),
                   ElevatedButton.icon(
                     onPressed: loading ? null : cancelarEdicion,
-                    icon: const Icon(Icons.cancel, color: Colors.white),
-                    label: const Text('Cancelar', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
-                    style: ElevatedButton.styleFrom(backgroundColor: Colors.blueGrey),
+                    icon: const Icon(Icons.cancel, color: Colors.white, size: 16),
+                    label: const Text(
+                      'Cancelar',
+                      style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 12)
+                    ),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.blueGrey,
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                      minimumSize: const Size(0, 36),
+                    ),
                   ),
                 ]
               ],
             ),
           ),
+          
+          // Contenido en Column vertical en lugar de Row horizontal
           Expanded(
             child: SingleChildScrollView(
-              padding: const EdgeInsets.all(16.0),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
+              padding: const EdgeInsets.all(12.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  Expanded(
+                  // Card de Información del Jugador
+                  Card(
+                    elevation: 3,
                     child: Padding(
-                      padding: const EdgeInsets.only(right: 8.0),
-                      child: Card(
-                        elevation: 4,
-                        child: Padding(
-                          padding: const EdgeInsets.all(16.0),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.stretch,
-                            children: [
-                              DropdownButtonFormField<String>(
-                                decoration: const InputDecoration(labelText: 'Seleccionar Categoría', border: OutlineInputBorder(), labelStyle: TextStyle(color: Color(0xffe63946))),
-                                value: categoriaSeleccionadaId,
-                                items: [
-                                  const DropdownMenuItem(value: null, child: Text("-- Selecciona una categoría --")),
-                                  ...categorias.map((cat) => DropdownMenuItem(value: cat.idCategorias.toString(), child: Text(cat.descripcion))),
-                                ],
-                                onChanged: modoEdicion ? null : (String? newValue) {
-                                  setState(() {
-                                    categoriaSeleccionadaId = newValue;
-                                    jugadorSeleccionado = null;
-                                  });
-                                  filtrarJugadores(newValue);
-                                },
-                              ),
-                              const SizedBox(height: 15),
-                              DropdownButtonFormField<int>(
-                                decoration: const InputDecoration(labelText: 'Seleccionar Jugador', border: OutlineInputBorder(), labelStyle: TextStyle(color: Color(0xffe63946))),
-                                value: jugadorSeleccionado?.idJugadores,
-                                items: [
-                                  const DropdownMenuItem(value: null, child: Text("-- Selecciona un jugador --")),
-                                  ...jugadoresFiltrados.map((jugador) => DropdownMenuItem(
-                                    value: jugador.idJugadores,
-                                    child: Text("${jugador.persona.nombre1} ${jugador.persona.apellido1}"),
-                                  )),
-                                ],
-                                onChanged: (int? newValue) {
-                                  if (newValue != null && !modoEdicion) {
-                                    final jugador = jugadores.firstWhere((j) => j.idJugadores == newValue);
-                                    setState(() => jugadorSeleccionado = jugador);
-                                    fetchEstadisticasTotales(newValue);
-                                  } else if (newValue == null && !modoEdicion) {
-                                    setState(() {
-                                      jugadorSeleccionado = null;
-                                      estadisticasTotales = null;
-                                    });
-                                  }
-                                },
-                                disabledHint: const Text("Selecciona un jugador"),
-                              ),
-                              const SizedBox(height: 20),
-                              const Center(child: Icon(Icons.person, size: 100, color: Colors.grey)),
-                              const SizedBox(height: 15),
-
-                              const Center(child: Text('Información Personal', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Color(0xffe63946)))),
-                              const SizedBox(height: 8),
-                              buildInfoItem(
-                                'Nombre',
-                                persona != null
-                                    ? "${persona.nombre1} ${persona.nombre2 ?? ''} ${persona.apellido1} ${persona.apellido2 ?? ''}".trim()
-                                    : "-",
-                              ),
-                              buildInfoItem('Edad', calcularEdad(persona?.fechaDeNacimiento)),
-                              buildInfoItem('Documento', persona?.numeroDeDocumento ?? "-"),
-                              buildInfoItem('Contacto', persona?.telefono ?? "-"),
-
-                              const Divider(height: 30),
-
-                              const Center(child: Text('Información Deportiva', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Color(0xffe63946)))),
-                              const SizedBox(height: 8),
-                              buildInfoItem('Categoría', categoriaJugador?.descripcion ?? "-"),
-                              buildInfoItem('Dorsal', jugadorSeleccionado?.dorsal.toString() ?? "-"),
-                              buildInfoItem('Posición', jugadorSeleccionado?.posicion ?? "-"),
+                      padding: const EdgeInsets.all(14.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          DropdownButtonFormField<String>(
+                            decoration: const InputDecoration(
+                              labelText: 'Seleccionar Categoría',
+                              border: OutlineInputBorder(),
+                              labelStyle: TextStyle(color: Color(0xffe63946), fontSize: 13),
+                              contentPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                            ),
+                            style: const TextStyle(fontSize: 13, color: Colors.black),
+                            value: categoriaSeleccionadaId,
+                            items: [
+                              const DropdownMenuItem(value: null, child: Text("-- Selecciona categoría --")),
+                              ...categorias.map((cat) => DropdownMenuItem(
+                                value: cat.idCategorias.toString(),
+                                child: Text(cat.descripcion)
+                              )),
                             ],
+                            onChanged: modoEdicion ? null : (String? newValue) {
+                              setState(() {
+                                categoriaSeleccionadaId = newValue;
+                                jugadorSeleccionado = null;
+                              });
+                              filtrarJugadores(newValue);
+                            },
                           ),
-                        ),
+                          const SizedBox(height: 12),
+                          DropdownButtonFormField<int>(
+                            decoration: const InputDecoration(
+                              labelText: 'Seleccionar Jugador',
+                              border: OutlineInputBorder(),
+                              labelStyle: TextStyle(color: Color(0xffe63946), fontSize: 13),
+                              contentPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                            ),
+                            style: const TextStyle(fontSize: 13, color: Colors.black),
+                            value: jugadorSeleccionado?.idJugadores,
+                            items: [
+                              const DropdownMenuItem(value: null, child: Text("-- Selecciona jugador --")),
+                              ...jugadoresFiltrados.map((jugador) => DropdownMenuItem(
+                                value: jugador.idJugadores,
+                                child: Text("${jugador.persona.nombre1} ${jugador.persona.apellido1}"),
+                              )),
+                            ],
+                            onChanged: (int? newValue) {
+                              if (newValue != null && !modoEdicion) {
+                                final jugador = jugadores.firstWhere((j) => j.idJugadores == newValue);
+                                setState(() => jugadorSeleccionado = jugador);
+                                fetchEstadisticasTotales(newValue);
+                              } else if (newValue == null && !modoEdicion) {
+                                setState(() {
+                                  jugadorSeleccionado = null;
+                                  estadisticasTotales = null;
+                                });
+                              }
+                            },
+                            disabledHint: const Text("Selecciona un jugador"),
+                          ),
+                          const SizedBox(height: 16),
+                          const Center(child: Icon(Icons.person, size: 80, color: Colors.grey)),
+                          const SizedBox(height: 12),
+
+                          const Center(
+                            child: Text(
+                              'Información Personal',
+                              style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: Color(0xffe63946))
+                            )
+                          ),
+                          const SizedBox(height: 8),
+                          buildInfoItem(
+                            'Nombre',
+                            persona != null
+                                ? "${persona.nombre1} ${persona.nombre2 ?? ''} ${persona.apellido1} ${persona.apellido2 ?? ''}".trim()
+                                : "-",
+                          ),
+                          buildInfoItem('Edad', calcularEdad(persona?.fechaDeNacimiento)),
+                          buildInfoItem('Documento', persona?.numeroDeDocumento ?? "-"),
+                          buildInfoItem('Contacto', persona?.telefono ?? "-"),
+
+                          const Divider(height: 24),
+
+                          const Center(
+                            child: Text(
+                              'Información Deportiva',
+                              style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: Color(0xffe63946))
+                            )
+                          ),
+                          const SizedBox(height: 8),
+                          buildInfoItem('Categoría', categoriaJugador?.descripcion ?? "-"),
+                          buildInfoItem('Dorsal', jugadorSeleccionado?.dorsal.toString() ?? "-"),
+                          buildInfoItem('Posición', jugadorSeleccionado?.posicion ?? "-"),
+                        ],
                       ),
                     ),
                   ),
 
-                  Expanded(
+                  const SizedBox(height: 12),
+
+                  // Card de Estadísticas
+                  Card(
+                    elevation: 3,
                     child: Padding(
-                      padding: const EdgeInsets.only(left: 8.0),
-                      child: Card(
-                        elevation: 4,
-                        child: Padding(
-                          padding: const EdgeInsets.all(16.0),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.stretch,
-                            children: [
-                              const Center(child: Text('Estadísticas', style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Color(0xffe63946)))),
-                              const Divider(height: 20),
-                              if (loading)
-                                const Center(child: CircularProgressIndicator(color: Color(0xffe63946)))
-                              else if (estadisticasTotales != null)
-                                Column(
-                                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                                  children: [
-                                    Center(child: Text(modoEdicion ? "Editar Último Partido" : "Estadísticas Básicas", style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold))),
-                                    const SizedBox(height: 10),
-
-                                    buildEstadisticaItem('⚽ Goles', 'total_goles', isEditable: true),
-                                    buildEstadisticaItem('🎯 Asistencias', 'total_asistencias', isEditable: true),
-                                    buildEstadisticaItem('📋 Partidos', 'total_partidos_jugados'),
-                                    buildEstadisticaItem('⏱️ Minutos', 'total_minutos_jugados', isEditable: true),
-
-                                    const Divider(height: 20),
-
-                                    const Center(child: Text("Estadísticas Detalladas", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold))),
-                                    const SizedBox(height: 10),
-
-                                    buildEstadisticaItem('⚽ Goles de Cabeza', 'total_goles_cabeza', isEditable: true),
-                                    buildEstadisticaItem('📊 Goles por Partido', 'total_goles', statAverageKey: 'goles_por_partido'),
-                                    buildEstadisticaItem('🎯 Tiros a puerta', 'total_tiros_apuerta', isEditable: true),
-                                    buildEstadisticaItem('🚩 Fueras de Juego', 'total_fueras_de_lugar', isEditable: true),
-                                    buildEstadisticaItem('🟨 Tarjetas Amarillas', 'total_tarjetas_amarillas', isEditable: true),
-                                    buildEstadisticaItem('🟥 Tarjetas Rojas', 'total_tarjetas_rojas', isEditable: true),
-                                    buildEstadisticaItem('🧤 Arco en cero', 'total_arco_en_cero', isEditable: true),
-                                  ],
-                                )
-                              else
-                                const Center(child: Text('Selecciona un jugador para ver sus estadísticas', style: TextStyle(color: Colors.grey))),
-                            ],
+                      padding: const EdgeInsets.all(14.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          const Center(
+                            child: Text(
+                              'Estadísticas',
+                              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Color(0xffe63946))
+                            )
                           ),
-                        ),
+                          const Divider(height: 16),
+                          if (loading)
+                            const Center(
+                              child: Padding(
+                                padding: EdgeInsets.all(20.0),
+                                child: CircularProgressIndicator(color: Color(0xffe63946))
+                              )
+                            )
+                          else if (estadisticasTotales != null)
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.stretch,
+                              children: [
+                                Center(
+                                  child: Text(
+                                    modoEdicion ? "Editar Último Partido" : "Estadísticas Básicas",
+                                    style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold)
+                                  )
+                                ),
+                                const SizedBox(height: 10),
+
+                                buildEstadisticaItem('⚽ Goles', 'total_goles', isEditable: true),
+                                buildEstadisticaItem('🎯 Asistencias', 'total_asistencias', isEditable: true),
+                                buildEstadisticaItem('📋 Partidos', 'total_partidos_jugados'),
+                                buildEstadisticaItem('⏱️ Minutos', 'total_minutos_jugados', isEditable: true),
+
+                                const Divider(height: 16),
+
+                                const Center(
+                                  child: Text(
+                                    "Estadísticas Detalladas",
+                                    style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold)
+                                  )
+                                ),
+                                const SizedBox(height: 10),
+
+                                buildEstadisticaItem('⚽ Goles de Cabeza', 'total_goles_cabeza', isEditable: true),
+                                buildEstadisticaItem('📊 Goles por Partido', 'total_goles', statAverageKey: 'goles_por_partido'),
+                                buildEstadisticaItem('🎯 Tiros a puerta', 'total_tiros_apuerta', isEditable: true),
+                                buildEstadisticaItem('🚩 Fueras de Juego', 'total_fueras_de_lugar', isEditable: true),
+                                buildEstadisticaItem('🟨 Tarjetas Amarillas', 'total_tarjetas_amarillas', isEditable: true),
+                                buildEstadisticaItem('🟥 Tarjetas Rojas', 'total_tarjetas_rojas', isEditable: true),
+                                buildEstadisticaItem('🧤 Arco en cero', 'total_arco_en_cero', isEditable: true),
+                              ],
+                            )
+                          else
+                            const Center(
+                              child: Padding(
+                                padding: EdgeInsets.all(20.0),
+                                child: Text(
+                                  'Selecciona un jugador para ver sus estadísticas',
+                                  style: TextStyle(color: Colors.grey, fontSize: 13),
+                                  textAlign: TextAlign.center,
+                                ),
+                              )
+                            ),
+                        ],
                       ),
                     ),
                   ),
@@ -677,11 +786,13 @@ class _EstadisticasJugadorScreenState extends State<EstadisticasJugadorScreen> {
       ),
       bottomNavigationBar: Container(
         color: Colors.black87,
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 12.0),
         child: const Text(
           '© 2025 SCORD | Escuela de Fútbol Quilmes | Todos los derechos reservados',
           textAlign: TextAlign.center,
-          style: TextStyle(color: Colors.white70, fontSize: 12),
+          style: TextStyle(color: Colors.white70, fontSize: 10),
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
         ),
       ),
     );
