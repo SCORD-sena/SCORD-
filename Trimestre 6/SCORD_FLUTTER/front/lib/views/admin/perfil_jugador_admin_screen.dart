@@ -1,4 +1,3 @@
-// ... (Importaciones en la parte superior del archivo)
 import 'package:flutter/material.dart';
 import '../../models/jugador_model.dart'; 
 import '../../models/categoria_model.dart';
@@ -6,7 +5,6 @@ import '../../models/tipo_documento_model.dart';
 import '../../models/persona_model.dart';
 import '../../services/jugador_service.dart';
 import '../../utils/validator.dart';
-// ...
 
 class PerfilJugadorAdminScreen extends StatefulWidget {
   const PerfilJugadorAdminScreen({super.key});
@@ -315,37 +313,45 @@ class _PerfilJugadorAdminScreenState extends State<PerfilJugadorAdminScreen> {
     return edad.toString();
   }
 
-  // ✅ CORRECCIÓN: Usar el parámetro nombrado 'trailing' correctamente
-  Widget _buildListItem(String label, Widget trailing) {
-    return ListTile(
-      visualDensity: VisualDensity.compact,
-      contentPadding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 4.0),
-      title: Text(
-        label, 
-        style: const TextStyle(
-          color: Colors.red, 
-          fontWeight: FontWeight.bold,
-          fontSize: 14,
-        ),
-      ),
-      trailing: SizedBox(
-        width: 200, // ✅ Ancho fijo para el trailing
-        child: trailing,
+  Widget _buildInfoDisplay(String label, String value) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 6.0, horizontal: 12.0),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Expanded(
+            flex: 2,
+            child: Text(
+              label,
+              style: const TextStyle(
+                color: Colors.red,
+                fontWeight: FontWeight.bold,
+                fontSize: 13,
+              ),
+            ),
+          ),
+          Expanded(
+            flex: 3,
+            child: Text(
+              value,
+              style: const TextStyle(fontSize: 13),
+              textAlign: TextAlign.left,
+            ),
+          ),
+        ],
       ),
     );
   }
   
   Widget _buildSectionTitle(String title) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8.0),
-      child: Center(
-        child: Text(
-          title,
-          style: const TextStyle(
-            fontSize: 18, 
-            fontWeight: FontWeight.bold, 
-            color: Colors.black87
-          ),
+      padding: const EdgeInsets.symmetric(vertical: 10.0),
+      child: Text(
+        title,
+        style: const TextStyle(
+          fontSize: 15,
+          fontWeight: FontWeight.bold,
+          color: Color(0xffe63946),
         ),
       ),
     );
@@ -374,31 +380,20 @@ class _PerfilJugadorAdminScreenState extends State<PerfilJugadorAdminScreen> {
       appBar: AppBar(
         title: const Text(
           'SCORD - Perfil Jugador',
-          style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold),
+          style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold, fontSize: 18),
         ),
         backgroundColor: Colors.white,
         elevation: 1,
         centerTitle: false,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.person_add, color: Colors.green),
-            onPressed: () {
-              Navigator.of(context).pushNamed('/AgregarJugador');
-            },
-            tooltip: 'Agregar Jugador',
-          ),
-          const SizedBox(width: 8),
-        ],
+        iconTheme: const IconThemeData(color: Colors.red),
       ),
 
-drawer: Drawer(
+      drawer: Drawer(
         child: ListView(
           padding: EdgeInsets.zero,
           children: <Widget>[
             const DrawerHeader(
-              decoration: BoxDecoration(
-                color: Colors.red,
-              ),
+              decoration: BoxDecoration(color: Colors.red),
               child: Text(
                 'Menú de Navegación',
                 style: TextStyle(
@@ -408,16 +403,13 @@ drawer: Drawer(
                 ),
               ),
             ),
-            
             _buildDrawerItem(context, 'Inicio', Icons.home, '/InicioAdmin'),
             _buildDrawerItem(context, 'Cronograma', Icons.calendar_month, '/Cronograma'),
             _buildDrawerItem(context, 'Perfil Jugador', Icons.person_pin, '/PerfilJugadorAdmin'),
             _buildDrawerItem(context, 'Estadísticas Jugadores', Icons.bar_chart, '/EstadisticasJugadores'),
             _buildDrawerItem(context, 'Perfil Entrenador', Icons.sports_gymnastics, '/PerfilEntrenador'),
             _buildDrawerItem(context, 'Evaluar Jugadores', Icons.rule, '/EvaluarJugadores'),
-
             const Divider(),
-            
             _buildDrawerItem(context, 'Cerrar Sesión', Icons.logout, '/Logout'),
           ],
         ),
@@ -426,443 +418,456 @@ drawer: Drawer(
       body: _loading 
         ? const Center(child: CircularProgressIndicator())
         : SingleChildScrollView(
-            padding: const EdgeInsets.all(16.0),
+            padding: const EdgeInsets.all(12.0),
             child: Form( 
               key: _formKey,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
+                  // Botones compactos
                   Wrap(
-                    spacing: 8.0,
-                    runSpacing: 8.0,
+                    spacing: 6.0,
+                    runSpacing: 6.0,
                     alignment: WrapAlignment.center,
                     children: [
                       ElevatedButton.icon(
                         onPressed: () {
                           Navigator.of(context).pushNamed('/AgregarJugador');
                         },
-                        icon: const Icon(Icons.add),
-                        label: const Text('Agregar Jugador'),
+                        icon: const Icon(Icons.add, size: 16),
+                        label: const Text('Agregar', style: TextStyle(fontSize: 12)),
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.green, 
-                          foregroundColor: Colors.white
+                          backgroundColor: Colors.green,
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                          minimumSize: const Size(0, 36),
                         ),
                       ),
                       
                       if (!_modoEdicion) ...[
                         ElevatedButton.icon(
                           onPressed: _activarEdicion,
-                          icon: const Icon(Icons.edit),
-                          label: const Text('Editar Jugador'),
-                          style: ElevatedButton.styleFrom(backgroundColor: Colors.orange, foregroundColor: Colors.white),
+                          icon: const Icon(Icons.edit, size: 16),
+                          label: const Text('Editar', style: TextStyle(fontSize: 12)),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.orange,
+                            foregroundColor: Colors.white,
+                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                            minimumSize: const Size(0, 36),
+                          ),
                         ),
                         ElevatedButton.icon(
                           onPressed: _eliminarJugador,
-                          icon: const Icon(Icons.delete),
-                          label: const Text('Eliminar Jugador'),
-                          style: ElevatedButton.styleFrom(backgroundColor: Colors.red, foregroundColor: Colors.white),
+                          icon: const Icon(Icons.delete, size: 16),
+                          label: const Text('Eliminar', style: TextStyle(fontSize: 12)),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.red,
+                            foregroundColor: Colors.white,
+                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                            minimumSize: const Size(0, 36),
+                          ),
                         ),
                       ] else ...[
                         ElevatedButton.icon(
                           onPressed: _guardarCambios,
-                          icon: const Icon(Icons.save),
-                          label: const Text('Guardar Cambios'),
-                          style: ElevatedButton.styleFrom(backgroundColor: Colors.green, foregroundColor: Colors.white),
+                          icon: const Icon(Icons.save, size: 16),
+                          label: const Text('Guardar', style: TextStyle(fontSize: 12)),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.green,
+                            foregroundColor: Colors.white,
+                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                            minimumSize: const Size(0, 36),
+                          ),
                         ),
                         ElevatedButton.icon(
                           onPressed: _cancelarEdicion,
-                          icon: const Icon(Icons.cancel),
-                          label: const Text('Cancelar'),
-                          style: ElevatedButton.styleFrom(backgroundColor: Colors.grey, foregroundColor: Colors.white),
+                          icon: const Icon(Icons.cancel, size: 16),
+                          label: const Text('Cancelar', style: TextStyle(fontSize: 12)),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.grey,
+                            foregroundColor: Colors.white,
+                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                            minimumSize: const Size(0, 36),
+                          ),
                         ),
                       ],
                     ],
                   ),
                   
-                  const Divider(height: 32),
+                  const SizedBox(height: 16),
 
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Expanded(
-                        child: Padding(
-                          padding: const EdgeInsets.only(right: 16.0),
-                          child: Column(
-                            children: [
-                              DropdownButtonFormField<String>(
-                                decoration: const InputDecoration(labelText: 'Seleccionar Categoría'),
-                                value: _categoriaSeleccionada,
-                                hint: const Text('-- Selecciona una categoría --'),
-                                items: [
-                                  const DropdownMenuItem(value: null, child: Text('-- Selecciona una categoría --')),
-                                  ..._categorias.map((cat) => DropdownMenuItem(
-                                    value: cat.idCategorias.toString(),
-                                    child: Text(cat.descripcion),
-                                  )).toList(),
-                                ],
-                                onChanged: _modoEdicion ? null : (value) {
-                                  setState(() {
-                                    _categoriaSeleccionada = value;
-                                    _filterJugadores();
-                                  });
-                                },
-                              ),
-                              const SizedBox(height: 16),
-                              DropdownButtonFormField<int>(
-                                decoration: const InputDecoration(labelText: 'Seleccionar Jugador'),
-                                value: _jugadorSeleccionado?.idJugadores,
-                                hint: const Text('-- Selecciona un jugador --'),
-                                items: [
-                                  const DropdownMenuItem(value: null, child: Text('-- Selecciona un jugador --')),
-                                  ..._jugadoresFiltrados.map((jug) => DropdownMenuItem(
-                                    value: jug.idJugadores,
-                                    child: Text('${jug.persona.nombre1} ${jug.persona.apellido1}'),
-                                  )).toList(),
-                                ],
-                                onChanged: _categoriaSeleccionada == null || _modoEdicion ? null : (value) {
-                                  setState(() {
-                                    _jugadorSeleccionado = _jugadores.firstWhere((j) => j.idJugadores == value);
-                                    _modoEdicion = false;
-                                  });
-                                },
-                              ),
-                              const SizedBox(height: 24),
-                              ClipOval(
-                                child: Image.asset(
-                                  'assets/Foto_Perfil.webp', 
-                                  width: 150,
-                                  height: 150,
-                                  fit: BoxFit.cover,
-                                ),
-                              ),
+                  // Dropdowns y foto
+                  Card(
+                    elevation: 3,
+                    child: Padding(
+                      padding: const EdgeInsets.all(14.0),
+                      child: Column(
+                        children: [
+                          DropdownButtonFormField<String>(
+                            decoration: const InputDecoration(
+                              labelText: 'Seleccionar Categoría',
+                              labelStyle: TextStyle(fontSize: 13),
+                              contentPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                            ),
+                            style: const TextStyle(fontSize: 13, color: Colors.black),
+                            value: _categoriaSeleccionada,
+                            hint: const Text('-- Selecciona categoría --'),
+                            items: [
+                              const DropdownMenuItem(value: null, child: Text('-- Selecciona categoría --')),
+                              ..._categorias.map((cat) => DropdownMenuItem(
+                                value: cat.idCategorias.toString(),
+                                child: Text(cat.descripcion),
+                              )).toList(),
                             ],
+                            onChanged: _modoEdicion ? null : (value) {
+                              setState(() {
+                                _categoriaSeleccionada = value;
+                                _filterJugadores();
+                              });
+                            },
                           ),
-                        ),
-                      ),
-                      
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                          children: [
-                            _buildSectionTitle('📞 Información de Contacto'),
-                            Card(
-                              elevation: 0,
-                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8.0)),
-                              child: Column(
-                                children: [
-                                  _buildListItem(
-                                    'Teléfono:', 
-                                    _modoEdicion 
-                                      ? _buildEditableField('telefono', 'Teléfono', keyboardType: TextInputType.phone, validator: (v) => Validator.validateTelefono(v, 'Teléfono')) 
-                                      : Text(persona?.telefono ?? '-')),
-                                  _buildListItem(
-                                    'Dirección:', 
-                                    _modoEdicion 
-                                      ? _buildEditableField('direccion', 'Dirección', validator: (v) => Validator.validateRequired(v, 'Dirección')) 
-                                      : Text(persona?.direccion ?? '-')),
-                                  _buildListItem(
-                                    'Email:', 
-                                    _modoEdicion 
-                                      ? _buildEditableField('correo', 'Email', keyboardType: TextInputType.emailAddress, validator: Validator.validateCorreo) 
-                                      : Text(persona?.correo ?? '-')),
-                                  _buildListItem(
-                                    'EPS:', 
-                                    _modoEdicion 
-                                      ? _buildEditableField('epsSisben', 'EPS/Sisbén', isOptional: true) 
-                                      : Text(persona?.epsSisben ?? '-')),
-                                ],
-                              ),
+                          const SizedBox(height: 12),
+                          DropdownButtonFormField<int>(
+                            decoration: const InputDecoration(
+                              labelText: 'Seleccionar Jugador',
+                              labelStyle: TextStyle(fontSize: 13),
+                              contentPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 8),
                             ),
-                            const SizedBox(height: 16),
-                            _buildSectionTitle('👨‍👩‍👦 Información de Tutores'),
-                            Card(
-                              elevation: 0,
-                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8.0)),
-                              child: Column(
-                                children: [
-                                  _buildListItem(
-                                    'Nombre del Tutor:', 
-                                    _modoEdicion 
-                                      ? _buildTutorNameField() 
-                                      : Text('${_jugadorSeleccionado?.nomTutor1 ?? ''} ${_jugadorSeleccionado?.apeTutor1 ?? ''}'.trim().isEmpty ? '-' : '${_jugadorSeleccionado?.nomTutor1 ?? ''} ${_jugadorSeleccionado?.apeTutor1 ?? ''}')
-                                  ),
-                                  _buildListItem(
-                                    'Teléfono del Tutor:', 
-                                    _modoEdicion 
-                                      ? _buildEditableField('telefonoTutor', 'Teléfono Tutor', keyboardType: TextInputType.phone, validator: (v) => Validator.validateTelefono(v, 'Teléfono del Tutor')) 
-                                      : Text(_jugadorSeleccionado?.telefonoTutor ?? '-')),
-                                ],
-                              ),
+                            style: const TextStyle(fontSize: 13, color: Colors.black),
+                            value: _jugadorSeleccionado?.idJugadores,
+                            hint: const Text('-- Selecciona jugador --'),
+                            items: [
+                              const DropdownMenuItem(value: null, child: Text('-- Selecciona jugador --')),
+                              ..._jugadoresFiltrados.map((jug) => DropdownMenuItem(
+                                value: jug.idJugadores,
+                                child: Text('${jug.persona.nombre1} ${jug.persona.apellido1}'),
+                              )).toList(),
+                            ],
+                            onChanged: _categoriaSeleccionada == null || _modoEdicion ? null : (value) {
+                              setState(() {
+                                _jugadorSeleccionado = _jugadores.firstWhere((j) => j.idJugadores == value);
+                                _modoEdicion = false;
+                              });
+                            },
+                          ),
+                          const SizedBox(height: 16),
+                          ClipOval(
+                            child: Image.asset(
+                              'assets/Foto_Perfil.webp',
+                              width: 100,
+                              height: 100,
+                              fit: BoxFit.cover,
                             ),
-                          ],
-                        ),
+                          ),
+                        ],
                       ),
-                    ],
+                    ),
                   ),
 
-                  const Divider(height: 32),
+                  const SizedBox(height: 12),
 
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                          children: [
-                            _buildSectionTitle('👤 Información Personal'),
-                            Card(
-                              elevation: 0,
-                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8.0)),
-                              child: Column(
-                                children: [
-                                  _buildListItem(
-                                    'Nombres:', 
-                                    _modoEdicion 
-                                      ? _buildNameField() 
-                                      : Text('${persona?.nombre1 ?? ''} ${persona?.nombre2 ?? ''}'.trim().isEmpty ? '-' : '${persona?.nombre1 ?? ''} ${persona?.nombre2 ?? ''}')
-                                  ),
-                                  _buildListItem(
-                                    'Apellidos:', 
-                                    _modoEdicion 
-                                      ? _buildApellidoField() 
-                                      : Text('${persona?.apellido1 ?? ''} ${persona?.apellido2 ?? ''}'.trim().isEmpty ? '-' : '${persona?.apellido1 ?? ''} ${persona?.apellido2 ?? ''}')
-                                  ),
-                                  _buildListItem('Edad:', Text(_calcularEdad(persona?.fechaDeNacimiento))),
-                                  _buildListItem(
-                                    'Fecha de Nacimiento:', 
-                                    _modoEdicion 
-                                      ? _buildDateField('fechaNacimiento') 
-                                      : Text(persona?.fechaDeNacimiento != null ? '${persona!.fechaDeNacimiento.day.toString().padLeft(2, '0')}/${persona.fechaDeNacimiento.month.toString().padLeft(2, '0')}/${persona.fechaDeNacimiento.year}' : '-')),
-                                  _buildListItem(
-                                    'Documento:', 
-                                    _modoEdicion 
-                                      ? _buildEditableField('numeroDocumento', 'Documento', validator: (v) => Validator.validateRequired(v, 'Número de Documento'))
-                                      : Text(persona?.numeroDeDocumento ?? '-')),
-                                  _buildListItem(
-                                    'Tipo de Documento:', 
-                                    _modoEdicion 
-                                      ? _buildTipoDocumentoDropdown() 
-                                      : Text(persona?.tiposDeDocumentos?.descripcion ?? '-')),
-                                  _buildListItem(
-                                    'Género:', 
-                                    _modoEdicion 
-                                      ? _buildGeneroDropdown() 
-                                      : Text(persona?.genero == 'M' ? 'Masculino' : persona?.genero == 'F' ? 'Femenino' : '-')),
-                                  if (_modoEdicion) 
-                                    _buildListItem(
-                                      'Contraseña:', 
-                                      _buildEditableField('contrasena', 'Contraseña (Opcional)', isOptional: true, isPassword: true, validator: Validator.validateContrasena)),
-                                ],
-                              ),
-                            ),
+                  // Información Personal
+                  Card(
+                    elevation: 3,
+                    child: Padding(
+                      padding: const EdgeInsets.all(14.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          _buildSectionTitle('👤 Información Personal'),
+                          if (!_modoEdicion) ...[
+                            _buildInfoDisplay('Nombres:', '${persona?.nombre1 ?? ''} ${persona?.nombre2 ?? ''}'.trim().isEmpty ? '-' : '${persona?.nombre1 ?? ''} ${persona?.nombre2 ?? ''}'),
+                            _buildInfoDisplay('Apellidos:', '${persona?.apellido1 ?? ''} ${persona?.apellido2 ?? ''}'.trim().isEmpty ? '-' : '${persona?.apellido1 ?? ''} ${persona?.apellido2 ?? ''}'),
+                            _buildInfoDisplay('Edad:', _calcularEdad(persona?.fechaDeNacimiento)),
+                            _buildInfoDisplay('Fecha de Nacimiento:', persona?.fechaDeNacimiento != null ? '${persona!.fechaDeNacimiento.day.toString().padLeft(2, '0')}/${persona.fechaDeNacimiento.month.toString().padLeft(2, '0')}/${persona.fechaDeNacimiento.year}' : '-'),
+                            _buildInfoDisplay('Documento:', persona?.numeroDeDocumento ?? '-'),
+                            _buildInfoDisplay('Tipo de Documento:', persona?.tiposDeDocumentos?.descripcion ?? '-'),
+                            _buildInfoDisplay('Género:', persona?.genero == 'M' ? 'Masculino' : persona?.genero == 'F' ? 'Femenino' : '-'),
+                          ] else ...[
+                            _buildNameField(),
+                            const SizedBox(height: 8),
+                            _buildApellidoField(),
+                            const SizedBox(height: 8),
+                            _buildDateField('fechaNacimiento'),
+                            const SizedBox(height: 8),
+                            _buildEditableField('numeroDocumento', 'Documento', validator: (v) => Validator.validateRequired(v, 'Número de Documento')),
+                            const SizedBox(height: 8),
+                            _buildTipoDocumentoDropdown(),
+                            const SizedBox(height: 8),
+                            _buildGeneroDropdown(),
+                            const SizedBox(height: 8),
+                            _buildEditableField('contrasena', 'Contraseña (Opcional)', isOptional: true, isPassword: true, validator: Validator.validateContrasena),
                           ],
-                        ),
+                        ],
                       ),
-                      
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                          children: [
-                            _buildSectionTitle('⚽ Información Deportiva'),
-                            Card(
-                              elevation: 0,
-                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8.0)),
-                              child: Column(
-                                children: [
-                                  _buildListItem(
-                                    'Dorsal:', 
-                                    _modoEdicion 
-                                      ? _buildEditableField('dorsal', 'Dorsal', keyboardType: TextInputType.number, validator: Validator.validateDorsal) 
-                                      : Text(_jugadorSeleccionado?.dorsal.toString() ?? '-')),
-                                  _buildListItem(
-                                    'Posición:', 
-                                    _modoEdicion 
-                                      ? _buildEditableField('posicion', 'Posición', validator: (v) => Validator.validateRequired(v, 'Posición')) 
-                                      : Text(_jugadorSeleccionado?.posicion ?? '-')),
-_buildListItem(
-'Estatura:',
-_modoEdicion
-? _buildEditableField('estatura', 'Estatura (cm)', keyboardType: TextInputType.number, validator: Validator.validateEstatura)
-: Text(_jugadorSeleccionado != null ? '${_jugadorSeleccionado!.estatura} cm' : '-')),
-_buildListItem(
-'UPZ:',
-_modoEdicion
-? _buildEditableField('upz', 'UPZ (Opcional)', isOptional: true)
-: Text(_jugadorSeleccionado?.upz ?? '-')),
-_buildListItem(
-'Categoría:',
-_modoEdicion
-? _buildCategoriaDropdown()
-: Text(_categorias.firstWhere((c) => c.idCategorias == _jugadorSeleccionado?.idCategorias, orElse: () => Categoria(idCategorias: 0, descripcion: '-')).descripcion)),
-],
-),
-),
-],
-),
-),
-],
-),
-],
-),
-),
-),
-);
-}
-// ✅ CORRECCIÓN: Removed SizedBox wrapper, let parent ListTile handle sizing
-Widget _buildEditableField(
-String key,
-String label,
-{
-bool isOptional = false,
-TextInputType keyboardType = TextInputType.text,
-bool isPassword = false,
-String? Function(String?)? validator
-}
-) {
-return TextFormField(
-controller: _controllers[key],
-keyboardType: keyboardType,
-obscureText: isPassword,
-decoration: InputDecoration(
-labelText: label,
-suffixText: isOptional ? '(Opcional)' : null,
-isDense: true,
-contentPadding: const EdgeInsets.symmetric(vertical: 8, horizontal: 8),
-border: const OutlineInputBorder()
-),
-validator: (value) {
-if (validator != null) {
-final error = validator(value);
-return error;
-}
-return null;
-},
-);
-}
-Widget _buildTutorNameField() {
-return Column(
-crossAxisAlignment: CrossAxisAlignment.stretch,
-children: [
-_buildEditableField('nomTutor1', 'Nom. Tutor 1', validator: (v) => Validator.validateRequired(v, 'Nombre Tutor 1')),
-const SizedBox(height: 4),
-_buildEditableField('apeTutor1', 'Ape. Tutor 1', validator: (v) => Validator.validateRequired(v, 'Apellido Tutor 1')),
-const SizedBox(height: 4),
-_buildEditableField('nomTutor2', 'Nom. Tutor 2', isOptional: true),
-const SizedBox(height: 4),
-_buildEditableField('apeTutor2', 'Ape. Tutor 2', isOptional: true),
-],
-);
-}
-Widget _buildNameField() {
-return Column(
-crossAxisAlignment: CrossAxisAlignment.stretch,
-children: [
-_buildEditableField('primerNombre', 'Primer Nombre', validator: (v) => Validator.validateRequired(v, 'Primer Nombre')),
-const SizedBox(height: 4),
-_buildEditableField('segundoNombre', 'Segundo Nombre', isOptional: true),
-],
-);
-}
-Widget _buildApellidoField() {
-return Column(
-crossAxisAlignment: CrossAxisAlignment.stretch,
-children: [
-_buildEditableField('primerApellido', 'Primer Apellido', validator: (v) => Validator.validateRequired(v, 'Primer Apellido')),
-const SizedBox(height: 4),
-_buildEditableField('segundoApellido', 'Segundo Apellido', isOptional: true),
-],
-);
-}
-Widget _buildTipoDocumentoDropdown() {
-return DropdownButtonFormField<int>(
-value: _selectedTipoDocumentoId,
-hint: const Text('Tipo Doc.'),
-decoration: const InputDecoration(
-isDense: true,
-contentPadding: EdgeInsets.symmetric(vertical: 8, horizontal: 8),
-border: OutlineInputBorder(),
-),
-items: _tiposDocumento.map((td) => DropdownMenuItem(
-value: td.idTiposDeDocumentos,
-child: Text(td.descripcion)
-)).toList(),
-onChanged: (value) {
-setState(() {
-_selectedTipoDocumentoId = value;
-});
-},
-);
-}
-Widget _buildGeneroDropdown() {
-return DropdownButtonFormField<String>(
-value: _selectedGenero,
-hint: const Text('Género'),
-decoration: const InputDecoration(
-isDense: true,
-contentPadding: EdgeInsets.symmetric(vertical: 8, horizontal: 8),
-border: OutlineInputBorder(),
-),
-items: const [
-DropdownMenuItem(value: 'M', child: Text('Masculino')),
-DropdownMenuItem(value: 'F', child: Text('Femenino'))
-],
-onChanged: (value) {
-setState(() {
-_selectedGenero = value;
-});
-},
-);
-}
-Widget _buildCategoriaDropdown() {
-return DropdownButtonFormField<int>(
-value: _selectedCategoriaId,
-hint: const Text('Categoría'),
-decoration: const InputDecoration(
-isDense: true,
-contentPadding: EdgeInsets.symmetric(vertical: 8, horizontal: 8),
-border: OutlineInputBorder(),
-),
-items: _categorias.map((cat) => DropdownMenuItem(
-value: cat.idCategorias,
-child: Text(cat.descripcion)
-)).toList(),
-onChanged: (value) {
-setState(() {
-_selectedCategoriaId = value;
-});
-},
-);
-}
-Widget _buildDateField(String key) {
-Future<void> _selectDate() async {
-final DateTime? picked = await showDatePicker(
-context: context,
-initialDate: _selectedFechaNacimiento ?? DateTime.now(),
-firstDate: DateTime(1900),
-lastDate: DateTime.now()
-);
-if (picked != null && picked != _selectedFechaNacimiento) {
-setState(() {
-_selectedFechaNacimiento = picked;
-_controllers[key]!.text = picked.toIso8601String().split('T')[0];
-});
-}
-}
-return GestureDetector(
-  onTap: _selectDate, 
-  child: AbsorbPointer(
-    child: TextFormField(
+                    ),
+                  ),
+
+                  const SizedBox(height: 12),
+
+                  // Información de Contacto
+                  Card(
+                    elevation: 3,
+                    child: Padding(
+                      padding: const EdgeInsets.all(14.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          _buildSectionTitle('📞 Información de Contacto'),
+                          if (!_modoEdicion) ...[
+                            _buildInfoDisplay('Teléfono:', persona?.telefono ?? '-'),
+                            _buildInfoDisplay('Dirección:', persona?.direccion ?? '-'),
+                            _buildInfoDisplay('Email:', persona?.correo ?? '-'),
+                            _buildInfoDisplay('EPS:', persona?.epsSisben ?? '-'),
+                          ] else ...[
+                            _buildEditableField('telefono', 'Teléfono', keyboardType: TextInputType.phone, validator: (v) => Validator.validateTelefono(v, 'Teléfono')),
+                            const SizedBox(height: 8),
+                            _buildEditableField('direccion', 'Dirección', validator: (v) => Validator.validateRequired(v, 'Dirección')),
+                            const SizedBox(height: 8),
+                            _buildEditableField('correo', 'Email', keyboardType: TextInputType.emailAddress, validator: Validator.validateCorreo),
+                            const SizedBox(height: 8),
+                            _buildEditableField('epsSisben', 'EPS/Sisbén', isOptional: true),
+                          ],
+                        ],
+                      ),
+                    ),
+                  ),
+
+                  const SizedBox(height: 12),
+
+                  // Información de Tutores
+                  Card(
+                    elevation: 3,
+                    child: Padding(
+                      padding: const EdgeInsets.all(14.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          _buildSectionTitle('👨‍👩‍👦 Información de Tutores'),
+                          if (!_modoEdicion) ...[
+                            _buildInfoDisplay('Nombre del Tutor:', '${_jugadorSeleccionado?.nomTutor1 ?? ''} ${_jugadorSeleccionado?.apeTutor1 ?? ''}'.trim().isEmpty ? '-' : '${_jugadorSeleccionado?.nomTutor1 ?? ''} ${_jugadorSeleccionado?.apeTutor1 ?? ''}'),
+                            _buildInfoDisplay('Teléfono del Tutor:', _jugadorSeleccionado?.telefonoTutor ?? '-'),
+                          ] else ...[
+                            _buildTutorNameField(),
+                            const SizedBox(height: 8),
+                            _buildEditableField('telefonoTutor', 'Teléfono Tutor', keyboardType: TextInputType.phone, validator: (v) => Validator.validateTelefono(v, 'Teléfono del Tutor')),
+                          ],
+                        ],
+                      ),
+                    ),
+                  ),
+
+                  const SizedBox(height: 12),
+
+                  // Información Deportiva
+                  Card(
+                    elevation: 3,
+                    child: Padding(
+                      padding: const EdgeInsets.all(14.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          _buildSectionTitle('⚽ Información Deportiva'),
+                          if (!_modoEdicion) ...[
+                            _buildInfoDisplay('Dorsal:', _jugadorSeleccionado?.dorsal.toString() ?? '-'),
+                            _buildInfoDisplay('Posición:', _jugadorSeleccionado?.posicion ?? '-'),
+                            _buildInfoDisplay('Estatura:', _jugadorSeleccionado != null ? '${_jugadorSeleccionado!.estatura} cm' : '-'),
+                            _buildInfoDisplay('UPZ:', _jugadorSeleccionado?.upz ?? '-'),
+                            _buildInfoDisplay('Categoría:', _categorias.firstWhere((c) => c.idCategorias == _jugadorSeleccionado?.idCategorias, orElse: () => Categoria(idCategorias: 0, descripcion: '-')).descripcion),
+                          ] else ...[
+                            _buildEditableField('dorsal', 'Dorsal', keyboardType: TextInputType.number, validator: Validator.validateDorsal),
+                            const SizedBox(height: 8),
+                            _buildEditableField('posicion', 'Posición', validator: (v) => Validator.validateRequired(v, 'Posición')),
+                            const SizedBox(height: 8),
+                            _buildEditableField('estatura', 'Estatura (cm)', keyboardType: TextInputType.number, validator: Validator.validateEstatura),
+                            const SizedBox(height: 8),
+                            _buildEditableField('upz', 'UPZ (Opcional)', isOptional: true),
+                            const SizedBox(height: 8),
+                            _buildCategoriaDropdown(),
+                          ],
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+    );
+  }
+
+  Widget _buildEditableField(
+    String key,
+    String label,
+    {
+      bool isOptional = false,
+      TextInputType keyboardType = TextInputType.text,
+      bool isPassword = false,
+      String? Function(String?)? validator
+    }
+  ) {
+    return TextFormField(
       controller: _controllers[key],
-      decoration: const InputDecoration(
-        labelText: 'dd/mm/aaaa', 
-        suffixIcon: Icon(Icons.calendar_today), 
-        isDense: true, 
-        contentPadding: EdgeInsets.symmetric(vertical: 8, horizontal: 8), 
-        border: OutlineInputBorder()
+      keyboardType: keyboardType,
+      obscureText: isPassword,
+      style: const TextStyle(fontSize: 13),
+      decoration: InputDecoration(
+        labelText: label,
+        labelStyle: const TextStyle(fontSize: 13),
+        suffixText: isOptional ? '(Opcional)' : null,
+        isDense: true,
+        contentPadding: const EdgeInsets.symmetric(vertical: 10, horizontal: 10),
+        border: const OutlineInputBorder()
       ),
-      validator: (v) => Validator.validateRequired(v, 'Fecha de Nacimiento'),
-    ),
-  ),
-);
-}
+      validator: (value) {
+        if (validator != null) {
+          final error = validator(value);
+          return error;
+        }
+        return null;
+      },
+    );
+  }
+
+  Widget _buildTutorNameField() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        _buildEditableField('nomTutor1', 'Nom. Tutor 1', validator: (v) => Validator.validateRequired(v, 'Nombre Tutor 1')),
+        const SizedBox(height: 8),
+        _buildEditableField('apeTutor1', 'Ape. Tutor 1', validator: (v) => Validator.validateRequired(v, 'Apellido Tutor 1')),
+        const SizedBox(height: 8),
+        _buildEditableField('nomTutor2', 'Nom. Tutor 2', isOptional: true),
+        const SizedBox(height: 8),
+        _buildEditableField('apeTutor2', 'Ape. Tutor 2', isOptional: true),
+      ],
+    );
+  }
+
+  Widget _buildNameField() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        _buildEditableField('primerNombre', 'Primer Nombre', validator: (v) => Validator.validateRequired(v, 'Primer Nombre')),
+        const SizedBox(height: 8),
+        _buildEditableField('segundoNombre', 'Segundo Nombre', isOptional: true),
+      ],
+    );
+  }
+
+  Widget _buildApellidoField() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        _buildEditableField('primerApellido', 'Primer Apellido', validator: (v) => Validator.validateRequired(v, 'Primer Apellido')),
+        const SizedBox(height: 8),
+        _buildEditableField('segundoApellido', 'Segundo Apellido', isOptional: true),
+      ],
+    );
+  }
+
+  Widget _buildTipoDocumentoDropdown() {
+    return DropdownButtonFormField<int>(
+      value: _selectedTipoDocumentoId,
+      hint: const Text('Tipo Doc.', style: TextStyle(fontSize: 13)),
+      decoration: const InputDecoration(
+        labelText: 'Tipo de Documento',
+        labelStyle: TextStyle(fontSize: 13),
+        isDense: true,
+        contentPadding: EdgeInsets.symmetric(vertical: 10, horizontal: 10),
+        border: OutlineInputBorder(),
+      ),
+      items: _tiposDocumento.map((td) => DropdownMenuItem(
+        value: td.idTiposDeDocumentos,
+        child: Text(td.descripcion, style: const TextStyle(fontSize: 13))
+      )).toList(),
+      onChanged: (value) {
+        setState(() {
+          _selectedTipoDocumentoId = value;
+        });
+      },
+    );
+  }
+
+  Widget _buildGeneroDropdown() {
+    return DropdownButtonFormField<String>(
+      value: _selectedGenero,
+      hint: const Text('Género', style: TextStyle(fontSize: 13)),
+      decoration: const InputDecoration(
+        labelText: 'Género',
+        labelStyle: TextStyle(fontSize: 13),
+        isDense: true,
+        contentPadding: EdgeInsets.symmetric(vertical: 10, horizontal: 10),
+        border: OutlineInputBorder(),
+      ),
+      items: const [
+        DropdownMenuItem(value: 'M', child: Text('Masculino', style: TextStyle(fontSize: 13))),
+        DropdownMenuItem(value: 'F', child: Text('Femenino', style: TextStyle(fontSize: 13)))
+      ],
+      onChanged: (value) {
+        setState(() {
+          _selectedGenero = value;
+        });
+      },
+    );
+  }
+
+  Widget _buildCategoriaDropdown() {
+    return DropdownButtonFormField<int>(
+      value: _selectedCategoriaId,
+      hint: const Text('Categoría', style: TextStyle(fontSize: 13)),
+      decoration: const InputDecoration(
+        labelText: 'Categoría',
+        labelStyle: TextStyle(fontSize: 13),
+        isDense: true,
+        contentPadding: EdgeInsets.symmetric(vertical: 10, horizontal: 10),
+        border: OutlineInputBorder(),
+      ),
+      items: _categorias.map((cat) => DropdownMenuItem(
+        value: cat.idCategorias,
+        child: Text(cat.descripcion, style: const TextStyle(fontSize: 13))
+      )).toList(),
+      onChanged: (value) {
+        setState(() {
+          _selectedCategoriaId = value;
+        });
+      },
+    );
+  }
+
+  Widget _buildDateField(String key) {
+    Future<void> _selectDate() async {
+      final DateTime? picked = await showDatePicker(
+        context: context,
+        initialDate: _selectedFechaNacimiento ?? DateTime.now(),
+        firstDate: DateTime(1900),
+        lastDate: DateTime.now()
+      );
+      if (picked != null && picked != _selectedFechaNacimiento) {
+        setState(() {
+          _selectedFechaNacimiento = picked;
+          _controllers[key]!.text = picked.toIso8601String().split('T')[0];
+        });
+      }
+    }
+    return GestureDetector(
+      onTap: _selectDate,
+      child: AbsorbPointer(
+        child: TextFormField(
+          controller: _controllers[key],
+          style: const TextStyle(fontSize: 13),
+          decoration: const InputDecoration(
+            labelText: 'Fecha de Nacimiento',
+            labelStyle: TextStyle(fontSize: 13),
+            hintText: 'dd/mm/aaaa',
+            suffixIcon: Icon(Icons.calendar_today, size: 18),
+            isDense: true,
+            contentPadding: EdgeInsets.symmetric(vertical: 10, horizontal: 10),
+            border: OutlineInputBorder()
+          ),
+          validator: (v) => Validator.validateRequired(v, 'Fecha de Nacimiento'),
+        ),
+      ),
+    );
+  }
 }

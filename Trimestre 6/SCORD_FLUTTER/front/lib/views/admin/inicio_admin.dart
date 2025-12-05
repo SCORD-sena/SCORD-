@@ -307,7 +307,7 @@ class _InicioAdminState extends State<InicioAdmin> {
           _buildCarouselItem(
             title: '¿Quiénes Somos?',
             description:
-                'Somos Fénix, una escuela de fútbol apasionada por la formación deportiva y el desarrollo integral de nuestros jugadores. Ubicados en la 8va localidad de Bogotá, Kennedy, entrenamos en el Parque Timiza...',
+                'Somos un Club deportivo Fundado en el año 2010, ofrecemos espacios de formación deportiva, integral, enfocados en el Futbol, contribuimos a la formación personal deportiva de los niño, niñas y adolescentes mediante la aplicación de procesos metodológicos y pedagógicos para la enseñanza deportiva, complementada con principios y valores que les permitan un crecimiento como personas integras....',
             imagePath: 'assets/Escudo quilmes.jpg',
           ),
           _buildCarouselItem(
