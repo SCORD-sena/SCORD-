@@ -1,0 +1,1 @@
+ C:\\Users\\Usuario\\OneDrive\\Desktop\\fluttsebas\\fluttsebas\\front\\build\\36d19e13b9af91dbdecc2c623ee6bc8a\\dart_build_result.json: 

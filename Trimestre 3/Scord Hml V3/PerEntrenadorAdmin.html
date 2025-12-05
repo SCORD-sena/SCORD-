@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Perfil Entrenador - SCORD</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="/Css/InicioEntrenador.css">
+</head>
+<body>
+
+ <header class="header bg-white shadow-sm py-3">
+  <nav class="navbar container d-flex align-items-center justify-content-between flex-wrap">
+    <!-- Logo y título -->
+    <div class="d-flex align-items-center">
+      <img src="/Img/logo.jpg" alt="Logo SCORD" class="me-2" style="height: 50px;" />
+      <h4 class="mb-0 text-danger fw-bold">SCORD</h4>
+    </div>
+
+    <!-- Icono hamburguesa -->
+    <label class="labe_hamburguesa d-md-none" for="menu_hamburguesa">
+      <svg xmlns="http://www.w3.org/2000/svg" width="35" height="35" fill="#e63946" viewBox="0 0 16 16">
+        <path fill-rule="evenodd"
+          d="M2.5 12a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5zm0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5zm0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5z" />
+      </svg>
+    </label>
+
+    <!-- Checkbox oculto -->
+    <input class="menu_hamburguesa d-none" type="checkbox" id="menu_hamburguesa" />
+
+    <!-- Menú de enlaces -->
+    <ul class="ul_links nav flex-md-row flex-column">
+      <li class="nav-item"><a href="/InicioAdmin.html" class="nav-link text-black ">Inicio</a></li>
+          <li class="nav-item"><a href="/CrEntrenadorAdmin.html" class="nav-link text-black">Cronograma Admin</a></li>
+          <li class="nav-item"><a href="/PerfilJugadorAdmin.html" class="nav-link text-black">Perfil Jugador</a></li>
+          <li class="nav-item"><a href="/PerEntrenadorAdmin.html" class="nav-link text-danger">Perfil Entrenador</a></li>
+          <li class="nav-item"><a href="/EstJJugadorAdmin.html" class="nav-link text-black">Evaluar Jugadores</a></li>
+          <li class="nav-item"><a href="/AgregarUsu.html" class="nav-link text-black">Agregar Usuario</a></li>
+          <li class="nav-item"><a href="/CerrarSesion.html" class="nav-link btn btn-outline-danger btn-sm">Cerrar Sesión</a></li>
+  </nav>
+</header>
+
+<main class="container my-5">
+  <div class="row g-5">
+    <!-- Columna izquierda -->
+    <div class="col-md-6">
+      <section class="text-center mb-4">
+        <h2 class="fw-semibold">Bienvenido(a), <span class="fw-bold">Andres Prada</span></h2>
+        
+        <!-- Selector de categoría -->
+<div class="d-flex justify-content-center mb-3">
+  <label class="me-2 align-self-center fw-semibold">Categoría:</label>
+  <select class="form-select w-auto">
+    <option selected>2007</option>
+    <option value="2008">2008</option>
+    <option value="2009">2009</option>
+    <option value="2010">2010</option>
+  </select>
+</div>
+        <img src="/Img/Foto_Perfil.webp" alt="Foto de Perfil" class="rounded-circle shadow mb-4" style="width: 150px;">
+        <ul class="list-group list-group-flush shadow-sm rounded-3">
+          <li class="list-group-item d-flex justify-content-between"><strong>Nombre:</strong> <span>Andres Prada</span></li>
+          <li class="list-group-item d-flex justify-content-between"><strong>Edad:</strong> <span>17</span></li>
+          <li class="list-group-item d-flex justify-content-between"><strong>Documento:</strong> <span>1029220893</span></li>
+          <li class="list-group-item d-flex justify-content-between"><strong>Número de Contacto:</strong> <span>3114792068</span></li>
+          <li class="list-group-item d-flex justify-content-between"><strong>Categoría:</strong> <span>2007</span></li>
+          <li class="list-group-item d-flex justify-content-between"><strong>Años en el equipo:</strong> <span>5</span></li>
+        </ul>
+      </section>
+</div>
+
+
+
+    <!-- Columna derecha -->
+    <div class="col-md-6">
+      <section>
+        <h3 class="text-center fw-semibold mb-4">Temporada 24/25 - Estadísticas</h3>
+        <ul class="list-group list-group-flush shadow-sm rounded-3 mb-4">
+          <li class="list-group-item d-flex justify-content-between"><strong>📋 Partidos Dirigidos:</strong> <span>10</span></li>
+          <li class="list-group-item d-flex justify-content-between"><strong>🏆 Victorias:</strong> <span>7</span></li>
+          <li class="list-group-item d-flex justify-content-between"><strong>🤝 Empates:</strong> <span>2</span></li>
+          <li class="list-group-item d-flex justify-content-between"><strong>❌ Derrotas:</strong> <span>1</span></li>
+        </ul>
+
+        <ul class="list-group list-group-flush shadow-sm rounded-3">
+          <li class="list-group-item d-flex justify-content-between"><strong>🧠 Formación Actual:</strong> <span>4-3-3 (Ataque)</span></li>
+          <li class="list-group-item">
+  <div class="d-flex justify-content-between">
+    <strong>📈 Posesión promedio:</strong>
+    <span>48%</span>
+  </div>
+  <div class="progress mt-2" style="height: 10px;">
+    <div class="progress-bar bg-info" role="progressbar" style="width: 48%;" aria-valuenow="48" aria-valuemin="0" aria-valuemax="100"></div>
+  </div>
+</li>
+
+          <li class="list-group-item d-flex justify-content-between"><strong>🛡️ Porterías a cero:</strong> <span>4</span></li>
+          <li class="list-group-item d-flex justify-content-between"><strong>🎯 Goles a favor:</strong> <span>10</span></li>
+          <li class="list-group-item d-flex justify-content-between"><strong>🥅 Goles en contra:</strong> <span>6</span></li>
+          <li class="list-group-item d-flex justify-content-between"><strong>⏱️ Min. promedio/jugador:</strong> <span>65</span></li>
+          <li class="list-group-item d-flex justify-content-between"><strong>🧑‍🤝‍🧑 Equipos dirigidos:</strong> <span>1</span></li>
+          <li class="list-group-item d-flex justify-content-between"><strong>🏅 Títulos ganados:</strong> <span>0</span></li>
+        </ul>
+      </section>
+    </div>
+  </div>
+</main>
+
+<footer class="bg-dark text-white py-4 mt-auto">
+    <div class="container">
+      <div class="row text-center text-md-start justify-content-center">
+        <div class="col-md-4 mb-3">
+          <h3 class="text-danger">SCORD</h3>
+          <p>Sistema de control y organización deportiva</p>
+        </div>
+        <div class="col-md-4 mb-3">
+          <h3 class="text-danger">Escuela Quilmes</h3>
+          <p>Formando talentos para el futuro</p>
+        </div>
+      </div>
+      <hr class="border-light">
+      <p class="text-center mb-0 small">&copy; 2025 SCORD | Escuela de Fútbol Quilmes | Todos los derechos reservados</p>
+    </div>
+  </footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
