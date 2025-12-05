@@ -1,0 +1,1 @@
+ C:\\Users\\Usuario\\OneDrive\\Desktop\\SCORD-\\Trimestre\ 6\\Flutter_Perfil_Jugador\\fluttsebas\\front\\build\\1104802c9cd8d11421aced1398c4b281\\dart_build_result.json: 
