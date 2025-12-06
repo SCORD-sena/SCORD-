@@ -1,12 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart'; // Necesario para formatear la fecha
+import 'package:intl/intl.dart';
 
-// Modelos y Servicios
 import '../../models/categoria_model.dart';
 import '../../models/tipo_documento_model.dart';
 import '../../services/jugador_service.dart';
-// import '../utils/validator.dart'; // Ya no es necesario si usamos regex en línea
-
+import '../../widgets/admin/agregar_jugador/jugador_form_widgets.dart';
 
 class AgregarJugadorScreen extends StatefulWidget {
   const AgregarJugadorScreen({super.key});
@@ -20,12 +18,12 @@ class _AgregarJugadorScreenState extends State<AgregarJugadorScreen> {
   final _formKey = GlobalKey<FormState>();
   final _scrollController = ScrollController();
 
-  // Estado (equivalente a useState)
+  // Estado
   bool _loading = false;
   List<Categoria> _categorias = [];
   List<TipoDocumento> _tiposDocumento = [];
   
-  // Valores seleccionados en Dropdown (se guardan como ID del modelo)
+  // Valores seleccionados en Dropdown
   int? _selectedTipoDocumentoId;
   String? _selectedGenero;
   int? _selectedCategoriaId;
@@ -67,7 +65,7 @@ class _AgregarJugadorScreenState extends State<AgregarJugadorScreen> {
     super.dispose();
   }
 
-  // === Helpers para SnackBar y Dialogos (Se mantienen igual) ===
+  // === Helpers para SnackBar y Dialogos ===
 
   void _showSnackbar(String message, {bool isError = false}) {
     ScaffoldMessenger.of(context).showSnackBar(
@@ -101,14 +99,12 @@ class _AgregarJugadorScreenState extends State<AgregarJugadorScreen> {
   Future<void> _cargarDatosIniciales() async {
     setState(() => _loading = true);
     try {
-      // ✅ CORRECCIÓN 1: Usamos dynamic y casteamos después.
       final results = await Future.wait([
         _jugadorService.fetchCategorias(),
         _jugadorService.fetchTiposDocumento(),
       ]);
       
       setState(() {
-        // Casteo explícito del resultado de Future.wait
         _categorias = results[0] as List<Categoria>;
         _tiposDocumento = results[1] as List<TipoDocumento>;
       });
@@ -122,7 +118,7 @@ class _AgregarJugadorScreenState extends State<AgregarJugadorScreen> {
   // === Lógica de Validación ===
 
   bool _validarFormulario() {
-    // 1. Validación de campos vacíos (usa el FormKey de Flutter)
+    // 1. Validación de campos vacíos
     if (!_formKey.currentState!.validate()) {
       _showSnackbar('Por favor, completa todos los campos requeridos.', isError: true);
       return false;
@@ -149,7 +145,6 @@ class _AgregarJugadorScreenState extends State<AgregarJugadorScreen> {
     }
     
     // 4. Validación de Correo
-    // ✅ CORRECCIÓN 3: Validación de correo con regex local
     final emailRegex = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$'); 
     if (!emailRegex.hasMatch(values['correo']!)) {
        _showErrorDialog("Correo inválido", "Ingresa un correo válido.");
@@ -179,7 +174,7 @@ class _AgregarJugadorScreenState extends State<AgregarJugadorScreen> {
     return true;
   }
 
-  // === Lógica de Creación (Se mantiene igual) ===
+  // === Lógica de Creación ===
 
   Future<void> _crearJugador() async {
     // 1. Validar el formulario antes de continuar
@@ -190,35 +185,7 @@ class _AgregarJugadorScreenState extends State<AgregarJugadorScreen> {
     // 2. Mostrar Confirmación 
     final bool? confirmation = await showDialog<bool>(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text("¿Estás Seguro?"),
-        icon: const Icon(Icons.help_outline, color: Colors.blue),
-        content: SingleChildScrollView(
-          child: ListBody(
-            children: <Widget>[
-              Text("Documento: ${values['numeroDocumento']}", style: const TextStyle(fontWeight: FontWeight.bold)),
-              Text("Nombre: ${values['primerNombre']} ${values['segundoNombre'] ?? ''} ${values['primerApellido']}"),
-              Text("Teléfono: ${values['telefono']}"),
-              Text("Correo: ${values['correo']}"),
-              const Divider(height: 10),
-              Text("Tutor: ${values['nomTutor1']} ${values['apeTutor1']}"),
-              Text("Dorsal: ${values['dorsal']} — Posición: ${values['posicion']}"),
-              Text("Estatura: ${values['estatura']} cm"),
-            ],
-          ),
-        ),
-        actions: <Widget>[
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(false),
-            child: const Text('Cancelar', style: TextStyle(color: Colors.red)),
-          ),
-          ElevatedButton(
-            onPressed: () => Navigator.of(context).pop(true),
-            style: ElevatedButton.styleFrom(backgroundColor: Colors.green),
-            child: const Text('Sí, crear', style: TextStyle(color: Colors.white)),
-          ),
-        ],
-      ),
+      builder: (context) => ConfirmacionDialog(valores: values),
     );
 
     if (confirmation == null || !confirmation) return;
@@ -295,7 +262,7 @@ class _AgregarJugadorScreenState extends State<AgregarJugadorScreen> {
     });
   }
 
-  // Helper para el selector de fecha (Se mantiene igual)
+  // Helper para el selector de fecha
   Future<void> _selectDate() async {
     final DateTime? picked = await showDatePicker(
       context: context,
@@ -309,178 +276,16 @@ class _AgregarJugadorScreenState extends State<AgregarJugadorScreen> {
     }
   }
 
-  // === WIDGETS DE CONSTRUCCIÓN ===
-  
-  // ... (El resto de los métodos _build se mantienen igual, solo se actualizan las propiedades 'descripcion')
-
-  Widget _buildTipoDocumentoDropdown() {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 12.0),
-      child: DropdownButtonFormField<int>(
-        value: _selectedTipoDocumentoId,
-        decoration: const InputDecoration(
-          labelText: 'Tipo de Documento *',
-          border: OutlineInputBorder(),
-          isDense: true,
-          contentPadding: EdgeInsets.all(12),
-        ),
-        items: _tiposDocumento.map((tipo) {
-          return DropdownMenuItem(
-            value: tipo.idTiposDeDocumentos,
-            // ✅ CORRECCIÓN 2a
-            child: Text(tipo.descripcion), 
-          );
-        }).toList(),
-        onChanged: (int? newValue) {
-          setState(() {
-            _selectedTipoDocumentoId = newValue;
-          });
-        },
-        validator: (value) => value == null ? 'Selecciona un tipo de documento.' : null,
-      ),
-    );
-  }
-
-  Widget _buildGeneroDropdown() {
-    // Se mantiene igual
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 12.0),
-      child: DropdownButtonFormField<String>(
-        value: _selectedGenero,
-        decoration: const InputDecoration(
-          labelText: 'Género *',
-          border: OutlineInputBorder(),
-          isDense: true,
-          contentPadding: EdgeInsets.all(12),
-        ),
-        items: const [
-          DropdownMenuItem(value: 'M', child: Text('Masculino')),
-          DropdownMenuItem(value: 'F', child: Text('Femenino')),
-        ],
-        onChanged: (String? newValue) {
-          setState(() {
-            _selectedGenero = newValue;
-          });
-        },
-        validator: (value) => value == null ? 'Selecciona un género.' : null,
-      ),
-    );
-  }
-  
-  Widget _buildCategoriaDropdown() {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 12.0),
-      child: DropdownButtonFormField<int>(
-        value: _selectedCategoriaId,
-        decoration: const InputDecoration(
-          labelText: 'Categoría *',
-          border: OutlineInputBorder(),
-          isDense: true,
-          contentPadding: EdgeInsets.all(12),
-        ),
-        items: _categorias.map((cat) {
-          return DropdownMenuItem(
-            value: cat.idCategorias,
-            // ✅ CORRECCIÓN 2b
-            child: Text(cat.descripcion), 
-          );
-        }).toList(),
-        onChanged: (int? newValue) {
-          setState(() {
-            _selectedCategoriaId = newValue;
-          });
-        },
-        validator: (value) => value == null ? 'Selecciona una categoría.' : null,
-      ),
-    );
-  }
-  
-  Widget _buildTextField({
-    required String label,
-    required String key,
-    bool required = false,
-    bool isNumber = false,
-    bool isEmail = false,
-    bool isPassword = false,
-    String? hintText,
-    String? helperText,
-    TextInputType? keyboardType,
-    int? maxLength,
-  }) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 12.0),
-      child: TextFormField(
-        controller: _controllers[key],
-        keyboardType: keyboardType ?? (isNumber ? TextInputType.number : (isEmail ? TextInputType.emailAddress : TextInputType.text)),
-        obscureText: isPassword,
-        decoration: InputDecoration(
-          labelText: required ? '$label *' : label,
-          hintText: hintText,
-          helperText: helperText,
-          border: const OutlineInputBorder(),
-          isDense: true,
-          contentPadding: const EdgeInsets.all(12),
-        ),
-        maxLength: maxLength,
-        validator: (value) {
-          if (required && (value == null || value.isEmpty)) {
-            return 'Este campo es obligatorio.';
-          }
-          if (isEmail && value != null && !value.contains('@') && value.isNotEmpty) {
-            return 'Formato de correo inválido.';
-          }
-          return null;
-        },
-      ),
-    );
-  }
-  
-  Widget _buildFormSection(String title, List<Widget> fields) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Padding(
-          padding: const EdgeInsets.symmetric(vertical: 16.0),
-          child: Text(
-            title,
-            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.red),
-          ),
-        ),
-        ...fields,
-        const Divider(),
-      ],
-    );
-  }
-
-  Widget _buildDateField() {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 12.0),
-      child: GestureDetector(
-        onTap: _selectDate,
-        child: AbsorbPointer(
-          child: TextFormField(
-            controller: _controllers['fechaNacimiento'],
-            decoration: const InputDecoration(
-              labelText: 'Fecha de Nacimiento *',
-              hintText: 'YYYY-MM-DD',
-              suffixIcon: Icon(Icons.calendar_today),
-              border: OutlineInputBorder(),
-              isDense: true,
-              contentPadding: EdgeInsets.all(12),
-            ),
-            validator: (value) => value == null || value.isEmpty ? 'Campo obligatorio.' : null,
-          ),
-        ),
-      ),
-    );
-  }
-
+  // === BUILD ===
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Agregar Jugador', style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold)),
+        title: const Text(
+          'Agregar Jugador',
+          style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold),
+        ),
         backgroundColor: Colors.white,
         elevation: 0,
         centerTitle: true,
@@ -500,86 +305,168 @@ class _AgregarJugadorScreenState extends State<AgregarJugadorScreen> {
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     // === Sección de Datos Personales ===
-                    _buildFormSection('Datos Personales', [
-                      _buildTextField(label: 'Número de Documento', key: 'numeroDocumento', required: true),
-                      _buildTipoDocumentoDropdown(),
-                      _buildTextField(label: 'Primer Nombre', key: 'primerNombre', required: true),
-                      _buildTextField(label: 'Segundo Nombre', key: 'segundoNombre', required: false),
-                      _buildTextField(label: 'Primer Apellido', key: 'primerApellido', required: true),
-                      _buildTextField(label: 'Segundo Apellido', key: 'segundoApellido', required: false),
-                      _buildGeneroDropdown(),
-                      _buildDateField(),
-                    ]),
+                    FormSection(
+                      title: 'Datos Personales',
+                      children: [
+                        CustomTextField(
+                          label: 'Número de Documento',
+                          controller: _controllers['numeroDocumento']!,
+                          required: true,
+                        ),
+                        TipoDocumentoDropdown(
+                          value: _selectedTipoDocumentoId,
+                          tiposDocumento: _tiposDocumento,
+                          onChanged: (value) => setState(() => _selectedTipoDocumentoId = value),
+                        ),
+                        CustomTextField(
+                          label: 'Primer Nombre',
+                          controller: _controllers['primerNombre']!,
+                          required: true,
+                        ),
+                        CustomTextField(
+                          label: 'Segundo Nombre',
+                          controller: _controllers['segundoNombre']!,
+                        ),
+                        CustomTextField(
+                          label: 'Primer Apellido',
+                          controller: _controllers['primerApellido']!,
+                          required: true,
+                        ),
+                        CustomTextField(
+                          label: 'Segundo Apellido',
+                          controller: _controllers['segundoApellido']!,
+                        ),
+                        GeneroDropdown(
+                          value: _selectedGenero,
+                          onChanged: (value) => setState(() => _selectedGenero = value),
+                        ),
+                        DatePickerField(
+                          controller: _controllers['fechaNacimiento']!,
+                          label: 'Fecha de Nacimiento',
+                          onTap: _selectDate,
+                        ),
+                      ],
+                    ),
 
-                    // === Sección de Datos de Contacto y Tutor ===
-                    _buildFormSection('Datos de Contacto', [
-                      _buildTextField(label: 'Teléfono', key: 'telefono', required: true, keyboardType: TextInputType.phone, hintText: '3XXXXXXXXX', maxLength: 10),
-                      _buildTextField(label: 'Dirección', key: 'direccion', required: true),
-                      _buildTextField(label: 'Correo Electrónico', key: 'correo', required: true, isEmail: true),
-                      _buildTextField(label: 'Contraseña', key: 'contrasena', required: true, isPassword: true, helperText: '8–12 caracteres'),
-                      _buildTextField(label: 'EPS/Sisben', key: 'epsSisben', required: false),
-                    ]),
+                    // === Sección de Datos de Contacto ===
+                    FormSection(
+                      title: 'Datos de Contacto',
+                      children: [
+                        CustomTextField(
+                          label: 'Teléfono',
+                          controller: _controllers['telefono']!,
+                          required: true,
+                          keyboardType: TextInputType.phone,
+                          hintText: '3XXXXXXXXX',
+                          maxLength: 10,
+                        ),
+                        CustomTextField(
+                          label: 'Dirección',
+                          controller: _controllers['direccion']!,
+                          required: true,
+                        ),
+                        CustomTextField(
+                          label: 'Correo Electrónico',
+                          controller: _controllers['correo']!,
+                          required: true,
+                          isEmail: true,
+                        ),
+                        CustomTextField(
+                          label: 'Contraseña',
+                          controller: _controllers['contrasena']!,
+                          required: true,
+                          isPassword: true,
+                          helperText: '8–12 caracteres',
+                        ),
+                        CustomTextField(
+                          label: 'EPS/Sisben',
+                          controller: _controllers['epsSisben']!,
+                        ),
+                      ],
+                    ),
 
-                    _buildFormSection('Datos del Tutor', [
-                      _buildTextField(label: 'Nombre del Tutor', key: 'nomTutor1', required: true),
-                      _buildTextField(label: 'Segundo Nombre del Tutor', key: 'nomTutor2', required: false),
-                      _buildTextField(label: 'Apellido del Tutor', key: 'apeTutor1', required: true),
-                      _buildTextField(label: 'Segundo Apellido del Tutor', key: 'apeTutor2', required: false),
-                      _buildTextField(label: 'Teléfono del Tutor', key: 'telefonoTutor', required: true, keyboardType: TextInputType.phone, hintText: '3XXXXXXXXX', maxLength: 10),
-                    ]),
+                    // === Sección de Datos del Tutor ===
+                    FormSection(
+                      title: 'Datos del Tutor',
+                      children: [
+                        CustomTextField(
+                          label: 'Nombre del Tutor',
+                          controller: _controllers['nomTutor1']!,
+                          required: true,
+                        ),
+                        CustomTextField(
+                          label: 'Segundo Nombre del Tutor',
+                          controller: _controllers['nomTutor2']!,
+                        ),
+                        CustomTextField(
+                          label: 'Apellido del Tutor',
+                          controller: _controllers['apeTutor1']!,
+                          required: true,
+                        ),
+                        CustomTextField(
+                          label: 'Segundo Apellido del Tutor',
+                          controller: _controllers['apeTutor2']!,
+                        ),
+                        CustomTextField(
+                          label: 'Teléfono del Tutor',
+                          controller: _controllers['telefonoTutor']!,
+                          required: true,
+                          keyboardType: TextInputType.phone,
+                          hintText: '3XXXXXXXXX',
+                          maxLength: 10,
+                        ),
+                      ],
+                    ),
 
                     // === Sección de Información Deportiva ===
-                    _buildFormSection('Información Deportiva', [
-                      Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Flexible(
-                            child: _buildTextField(label: 'Dorsal', key: 'dorsal', required: true, keyboardType: TextInputType.number, maxLength: 2),
-                          ),
-                          const SizedBox(width: 16),
-                          Flexible(
-                            child: _buildTextField(label: 'Estatura (cm)', key: 'estatura', required: true, keyboardType: TextInputType.number),
-                          ),
-                        ],
-                      ),
-                      _buildTextField(label: 'Posición', key: 'posicion', required: true),
-                      _buildTextField(label: 'UPZ', key: 'upz', required: false),
-                      _buildCategoriaDropdown(),
-                    ]),
+                    FormSection(
+                      title: 'Información Deportiva',
+                      children: [
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Flexible(
+                              child: CustomTextField(
+                                label: 'Dorsal',
+                                controller: _controllers['dorsal']!,
+                                required: true,
+                                keyboardType: TextInputType.number,
+                                maxLength: 2,
+                              ),
+                            ),
+                            const SizedBox(width: 16),
+                            Flexible(
+                              child: CustomTextField(
+                                label: 'Estatura (cm)',
+                                controller: _controllers['estatura']!,
+                                required: true,
+                                keyboardType: TextInputType.number,
+                              ),
+                            ),
+                          ],
+                        ),
+                        CustomTextField(
+                          label: 'Posición',
+                          controller: _controllers['posicion']!,
+                          required: true,
+                        ),
+                        CustomTextField(
+                          label: 'UPZ',
+                          controller: _controllers['upz']!,
+                        ),
+                        CategoriaDropdown(
+                          value: _selectedCategoriaId,
+                          categorias: _categorias,
+                          onChanged: (value) => setState(() => _selectedCategoriaId = value),
+                        ),
+                      ],
+                    ),
 
                     // === Botones de Acción ===
-                    Padding(
-                      padding: const EdgeInsets.only(top: 24.0),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.end,
-                        children: [
-                          OutlinedButton(
-                            onPressed: _loading ? null : () => Navigator.of(context).pushReplacementNamed('/PerfilJugadorAdmin'),
-                            style: OutlinedButton.styleFrom(
-                              foregroundColor: Colors.red,
-                              side: const BorderSide(color: Colors.red),
-                              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-                            ),
-                            child: const Text('Cancelar'),
-                          ),
-                          const SizedBox(width: 16),
-                          ElevatedButton(
-                            onPressed: _loading ? null : _crearJugador,
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.green,
-                              foregroundColor: Colors.white,
-                              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-                            ),
-                            child: _loading
-                                ? const SizedBox(
-                                    width: 20,
-                                    height: 20,
-                                    child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
-                                  )
-                                : const Text('Guardar'),
-                          ),
-                        ],
-                      ),
+                    FormActionButtons(
+                      loading: _loading,
+                      onCancel: () => Navigator.of(context).pushReplacementNamed('/PerfilJugadorAdmin'),
+                      onSave: _crearJugador,
                     ),
                   ],
                 ),
