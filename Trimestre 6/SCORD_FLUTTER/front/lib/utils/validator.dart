@@ -164,4 +164,98 @@ class Validator {
       },
     );
   }
+  // ============================================
+// VALIDADORES PARA PERFIL ENTRENADOR
+// ============================================
+
+// Validar teléfono colombiano (debe iniciar con 3 y tener 10 dígitos)
+static String? validarTelefonoColombia(String? value) {
+  if (value == null || value.trim().isEmpty) {
+    return 'El teléfono es obligatorio';
+  }
+  
+  final telRegex = RegExp(r'^3\d{9}$');
+  if (!telRegex.hasMatch(value)) {
+    return 'El teléfono debe iniciar con 3 y tener 10 dígitos';
+  }
+  
+  return null;
+}
+
+// Validar correo electrónico
+static String? validarCorreo(String? value) {
+  if (value == null || value.trim().isEmpty) {
+    return 'El correo es obligatorio';
+  }
+  
+  final emailRegex = RegExp(r'\S+@\S+\.\S+');
+  if (!emailRegex.hasMatch(value)) {
+    return 'Ingresa un correo válido';
+  }
+  
+  return null;
+}
+
+// Validar contraseña (8-12 caracteres, opcional)
+static String? validarContrasenaOpcional(String? value) {
+  if (value == null || value.isEmpty) {
+    return null; // Es opcional
+  }
+  
+  if (value.length < 8 || value.length > 12) {
+    return 'La contraseña debe tener entre 8 y 12 caracteres';
+  }
+  
+  return null;
+}
+
+// Validar años de experiencia (0-50)
+static String? validarAnosExperiencia(String? value) {
+  if (value == null || value.trim().isEmpty) {
+    return 'Los años de experiencia son obligatorios';
+  }
+  
+  final anos = int.tryParse(value);
+  if (anos == null || anos < 0 || anos > 50) {
+    return 'Los años de experiencia deben estar entre 0 y 50';
+  }
+  
+  return null;
+}
+
+// Validar campo de texto obligatorio
+static String? validarCampoObligatorio(String? value, String nombreCampo) {
+  if (value == null || value.trim().isEmpty) {
+    return 'El campo "$nombreCampo" es obligatorio';
+  }
+  return null;
+}
+
+// Validar que al menos una categoría esté seleccionada
+static String? validarCategoriasSeleccionadas(List<int>? categorias) {
+  if (categorias == null || categorias.isEmpty) {
+    return 'Debes seleccionar al menos una categoría';
+  }
+  return null;
+}
+
+// Validar fecha de nacimiento (no puede ser futura)
+static String? validarFechaNacimiento(String? value) {
+  if (value == null || value.trim().isEmpty) {
+    return 'La fecha de nacimiento es obligatoria';
+  }
+  
+  try {
+    final fecha = DateTime.parse(value);
+    final hoy = DateTime.now();
+    
+    if (fecha.isAfter(hoy)) {
+      return 'La fecha de nacimiento no puede ser futura';
+    }
+    
+    return null;
+  } catch (e) {
+    return 'Fecha inválida';
+  }
+}
 }
