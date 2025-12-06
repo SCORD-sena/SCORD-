@@ -5,6 +5,7 @@ import 'views/admin/perfil_jugador_admin_screen.dart';
 import 'views/admin/estadisticas_jugador_screen.dart';
 import 'views/admin/agregar_jugador_screen.dart';
 import 'views/admin/agregar_rendimiento_screen.dart';
+import 'views/admin/perfil_entrenador_admin_screen.dart';
 
 void main() {
   runApp(const MyApp());
@@ -30,6 +31,7 @@ class MyApp extends StatelessWidget {
         '/EstadisticasJugadores': (context) => const EstadisticasJugadorScreen(),
         '/AgregarJugador': (context) => const AgregarJugadorScreen(),
         '/AgregarRendimiento': (context) => const AgregarRendimientoScreen(),
+        '/PerfilEntrenadorAdmin': (context) => const PerfilEntrenadorAdminScreen(),
       },
     );
   }
