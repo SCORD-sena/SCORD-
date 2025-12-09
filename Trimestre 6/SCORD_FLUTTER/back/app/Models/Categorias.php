@@ -3,18 +3,16 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
-
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Categorias extends Model
 {
     public $incrementing = true;
     protected $keyType = 'int';
     protected $table = 'Categorias';
-
-    protected $primaryKey = 'idCategorias'; // Clave primaria personalizada
-
-    public $timestamps = false; // Si tu tabla no tiene created_at/updated_at
+    protected $primaryKey = 'idCategorias';
+    public $timestamps = false;
 
     protected $fillable = [
         'idCategorias',
@@ -22,19 +20,26 @@ class Categorias extends Model
         'TiposCategoria'
     ];
 
+    // Relación Muchos a Muchos con Entrenadores (CORREGIDO)
+    public function entrenadores(): BelongsToMany
+    {
+        return $this->belongsToMany(
+            Entrenadores::class,
+            'EntrenadoresCategorias', // tabla pivote
+            'idCategorias',
+            'idEntrenadores'
+        );
+    }
 
-public function Entrenadores()
-{
-    return $this->hasMany(Entrenadores::class, 'idEntrenadores', 'idEntrenadores');
-}
+    // Relación con Jugadores
+    public function jugadores(): HasMany
+    {
+        return $this->hasMany(Jugadores::class, 'idCategorias', 'idCategorias');
+    }
 
-public function Jugadores()
-{
-    return $this->hasMany(Jugadores::class, 'idJugadores', 'idJugadores');
-}
-
-public function cronogramas()
-{
-    return $this->hasMany(Cronogramas::class, 'idCategorias', 'idCategorias');
-}
+    // Relación con Cronogramas
+    public function cronogramas(): HasMany
+    {
+        return $this->hasMany(Cronogramas::class, 'idCategorias', 'idCategorias');
+    }
 }

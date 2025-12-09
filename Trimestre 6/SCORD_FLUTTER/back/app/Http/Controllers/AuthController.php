@@ -149,50 +149,61 @@ class AuthController extends Controller
     }
 
     public function getUser()
-    {
-        try {
-            $personas = auth('api')->user();
-            
-            if (!$personas) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Usuario no encontrado',
-                ], 404);
-            }
-
-            // Obtener el usuario completo con las relaciones
-            $user = Personas::with(['tiposDeDocumentos', 'rol'])
-                ->where('idPersonas', $personas->IdPersonas)
-                ->first();
-
-            return response()->json([
-                'success' => true,
-                'message' => 'Usuario obtenido exitosamente',
-                'data' => [
-                    'NumeroDeDocumento' => $personas->NumeroDeDocumento,
-                    'Nombre1' => $personas->Nombre1,
-                    'Nombre2' => $personas->Nombre2,
-                    'Apellido1' => $personas->Apellido1,
-                    'Apellido2' => $personas->Apellido2,
-                    'correo' => $personas->correo,
-                    'Telefono' => $personas->Telefono,
-                    'Direccion' => $personas->Direccion,
-                    'FechaDeNacimiento' => $personas->FechaDeNacimiento,
-                    'Genero' => $personas->Genero,
-                    'EpsSisben' => $personas->EpsSisben,
-                    'TiposDeDocumentos' => $personas->tiposDeDocumentos,
-                    'Rol' => $personas->rol
-                ]
-            ], 200);
-
-        } catch (\Exception $e) {
+{
+    try {
+        $personas = auth('api')->user();
+        
+        if (!$personas) {
             return response()->json([
                 'success' => false,
-                'message' => 'Error al obtener usuario',
-                'error' => $e->getMessage(),
-            ], 500);
+                'message' => 'Usuario no encontrado',
+            ], 404);
         }
+
+        // Obtener el usuario completo con las relaciones, INCLUYENDO jugadores
+        $user = Personas::with(['tiposDeDocumentos', 'rol', 'jugadores.categoria'])
+            ->where('idPersonas', $personas->idPersonas)
+            ->first();
+
+        // Preparar respuesta base
+        $userData = [
+            'NumeroDeDocumento' => $user->NumeroDeDocumento,
+            'Nombre1' => $user->Nombre1,
+            'Nombre2' => $user->Nombre2,
+            'Apellido1' => $user->Apellido1,
+            'Apellido2' => $user->Apellido2,
+            'correo' => $user->correo,
+            'Telefono' => $user->Telefono,
+            'Direccion' => $user->Direccion,
+            'FechaDeNacimiento' => $user->FechaDeNacimiento,
+            'Genero' => $user->Genero,
+            'EpsSisben' => $user->EpsSisben,
+            'TiposDeDocumentos' => $user->tiposDeDocumentos,
+            'Rol' => $user->rol
+        ];
+
+        // Si el usuario es un jugador, agregar datos de jugador
+        // Como jugadores es HasMany, tomamos el primero
+        if ($user->jugadores->isNotEmpty()) {
+            $jugador = $user->jugadores->first();
+            $userData['idCategorias'] = $jugador->idCategorias;
+            $userData['Jugador'] = $jugador;
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Usuario obtenido exitosamente',
+            'data' => $userData
+        ], 200);
+
+    } catch (\Exception $e) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Error al obtener usuario',
+            'error' => $e->getMessage(),
+        ], 500);
     }
+}
 
     public function logout()
     {

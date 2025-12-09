@@ -15,6 +15,7 @@ use App\Http\Controllers\EquiposController;
 use App\Http\Controllers\ResultadosController;
 use App\Http\Controllers\RendimientosPartidosController;
 use App\Http\Controllers\PartidosEquiposController;
+use App\Http\Controllers\ReporteController;
 
 // ============================================
 // RUTAS PÚBLICAS (sin autenticación)
@@ -25,7 +26,7 @@ Route::post('login', [AuthController::class, 'login']);
 // ============================================
 // RUTAS PROTEGIDAS CON JWT
 // ============================================
-Route::middleware('jwt.auth')->group(function () {
+//Route::middleware('jwt.auth')->group(function () {
     
     // ============================================
     // AUTENTICACIÓN - Todos los usuarios
@@ -39,8 +40,13 @@ Route::middleware('jwt.auth')->group(function () {
     Route::get('personas', [PersonasController::class, 'index'])->middleware('auth_administrador');
     Route::get('personas/{id}', [PersonasController::class, 'show'])->middleware('auth_administrador');
     Route::post('personas', [PersonasController::class, 'store'])->middleware('auth_administrador');
-    Route::put('personas/{id}', [PersonasController::class, 'update'])->middleware('auth_administrador');
+    Route::put('personas/{id}', [PersonasController::class, 'update'])->middleware('auth_administrador:1,2');
     Route::delete('personas/{id}', [PersonasController::class, 'destroy'])->middleware('auth_administrador');
+    
+    // ============================================
+    // REPORTES ESTADÍSTICAS PDF - ADMIN Y ENTRENADOR
+    // ============================================
+    Route::get('reportes/jugador/{idJugadores}/pdf', [ReporteController::class, 'generarPdfJugador']);
     
     // ============================================
     // ROLES - Solo Admin (rol 1)
@@ -60,6 +66,15 @@ Route::middleware('jwt.auth')->group(function () {
     Route::post('entrenadores', [EntrenadoresController::class, 'store'])->middleware('auth_administrador');
     Route::put('entrenadores/{id}', [EntrenadoresController::class, 'update'])->middleware('auth_administrador:1,2');
     Route::delete('entrenadores/{id}', [EntrenadoresController::class, 'destroy'])->middleware('auth_administrador');
+
+    // Rutas para EntrenadorCategorias
+    Route::get('entrenador-categorias', [EntrenadoresCategoriasController::class, 'index'])->middleware('auth_administrador:1,2');
+    Route::get('entrenador-categorias/{idCategorias}/{idEntrenadores}', [EntrenadoresCategoriasController::class, 'show'])->middleware('auth_administrador:1,2');
+    Route::get('entrenadores/persona/{idPersona}', [EntrenadoresController::class, 'getByPersonaId'])->middleware('auth_administrador:1,2');
+    Route::get('entrenadores/{idEntrenador}/categorias', [EntrenadoresController::class, 'getCategoriasByEntrenador'])->middleware('auth_administrador:1,2');
+    Route::post('entrenador-categorias', [EntrenadoresCategoriasController::class, 'store'])->middleware('auth_administrador:1,2');
+    Route::put('entrenador-categorias/{idCategorias}/{idEntrenadores}', [EntrenadoresCategoriasController::class, 'update'])->middleware('auth_administrador:1,2');
+    Route::delete('entrenador-categorias/{idCategorias}/{idEntrenadores}', [EntrenadoresCategoriasController::class, 'destroy'])->middleware('auth_administrador:1,2');
     
     // ============================================
     // TIPOS DE DOCUMENTOS - Admin (todo) | Entrenador (lectura)
@@ -73,12 +88,24 @@ Route::middleware('jwt.auth')->group(function () {
     // ============================================
     // JUGADORES - Admin y Entrenador (todo) | Jugador (ver propio)
     // ============================================
-Route::get('jugadores/misDatos', [JugadoresController::class, 'misDatos'])->middleware('auth_administrador:3');
-Route::get('jugadores', [JugadoresController::class, 'index'])->middleware('auth_administrador:1,2');
-Route::get('jugadores/{id}', [JugadoresController::class, 'show'])->middleware('auth_administrador:1,2,3');
-Route::post('jugadores', [JugadoresController::class, 'store'])->middleware('auth_administrador:1,2');
-Route::put('jugadores/{id}', [JugadoresController::class, 'update'])->middleware('auth_administrador:1,2');
-Route::delete('jugadores/{id}', [JugadoresController::class, 'destroy'])->middleware('auth_administrador:1,2');
+    Route::get('jugadores/misDatos', [JugadoresController::class, 'misDatos'])->middleware('auth_administrador:3');
+    Route::get('jugadores', [JugadoresController::class, 'index'])->middleware('auth_administrador:1,2,3');
+    Route::get('jugadores/{id}', [JugadoresController::class, 'show'])->middleware('auth_administrador:1,2,3');
+    Route::post('jugadores', [JugadoresController::class, 'store'])->middleware('auth_administrador:1,2');
+    Route::put('jugadores/{id}', [JugadoresController::class, 'update'])->middleware('auth_administrador:1,2');
+    Route::delete('jugadores/{id}', [JugadoresController::class, 'destroy'])->middleware('auth_administrador:1,2');
+    
+    // ============================================
+    // JUGADORES POR CATEGORÍA 
+    // ============================================
+    Route::get('categorias/{id}/jugadores', [CategoriasController::class, 'jugadoresPorCategoria'])
+        ->middleware('auth_administrador:1,2,3');
+    
+    // ============================================
+    // RUTAS PARA ESTADÍSTICAS PERSONALES DE JUGADOR
+    // ============================================
+    Route::get('rendimientospartidos/mis-estadisticas', [RendimientosPartidosController::class, 'getMisEstadisticas'])
+        ->middleware('auth_administrador:3');
     
     // ============================================
     // CRONOGRAMAS - Admin y Entrenador (todo) | Jugador (lectura)
@@ -129,17 +156,18 @@ Route::delete('jugadores/{id}', [JugadoresController::class, 'destroy'])->middle
     // RENDIMIENTOS PARTIDOS - Admin y Entrenador
     // ============================================
     // ✅ RUTAS ESPECÍFICAS PRIMERO
-Route::get('rendimientospartidos/jugador/{idJugadores}/totales', [RendimientosPartidosController::class, 'getTotalStatsByPlayer'])->middleware('auth_administrador:1,2');
-Route::get('rendimientospartidos/jugador/{idJugadores}/temporadas', [RendimientosPartidosController::class, 'getStatsBySeason'])->middleware('auth_administrador:1,2');
-Route::get('rendimientospartidos/jugador/{idJugadores}/ultimos-partidos/{limit?}', [RendimientosPartidosController::class, 'getLastMatches'])->middleware('auth_administrador:1,2');
-Route::get('rendimientospartidos/jugador/{idJugadores}/ultimo-registro', [RendimientosPartidosController::class, 'getLastRecordForEdit'])->middleware('auth_administrador:1,2');
-
-// ✅ RUTAS GENÉRICAS DESPUÉS
-Route::get('rendimientospartidos', [RendimientosPartidosController::class, 'index'])->middleware('auth_administrador:1,2');
-Route::get('rendimientospartidos/{id}', [RendimientosPartidosController::class, 'show'])->middleware('auth_administrador:1,2');
-Route::post('rendimientospartidos', [RendimientosPartidosController::class, 'store'])->middleware('auth_administrador:1,2');
-Route::put('rendimientospartidos/{id}', [RendimientosPartidosController::class, 'update'])->middleware('auth_administrador:1,2');
-Route::delete('rendimientospartidos/{id}', [RendimientosPartidosController::class, 'destroy'])->middleware('auth_administrador:1,2');
+    Route::get('rendimientospartidos/jugador/{idJugadores}/totales', [RendimientosPartidosController::class, 'getTotalStatsByPlayer'])->middleware('auth_administrador:1,2,3');
+    Route::get('rendimientospartidos/jugador/{idJugadores}/temporadas', [RendimientosPartidosController::class, 'getStatsBySeason'])->middleware('auth_administrador:1,2,3');
+    Route::get('rendimientospartidos/jugador/{idJugadores}/ultimos-partidos/{limit?}', [RendimientosPartidosController::class, 'getLastMatches'])->middleware('auth_administrador:1,2');
+    Route::get('rendimientospartidos/jugador/{idJugadores}/ultimo-registro', [RendimientosPartidosController::class, 'getLastRecordForEdit'])->middleware('auth_administrador:1,2');
+    
+    // ✅ RUTAS GENÉRICAS DESPUÉS
+    Route::get('rendimientospartidos', [RendimientosPartidosController::class, 'index'])->middleware('auth_administrador:1,2');
+    Route::get('rendimientospartidos/{id}', [RendimientosPartidosController::class, 'show'])->middleware('auth_administrador:1,2');
+    Route::post('rendimientospartidos', [RendimientosPartidosController::class, 'store'])->middleware('auth_administrador:1,2');
+    Route::put('rendimientospartidos/{id}', [RendimientosPartidosController::class, 'update'])->middleware('auth_administrador:1,2');
+    Route::delete('rendimientospartidos/{id}', [RendimientosPartidosController::class, 'destroy'])->middleware('auth_administrador:1,2');
+    
     // ============================================
     // PARTIDOS EQUIPOS - Admin y Entrenador
     // ============================================
@@ -149,11 +177,11 @@ Route::delete('rendimientospartidos/{id}', [RendimientosPartidosController::clas
     Route::delete('partidosequipos/{id}', [PartidosEquiposController::class, 'destroy'])->middleware('auth_administrador:1,2');
     
     // ============================================
-    // CATEGORÍAS - Admin (todo) | Entrenador (lectura)
+    // CATEGORÍAS - Admin (todo) | Entrenador y Jugador (lectura)
     // ============================================
     Route::get('categorias', [CategoriasController::class, 'index'])->middleware('auth_administrador:1,2,3');
     Route::get('categorias/{id}', [CategoriasController::class, 'show'])->middleware('auth_administrador:1,2,3');
     Route::post('categorias', [CategoriasController::class, 'store'])->middleware('auth_administrador');
     Route::put('categorias/{id}', [CategoriasController::class, 'update'])->middleware('auth_administrador');
     Route::delete('categorias/{id}', [CategoriasController::class, 'destroy'])->middleware('auth_administrador');
-});
+//});

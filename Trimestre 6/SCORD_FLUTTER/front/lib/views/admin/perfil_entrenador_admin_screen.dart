@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import '../../models/entrenador_model.dart';
-import '../../models/categoria_model.dart';
-import '../../models/tipo_documento_model.dart';
-import '../../controllers/admin/entrenador_controller.dart';
-import '../../widgets/admin/perfil_entrenador/entrenador_info_card.dart';
-import '../../widgets/common/info_row.dart';
-import '../../widgets/common/custom_button.dart';
+import '/../models/entrenador_model.dart';
+import '/../models/categoria_model.dart';
+import '/../models/tipo_documento_model.dart';
+import '/../controllers/admin/entrenador_controller.dart';
+import '/../widgets/admin/perfil_entrenador/entrenador_botones_accion.dart';
+import '/../widgets/admin/perfil_entrenador/selector_entrenador_card.dart';
+import '/../widgets/admin/perfil_entrenador/entrenador_info_card.dart';
+import '/../widgets/common/info_row.dart';
+import '/../widgets/common/custom_alert.dart';
 
 class PerfilEntrenadorAdminScreen extends StatefulWidget {
   const PerfilEntrenadorAdminScreen({super.key});
@@ -103,7 +105,7 @@ class _PerfilEntrenadorAdminScreenState
     } catch (e) {
       if (mounted) {
         setState(() => _isLoadingData = false);
-        _mostrarError('Error al cargar datos: $e');
+        CustomAlert.mostrar(context, 'Error', 'Error al cargar datos: $e', Colors.red);
       }
     }
   }
@@ -133,23 +135,24 @@ class _PerfilEntrenadorAdminScreenState
 
   void _activarEdicion() {
     if (_entrenadorSeleccionado == null) {
-      _mostrarAdvertencia(
+      CustomAlert.mostrar(
+        context,
         'No hay entrenador seleccionado',
         'Por favor selecciona un entrenador primero',
+        Colors.orange,
       );
       return;
     }
 
     final persona = _entrenadorSeleccionado!.persona;
     if (persona == null) {
-      _mostrarError('Error: No se encontró la información de la persona');
+      CustomAlert.mostrar(context, 'Error', 'No se encontró la información de la persona', Colors.red);
       return;
     }
 
     final categoriasIds = _entrenadorSeleccionado!.categorias
-        ?.map((c) => c.idCategorias)
-        .toList() ??
-    [];
+            ?.map((c) => c.idCategorias)
+            .toList() ??
         [];
 
     setState(() {
@@ -208,27 +211,34 @@ class _PerfilEntrenadorAdminScreenState
     if (!_formKey.currentState!.validate()) return;
 
     if (_categoriasAsignadas.isEmpty) {
-      _mostrarAdvertencia(
+      CustomAlert.mostrar(
+        context,
         'Categorías requeridas',
         'Debes seleccionar al menos una categoría',
+        Colors.orange,
       );
       return;
     }
 
     if (_fechaNacimiento == null) {
-      _mostrarAdvertencia(
+      CustomAlert.mostrar(
+        context,
         'Fecha requerida',
         'Debes seleccionar una fecha de nacimiento',
+        Colors.orange,
       );
       return;
     }
 
-    final confirmar = await _mostrarConfirmacion(
+    final confirmar = await CustomAlert.confirmar(
+      context,
       '¿Estás Seguro?',
       'Documento: ${_numeroDocumentoController.text}\n'
           'Nombre: ${_primerNombreController.text} ${_segundoNombreController.text} ${_primerApellidoController.text}\n'
           'Cargo: ${_cargoController.text}\n'
           'Años de Experiencia: ${_anosExperienciaController.text}',
+      'Sí, actualizar',
+      Colors.green,
     );
 
     if (!confirmar) return;
@@ -280,9 +290,11 @@ class _PerfilEntrenadorAdminScreenState
           _modoEdicion = false;
         });
 
-        _mostrarExito(
+        CustomAlert.mostrar(
+          context,
           'Entrenador actualizado',
           'Los datos se actualizaron correctamente',
+          Colors.green,
         );
 
         await _cargarDatosIniciales();
@@ -291,23 +303,28 @@ class _PerfilEntrenadorAdminScreenState
     } catch (e) {
       if (mounted) {
         setState(() => _loading = false);
-        _mostrarError('Error al actualizar: $e');
+        CustomAlert.mostrar(context, 'Error', 'Error al actualizar: $e', Colors.red);
       }
     }
   }
 
   Future<void> _eliminarEntrenador() async {
     if (_entrenadorSeleccionado == null) {
-      _mostrarAdvertencia(
+      CustomAlert.mostrar(
+        context,
         'No hay entrenador seleccionado',
         'Por favor selecciona un entrenador primero',
+        Colors.orange,
       );
       return;
     }
 
-    final confirmar = await _mostrarConfirmacion(
+    final confirmar = await CustomAlert.confirmar(
+      context,
       '¿Estás seguro?',
       'Se eliminará el entrenador ${_entrenadorSeleccionado!.persona?.nombreCorto ?? ""}',
+      'Sí, eliminar',
+      Colors.red,
     );
 
     if (!confirmar) return;
@@ -318,9 +335,11 @@ class _PerfilEntrenadorAdminScreenState
       );
 
       if (mounted) {
-        _mostrarExito(
+        CustomAlert.mostrar(
+          context,
           'Entrenador eliminado',
           'El entrenador se eliminó correctamente',
+          Colors.green,
         );
 
         setState(() {
@@ -332,114 +351,51 @@ class _PerfilEntrenadorAdminScreenState
         _filtrarEntrenadores();
       }
     } catch (e) {
-      _mostrarError('Error al eliminar: $e');
+      CustomAlert.mostrar(context, 'Error', 'Error al eliminar: $e', Colors.red);
     }
   }
 
   // ============================================
-  // MÉTODOS DE DIÁLOGOS
+  // HANDLERS DE BOTONES
   // ============================================
 
-  Future<bool> _mostrarConfirmacion(String titulo, String mensaje) async {
-    return await showDialog<bool>(
-          context: context,
-          builder: (context) => AlertDialog(
-            title: Text(titulo),
-            content: Text(mensaje),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(context, false),
-                child: const Text('Cancelar'),
-              ),
-              ElevatedButton(
-                onPressed: () => Navigator.pop(context, true),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.green,
-                  foregroundColor: Colors.white,
-                ),
-                child: const Text('Confirmar'),
-              ),
-            ],
-          ),
-        ) ??
-        false;
+  void _onAgregarPressed() {
+    Navigator.pushNamed(context, '/AgregarEntrenador');
   }
 
-  void _mostrarExito(String titulo, String mensaje) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Row(
-          children: [
-            const Icon(Icons.check_circle, color: Colors.green),
-            const SizedBox(width: 8),
-            Expanded(child: Text(titulo)),
-          ],
-        ),
-        content: Text(mensaje),
-        actions: [
-          ElevatedButton(
-            onPressed: () => Navigator.pop(context),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.green,
-              foregroundColor: Colors.white,
-            ),
-            child: const Text('OK'),
-          ),
-        ],
-      ),
-    );
+  void _onEditarPressed() {
+    _activarEdicion();
   }
 
-  void _mostrarError(String mensaje) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Row(
-          children: [
-            Icon(Icons.error, color: Colors.red),
-            SizedBox(width: 8),
-            Text('Error'),
-          ],
-        ),
-        content: Text(mensaje),
-        actions: [
-          ElevatedButton(
-            onPressed: () => Navigator.pop(context),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.red,
-              foregroundColor: Colors.white,
-            ),
-            child: const Text('OK'),
-          ),
-        ],
-      ),
-    );
+  void _onGuardarPressed() {
+    _guardarCambios();
   }
 
-  void _mostrarAdvertencia(String titulo, String mensaje) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Row(
-          children: [
-            const Icon(Icons.warning, color: Colors.orange),
-            const SizedBox(width: 8),
-            Expanded(child: Text(titulo)),
-          ],
-        ),
-        content: Text(mensaje),
-        actions: [
-          ElevatedButton(
-            onPressed: () => Navigator.pop(context),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.orange,
-              foregroundColor: Colors.white,
-            ),
-            child: const Text('OK'),
-          ),
-        ],
-      ),
+  void _onEliminarPressed() {
+    _eliminarEntrenador();
+  }
+
+  void _onCancelarPressed() {
+    _cancelarEdicion();
+  }
+
+  // ============================================
+  // DRAWER
+  // ============================================
+
+  Widget _buildDrawerItem(String title, IconData icon, String routeName) {
+    return ListTile(
+      leading: Icon(icon, color: Colors.red),
+      title: Text(title, style: const TextStyle(fontSize: 16)),
+      onTap: () {
+        Navigator.of(context).pop();
+        
+        if (routeName == '/Logout') {
+          // Lógica de deslogueo
+        } else if (ModalRoute.of(context)?.settings.name != routeName) {
+          Navigator.of(context).pushNamed(routeName);
+        }
+      },
     );
   }
 
@@ -451,48 +407,131 @@ class _PerfilEntrenadorAdminScreenState
   Widget build(BuildContext context) {
     if (_isLoadingData) {
       return const Scaffold(
-        body: Center(child: CircularProgressIndicator()),
+        body: Center(child: CircularProgressIndicator(color: Color(0xffe63946))),
       );
     }
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Perfil Entrenador'),
-        backgroundColor: Colors.red,
-        foregroundColor: Colors.white,
+        title: const Text(
+          'SCORD - Perfil Entrenador',
+          style: TextStyle(
+            color: Color(0xffe63946),
+            fontWeight: FontWeight.bold,
+            fontSize: 18
+          )
+        ),
+        backgroundColor: Colors.white,
+        elevation: 1,
+        iconTheme: const IconThemeData(color: Color(0xffe63946)),
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
-        child: Form(
-          key: _formKey,
-          child: Column(
-            children: [
-              // Botones de acción
-              _buildBotonesAccion(),
-              const SizedBox(height: 24),
-
-              // Selectores y foto
-              _buildSelectoresYFoto(),
-              const SizedBox(height: 24),
-
-              // Información de contacto
-              if (_entrenadorSeleccionado?.persona != null)
-                _buildInformacionContacto(),
-              const SizedBox(height: 16),
-
-              // Información personal
-              if (_entrenadorSeleccionado?.persona != null)
-                _buildInformacionPersonal(),
-              const SizedBox(height: 16),
-
-              // Información deportiva
-              if (_entrenadorSeleccionado != null) _buildInformacionDeportiva(),
-              const SizedBox(height: 16),
-
-              // Campo de contraseña en modo edición
-              if (_modoEdicion) _buildCampoContrasena(),
-            ],
+      drawer: Drawer(
+        child: ListView(
+          padding: EdgeInsets.zero,
+          children: <Widget>[
+            const DrawerHeader(
+              decoration: BoxDecoration(color: Colors.red),
+              child: Text(
+                'Menú de Navegación',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold
+                ),
+              ),
+            ),
+            _buildDrawerItem('Inicio', Icons.home, '/InicioAdmin'),
+            _buildDrawerItem('Cronograma', Icons.calendar_month, '/CronogramaAdmin'),
+            _buildDrawerItem('Perfil Jugador', Icons.person_pin, '/PerfilJugadorAdmin'),
+            _buildDrawerItem('Estadísticas Jugadores', Icons.bar_chart, '/EstadisticasJugadores'),
+            _buildDrawerItem('Perfil Entrenador', Icons.sports_gymnastics, '/PerfilEntrenadorAdmin'),
+            _buildDrawerItem('Evaluar Jugadores', Icons.rule, '/EvaluarJugadores'),
+            const Divider(),
+            _buildDrawerItem('Cerrar Sesión', Icons.logout, '/Logout'),
+          ],
+        ),
+      ),
+      body: Column(
+        children: [
+          // Botones de acción
+          EntrenadorBotonesAccion(
+            modoEdicion: _modoEdicion,
+            loading: _loading,
+            onAgregar: _onAgregarPressed,
+            onEditar: _onEditarPressed,
+            onEliminar: _onEliminarPressed,
+            onGuardar: _onGuardarPressed,
+            onCancelar: _onCancelarPressed,
           ),
+
+          // Contenido principal
+          Expanded(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.all(12.0),
+              child: Form(
+                key: _formKey,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    // Selector de entrenador
+                    SelectorEntrenadorCard(
+                      categorias: _categorias,
+                      entrenadoresFiltrados: _entrenadoresFiltrados,
+                      categoriaSeleccionada: _categoriaSeleccionada,
+                      entrenadorSeleccionado: _entrenadorSeleccionado,
+                      modoEdicion: _modoEdicion,
+                      onCategoriaChanged: (value) {
+                        setState(() => _categoriaSeleccionada = value);
+                        _filtrarEntrenadores();
+                      },
+                      onEntrenadorChanged: (value) {
+                        setState(() {
+                          _entrenadorSeleccionado = _entrenadores.firstWhere(
+                            (ent) => ent.idEntrenadores == value,
+                          );
+                          _modoEdicion = false;
+                        });
+                      },
+                    ),
+
+                    const SizedBox(height: 12),
+
+                    // Información de contacto
+                    if (_entrenadorSeleccionado?.persona != null)
+                      _buildInformacionContacto(),
+                    
+                    const SizedBox(height: 12),
+
+                    // Información personal
+                    if (_entrenadorSeleccionado?.persona != null)
+                      _buildInformacionPersonal(),
+                    
+                    const SizedBox(height: 12),
+
+                    // Información deportiva
+                    if (_entrenadorSeleccionado != null)
+                      _buildInformacionDeportiva(),
+                    
+                    const SizedBox(height: 12),
+
+                    // Campo de contraseña en modo edición
+                    if (_modoEdicion) _buildCampoContrasena(),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+      bottomNavigationBar: Container(
+        color: Colors.black87,
+        padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 12.0),
+        child: const Text(
+          '© 2025 SCORD | Escuela de Fútbol Quilmes | Todos los derechos reservados',
+          textAlign: TextAlign.center,
+          style: TextStyle(color: Colors.white70, fontSize: 10),
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
         ),
       ),
     );
@@ -502,149 +541,6 @@ class _PerfilEntrenadorAdminScreenState
   // WIDGETS BUILDERS
   // ============================================
 
-  Widget _buildBotonesAccion() {
-    return Wrap(
-      spacing: 8,
-      runSpacing: 8,
-      alignment: WrapAlignment.center,
-      children: [
-        CustomButton(
-          text: 'Agregar Entrenador',
-          onPressed: () {
-            Navigator.pushNamed(context, '/agregar-entrenador');
-          },
-          backgroundColor: Colors.green,
-          icon: Icons.add,
-        ),
-        if (!_modoEdicion) ...[
-          CustomButton(
-            text: 'Editar',
-            onPressed: _activarEdicion,
-            backgroundColor: Colors.orange,
-            icon: Icons.edit,
-          ),
-          CustomButton(
-            text: 'Eliminar',
-            onPressed: _eliminarEntrenador,
-            backgroundColor: Colors.red,
-            icon: Icons.delete,
-          ),
-        ] else ...[
-          CustomButton(
-            text: 'Guardar',
-            onPressed: _guardarCambios,
-            backgroundColor: Colors.green,
-            isLoading: _loading,
-            icon: Icons.save,
-          ),
-          CustomButton(
-            text: 'Cancelar',
-            onPressed: _cancelarEdicion,
-            backgroundColor: Colors.grey,
-            icon: Icons.cancel,
-          ),
-        ],
-      ],
-    );
-  }
-
-  Widget _buildSelectoresYFoto() {
-    return Card(
-      elevation: 2,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Selector de categoría
-            const Text(
-              'Seleccionar Categoría:',
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-                color: Colors.red,
-                fontSize: 16,
-              ),
-            ),
-            const SizedBox(height: 8),
-            DropdownButtonFormField<int>(
-              value: _categoriaSeleccionada,
-              decoration: const InputDecoration(
-                border: OutlineInputBorder(),
-                contentPadding: EdgeInsets.symmetric(
-                  horizontal: 12,
-                  vertical: 8,
-                ),
-              ),
-              hint: const Text('-- Selecciona una categoría --'),
-              items: _categorias.map((cat) {
-                return DropdownMenuItem(
-                  value: cat.idCategorias,
-                  child: Text(cat.descripcion),
-                );
-              }).toList(),
-              onChanged: _modoEdicion
-                  ? null
-                  : (value) {
-                      setState(() => _categoriaSeleccionada = value);
-                      _filtrarEntrenadores();
-                    },
-            ),
-            const SizedBox(height: 16),
-
-            // Selector de entrenador
-            const Text(
-              'Seleccionar Entrenador:',
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-                color: Colors.red,
-                fontSize: 16,
-              ),
-            ),
-            const SizedBox(height: 8),
-            DropdownButtonFormField<int>(
-              value: _entrenadorSeleccionado?.idEntrenadores,
-              decoration: const InputDecoration(
-                border: OutlineInputBorder(),
-                contentPadding: EdgeInsets.symmetric(
-                  horizontal: 12,
-                  vertical: 8,
-                ),
-              ),
-              hint: const Text('-- Selecciona un entrenador --'),
-              items: _entrenadoresFiltrados.map((ent) {
-                return DropdownMenuItem(
-                  value: ent.idEntrenadores,
-                  child: Text(ent.persona?.nombreCorto ?? 'Sin nombre'),
-                );
-              }).toList(),
-              onChanged: _categoriaSeleccionada == null || _modoEdicion
-                  ? null
-                  : (value) {
-                      setState(() {
-                        _entrenadorSeleccionado = _entrenadores.firstWhere(
-                          (ent) => ent.idEntrenadores == value,
-                        );
-                        _modoEdicion = false;
-                      });
-                    },
-            ),
-            const SizedBox(height: 20),
-
-            // Foto de perfil
-            Center(
-              child: CircleAvatar(
-                radius: 60,
-                backgroundColor: Colors.grey[300],
-                child: const Icon(Icons.person, size: 60, color: Colors.grey),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
   Widget _buildInformacionContacto() {
     final persona = _entrenadorSeleccionado!.persona!;
 
@@ -653,7 +549,7 @@ class _PerfilEntrenadorAdminScreenState
       icon: Icons.contact_phone,
       children: [
         InfoRow(
-          label: 'Teléfono:',
+          label: '📞 Teléfono:',
           value: persona.telefono,
           isEditing: _modoEdicion,
           editWidget: TextFormField(
@@ -661,7 +557,9 @@ class _PerfilEntrenadorAdminScreenState
             decoration: const InputDecoration(
               border: OutlineInputBorder(),
               isDense: true,
+              contentPadding: EdgeInsets.symmetric(horizontal: 6, vertical: 6),
             ),
+            style: const TextStyle(fontSize: 13),
             keyboardType: TextInputType.phone,
             validator: (value) {
               if (value == null || value.trim().isEmpty) {
@@ -675,7 +573,7 @@ class _PerfilEntrenadorAdminScreenState
           ),
         ),
         InfoRow(
-          label: 'Dirección:',
+          label: '📍 Dirección:',
           value: persona.direccion,
           isEditing: _modoEdicion,
           editWidget: TextFormField(
@@ -683,7 +581,9 @@ class _PerfilEntrenadorAdminScreenState
             decoration: const InputDecoration(
               border: OutlineInputBorder(),
               isDense: true,
+              contentPadding: EdgeInsets.symmetric(horizontal: 6, vertical: 6),
             ),
+            style: const TextStyle(fontSize: 13),
             validator: (value) {
               if (value == null || value.trim().isEmpty) {
                 return 'Campo obligatorio';
@@ -693,7 +593,7 @@ class _PerfilEntrenadorAdminScreenState
           ),
         ),
         InfoRow(
-          label: 'Email:',
+          label: '📧 Email:',
           value: persona.correo,
           isEditing: _modoEdicion,
           editWidget: TextFormField(
@@ -701,7 +601,9 @@ class _PerfilEntrenadorAdminScreenState
             decoration: const InputDecoration(
               border: OutlineInputBorder(),
               isDense: true,
+              contentPadding: EdgeInsets.symmetric(horizontal: 6, vertical: 6),
             ),
+            style: const TextStyle(fontSize: 13),
             keyboardType: TextInputType.emailAddress,
             validator: (value) {
               if (value == null || value.trim().isEmpty) {
@@ -715,7 +617,7 @@ class _PerfilEntrenadorAdminScreenState
           ),
         ),
         InfoRow(
-          label: 'EPS:',
+          label: '🏥 EPS:',
           value: persona.epsSisben ?? '-',
           isEditing: _modoEdicion,
           editWidget: TextFormField(
@@ -723,7 +625,9 @@ class _PerfilEntrenadorAdminScreenState
             decoration: const InputDecoration(
               border: OutlineInputBorder(),
               isDense: true,
+              contentPadding: EdgeInsets.symmetric(horizontal: 6, vertical: 6),
             ),
+            style: const TextStyle(fontSize: 13),
           ),
         ),
       ],
@@ -750,12 +654,15 @@ class _PerfilEntrenadorAdminScreenState
                     border: OutlineInputBorder(),
                     isDense: true,
                     labelText: 'Primer',
+                    labelStyle: TextStyle(fontSize: 11),
+                    contentPadding: EdgeInsets.symmetric(horizontal: 6, vertical: 6),
                   ),
+                  style: const TextStyle(fontSize: 13),
                   validator: (value) =>
                       value?.trim().isEmpty ?? true ? 'Obligatorio' : null,
                 ),
               ),
-              const SizedBox(width: 8),
+              const SizedBox(width: 4),
               Expanded(
                 child: TextFormField(
                   controller: _segundoNombreController,
@@ -763,7 +670,10 @@ class _PerfilEntrenadorAdminScreenState
                     border: OutlineInputBorder(),
                     isDense: true,
                     labelText: 'Segundo',
+                    labelStyle: TextStyle(fontSize: 11),
+                    contentPadding: EdgeInsets.symmetric(horizontal: 6, vertical: 6),
                   ),
+                  style: const TextStyle(fontSize: 13),
                 ),
               ),
             ],
@@ -782,12 +692,15 @@ class _PerfilEntrenadorAdminScreenState
                     border: OutlineInputBorder(),
                     isDense: true,
                     labelText: 'Primer',
+                    labelStyle: TextStyle(fontSize: 11),
+                    contentPadding: EdgeInsets.symmetric(horizontal: 6, vertical: 6),
                   ),
+                  style: const TextStyle(fontSize: 13),
                   validator: (value) =>
                       value?.trim().isEmpty ?? true ? 'Obligatorio' : null,
                 ),
               ),
-              const SizedBox(width: 8),
+              const SizedBox(width: 4),
               Expanded(
                 child: TextFormField(
                   controller: _segundoApellidoController,
@@ -795,7 +708,10 @@ class _PerfilEntrenadorAdminScreenState
                     border: OutlineInputBorder(),
                     isDense: true,
                     labelText: 'Segundo',
+                    labelStyle: TextStyle(fontSize: 11),
+                    contentPadding: EdgeInsets.symmetric(horizontal: 6, vertical: 6),
                   ),
+                  style: const TextStyle(fontSize: 13),
                 ),
               ),
             ],
@@ -824,11 +740,13 @@ class _PerfilEntrenadorAdminScreenState
               decoration: const InputDecoration(
                 border: OutlineInputBorder(),
                 isDense: true,
+                contentPadding: EdgeInsets.symmetric(horizontal: 6, vertical: 6),
               ),
               child: Text(
                 _fechaNacimiento != null
                     ? DateFormat('dd/MM/yyyy').format(_fechaNacimiento!)
                     : 'Seleccionar fecha',
+                style: const TextStyle(fontSize: 13),
               ),
             ),
           ),
@@ -842,7 +760,9 @@ class _PerfilEntrenadorAdminScreenState
             decoration: const InputDecoration(
               border: OutlineInputBorder(),
               isDense: true,
+              contentPadding: EdgeInsets.symmetric(horizontal: 6, vertical: 6),
             ),
+            style: const TextStyle(fontSize: 13),
             keyboardType: TextInputType.number,
             validator: (value) =>
                 value?.trim().isEmpty ?? true ? 'Campo obligatorio' : null,
@@ -857,7 +777,9 @@ class _PerfilEntrenadorAdminScreenState
             decoration: const InputDecoration(
               border: OutlineInputBorder(),
               isDense: true,
+              contentPadding: EdgeInsets.symmetric(horizontal: 6, vertical: 6),
             ),
+            style: const TextStyle(fontSize: 13, color: Colors.black),
             items: _tiposDocumento.map((tipo) {
               return DropdownMenuItem(
                 value: tipo.idTiposDeDocumentos,
@@ -878,7 +800,9 @@ class _PerfilEntrenadorAdminScreenState
             decoration: const InputDecoration(
               border: OutlineInputBorder(),
               isDense: true,
+              contentPadding: EdgeInsets.symmetric(horizontal: 6, vertical: 6),
             ),
+            style: const TextStyle(fontSize: 13, color: Colors.black),
             items: const [
               DropdownMenuItem(value: 'M', child: Text('Masculino')),
               DropdownMenuItem(value: 'F', child: Text('Femenino')),
@@ -897,7 +821,7 @@ class _PerfilEntrenadorAdminScreenState
       icon: Icons.sports_soccer,
       children: [
         InfoRow(
-          label: 'Años de Experiencia:',
+          label: '⏱️ Años de Experiencia:',
           value: _entrenadorSeleccionado!.anosDeExperiencia.toString(),
           isEditing: _modoEdicion,
           editWidget: TextFormField(
@@ -905,7 +829,9 @@ class _PerfilEntrenadorAdminScreenState
             decoration: const InputDecoration(
               border: OutlineInputBorder(),
               isDense: true,
+              contentPadding: EdgeInsets.symmetric(horizontal: 6, vertical: 6),
             ),
+            style: const TextStyle(fontSize: 13),
             keyboardType: TextInputType.number,
             validator: (value) {
               if (value?.trim().isEmpty ?? true) return 'Campo obligatorio';
@@ -918,7 +844,7 @@ class _PerfilEntrenadorAdminScreenState
           ),
         ),
         InfoRow(
-          label: 'Cargo:',
+          label: '👔 Cargo:',
           value: _entrenadorSeleccionado!.cargo,
           isEditing: _modoEdicion,
           editWidget: TextFormField(
@@ -926,79 +852,85 @@ class _PerfilEntrenadorAdminScreenState
             decoration: const InputDecoration(
               border: OutlineInputBorder(),
               isDense: true,
+              contentPadding: EdgeInsets.symmetric(horizontal: 6, vertical: 6),
             ),
-            validator: (value) =>
-                value?.trim().isEmpty ??
-                                value?.trim().isEmpty ?? true ? 'Campo obligatorio' : null,
-          ),
-        ),
-        InfoRow(
-  label: 'Categorías:',
-  value: _entrenadorSeleccionado!.categorias != null &&
-          _entrenadorSeleccionado!.categorias!.isNotEmpty
-      ? _entrenadorSeleccionado!.categorias!
-          .map((c) => c.descripcion)
-          .join(', ')
-      : '-',
-  isEditing: _modoEdicion,
-  editWidget: Column(
-    crossAxisAlignment: CrossAxisAlignment.start,
-    children: _categorias.map((cat) {
-      return CheckboxListTile(
-        title: Text(cat.descripcion),
-        value: _categoriasAsignadas.contains(cat.idCategorias),
-        dense: true,
-        contentPadding: EdgeInsets.zero,
-        onChanged: (value) {
-          setState(() {
-            if (value == true) {
-              _categoriasAsignadas.add(cat.idCategorias);
-            } else {
-              _categoriasAsignadas.remove(cat.idCategorias);
-            }
-          });
-        },
-      );
-    }).toList(),
-  ),
+            style: const TextStyle(fontSize: 13),
+validator: (value) =>
+value?.trim().isEmpty ?? true ? 'Campo obligatorio' : null,
 ),
-      ],
-    );
-  }
-
-  Widget _buildCampoContrasena() {
-    return Card(
-      color: Colors.blue[50],
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text(
-              'Contraseña: Dejar vacío si no deseas cambiarla',
-              style: TextStyle(fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 8),
-            TextFormField(
-              controller: _contrasenaController,
-              decoration: const InputDecoration(
-                border: OutlineInputBorder(),
-                hintText: 'Nueva contraseña (8-12 caracteres)',
-                isDense: true,
-              ),
-              obscureText: true,
-              validator: (value) {
-                if (value != null &&
-                    value.isNotEmpty &&
-                    (value.length < 8 || value.length > 12)) {
-                  return 'Debe tener entre 8 y 12 caracteres';
-                }
-                return null;
-              },
-            ),
-          ],
-        ),
-      ),
-    );
-  }
+),
+InfoRow(
+label: '⚽ Categorías:',
+value: _entrenadorSeleccionado!.categorias != null &&
+_entrenadorSeleccionado!.categorias!.isNotEmpty
+? _entrenadorSeleccionado!.categorias!
+.map((c) => c.descripcion)
+.join(', ')
+: '-',
+isEditing: _modoEdicion,
+editWidget: Column(
+crossAxisAlignment: CrossAxisAlignment.start,
+children: _categorias.map((cat) {
+return CheckboxListTile(
+title: Text(
+cat.descripcion,
+style: const TextStyle(fontSize: 13),
+),
+value: _categoriasAsignadas.contains(cat.idCategorias),
+dense: true,
+contentPadding: EdgeInsets.zero,
+onChanged: (value) {
+setState(() {
+if (value == true) {
+_categoriasAsignadas.add(cat.idCategorias);
+} else {
+_categoriasAsignadas.remove(cat.idCategorias);
+}
+});
+},
+);
+}).toList(),
+),
+),
+],
+);
+}
+Widget _buildCampoContrasena() {
+return Card(
+color: Colors.blue[50],
+elevation: 3,
+child: Padding(
+padding: const EdgeInsets.all(14.0),
+child: Column(
+crossAxisAlignment: CrossAxisAlignment.start,
+children: [
+const Text(
+'🔒 Contraseña: Dejar vacío si no deseas cambiarla',
+style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+),
+const SizedBox(height: 8),
+TextFormField(
+controller: _contrasenaController,
+decoration: const InputDecoration(
+border: OutlineInputBorder(),
+hintText: 'Nueva contraseña (8-12 caracteres)',
+isDense: true,
+contentPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+),
+style: const TextStyle(fontSize: 13),
+obscureText: true,
+validator: (value) {
+if (value != null &&
+value.isNotEmpty &&
+(value.length < 8 || value.length > 12)) {
+return 'Debe tener entre 8 y 12 caracteres';
+}
+return null;
+},
+),
+],
+),
+),
+);
+}
 }

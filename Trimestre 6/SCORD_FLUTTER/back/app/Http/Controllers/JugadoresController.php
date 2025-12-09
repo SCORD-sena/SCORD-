@@ -118,4 +118,82 @@ class JugadoresController extends Controller
             'message' => 'Jugador eliminado correctamente'
         ], 200);
     }
+
+    /**
+     * Obtener datos del jugador autenticado
+     */
+    public function misDatos()
+    {
+        try {
+            $persona = auth()->user();
+            
+            if (!$persona) {
+                return response()->json([
+                    'message' => 'Usuario no autenticado',
+                    'status' => 401
+                ], 401);
+            }
+            
+            if (!$persona->isJugador()) {
+                return response()->json([
+                    'message' => 'El usuario no tiene rol de jugador',
+                    'status' => 403
+                ], 403);
+            }
+            
+            $jugador = Jugadores::where('idPersonas', $persona->idPersonas)
+                ->with(['persona.tiposDeDocumentos', 'categoria'])
+                ->first();
+            
+            if (!$jugador) {
+                return response()->json([
+                    'message' => 'No se encontró registro de jugador para este usuario',
+                    'status' => 404
+                ], 404);
+            }
+            
+            // Formatear la respuesta para el frontend
+            $response = [
+                // Datos de Persona
+                'Nombre1' => $jugador->persona->Nombre1,
+                'Nombre2' => $jugador->persona->Nombre2,
+                'Apellido1' => $jugador->persona->Apellido1,
+                'Apellido2' => $jugador->persona->Apellido2,
+                'FechaDeNacimiento' => $jugador->persona->FechaDeNacimiento,
+                'Genero' => $jugador->persona->Genero,
+                'Telefono' => $jugador->persona->Telefono,
+                'correo' => $jugador->persona->correo,
+                'Direccion' => $jugador->persona->Direccion,
+                
+                // Datos de Jugador
+                'idJugadores' => $jugador->idJugadores,
+                'Dorsal' => $jugador->Dorsal,
+                'Posicion' => $jugador->Posicion,
+                'Estatura' => $jugador->Estatura,
+                'Upz' => $jugador->Upz,
+                'NomTutor1' => $jugador->NomTutor1,
+                'NomTutor2' => $jugador->NomTutor2,
+                'ApeTutor1' => $jugador->ApeTutor1,
+                'ApeTutor2' => $jugador->ApeTutor2,
+                'TelefonoTutor' => $jugador->TelefonoTutor,
+                
+                // Datos de Categoría
+                'Categoria' => $jugador->categoria->Descripcion ?? null,
+                'idCategorias' => $jugador->idCategorias,
+            ];
+            
+            return response()->json([
+                'success' => true,
+                'data' => $response,
+                'status' => 200
+            ], 200);
+            
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Error al obtener datos del jugador',
+                'error' => $e->getMessage(),
+                'status' => 500
+            ], 500);
+        }
+    }
 }

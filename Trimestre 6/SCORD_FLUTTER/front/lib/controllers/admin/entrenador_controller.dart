@@ -100,4 +100,34 @@ class EntrenadorController {
       return 0;
     }
   }
+
+    // Crear entrenador completo (persona + entrenador)
+  Future<bool> crearEntrenador({
+    required Map<String, dynamic> personaData,
+    required Map<String, dynamic> entrenadorData,
+  }) async {
+    try {
+      // PASO 1: Crear la persona
+      final personaResponse = await _personaService.createPersona(personaData);
+      
+      // Extraer idPersonas de la respuesta
+      int? idPersonas;
+      
+      if (personaResponse['data'] != null && personaResponse['data']['idPersonas'] != null) {
+        idPersonas = personaResponse['data']['idPersonas'];
+      } else if (personaResponse['idPersonas'] != null) {
+        idPersonas = personaResponse['idPersonas'];
+      } else {
+        throw Exception('No se pudo obtener el ID de la persona creada');
+      }
+
+      // PASO 2: Crear el entrenador con el idPersonas obtenido
+      entrenadorData['idPersonas'] = idPersonas;
+      await _entrenadorService.createEntrenador(entrenadorData);
+
+      return true;
+    } catch (e) {
+      throw Exception('Error al crear entrenador: $e');
+    }
+  }
 }

@@ -73,9 +73,11 @@ class Persona {
     fechaDeNacimiento: DateTime.parse(json['FechaDeNacimiento'] as String),
     correo: json['correo'] as String,
     epsSisben: json['EpsSisben'] as String?,
-    tiposDeDocumentos: json['idTiposDeDocumentos'] is Map
+    tiposDeDocumentos: json['tipos_de_documentos'] != null
+    ? TipoDocumento.fromJson(json['tipos_de_documentos'])
+    : (json['idTiposDeDocumentos'] is Map
         ? TipoDocumento.fromJson(json['idTiposDeDocumentos'])
-        : null,
+        : null),
     idRoles: idRoles,
   );
 }

@@ -111,6 +111,7 @@ class _EstadisticasJugadorScreenState extends State<EstadisticasJugadorScreen> {
       },
     );
   }
+  
 
   @override
   Widget build(BuildContext context) {
@@ -144,7 +145,7 @@ class _EstadisticasJugadorScreenState extends State<EstadisticasJugadorScreen> {
               ),
             ),
             _buildDrawerItem('Inicio', Icons.home, '/InicioAdmin'),
-            _buildDrawerItem('Cronograma', Icons.calendar_month, '/Cronograma'),
+            _buildDrawerItem('Cronograma', Icons.calendar_month, '/CronogramaAdmin'),
             _buildDrawerItem('Perfil Jugador', Icons.person_pin, '/PerfilJugadorAdmin'),
             _buildDrawerItem('Estadísticas Jugadores', Icons.bar_chart, '/EstadisticasJugadores'),
             _buildDrawerItem('Perfil Entrenador', Icons.sports_gymnastics, '/PerfilEntrenadorAdmin'),

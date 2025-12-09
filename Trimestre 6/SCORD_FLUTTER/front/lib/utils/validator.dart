@@ -258,4 +258,229 @@ static String? validarFechaNacimiento(String? value) {
     return 'Fecha inválida';
   }
 }
+
+// ============================================
+// VALIDADORES PARA AGREGAR ENTRENADOR
+// ============================================
+
+// Validar todos los campos del formulario de agregar entrenador
+static String? validarFormularioAgregarEntrenador({
+  required String? numeroDocumento,
+  required int? tipoDocumento,
+  required String? primerNombre,
+  required String? primerApellido,
+  required String? genero,
+  required String? telefono,
+  required String? direccion,
+  required DateTime? fechaNacimiento,
+  required String? correo,
+  required String? contrasena,
+  required int? anosExperiencia,
+  required String? cargo,
+  required List<int> categorias,
+}) {
+  // Validar campos obligatorios
+  if (numeroDocumento == null || numeroDocumento.trim().isEmpty) {
+    return 'El número de documento es obligatorio';
+  }
+  
+  if (tipoDocumento == null) {
+    return 'El tipo de documento es obligatorio';
+  }
+  
+  if (primerNombre == null || primerNombre.trim().isEmpty) {
+    return 'El primer nombre es obligatorio';
+  }
+  
+  if (primerApellido == null || primerApellido.trim().isEmpty) {
+    return 'El primer apellido es obligatorio';
+  }
+  
+  if (genero == null || genero.isEmpty) {
+    return 'El género es obligatorio';
+  }
+  
+  if (telefono == null || telefono.trim().isEmpty) {
+    return 'El teléfono es obligatorio';
+  }
+  
+  if (direccion == null || direccion.trim().isEmpty) {
+    return 'La dirección es obligatoria';
+  }
+  
+  if (fechaNacimiento == null) {
+    return 'La fecha de nacimiento es obligatoria';
+  }
+  
+  if (correo == null || correo.trim().isEmpty) {
+    return 'El correo es obligatorio';
+  }
+  
+  if (contrasena == null || contrasena.trim().isEmpty) {
+    return 'La contraseña es obligatoria';
+  }
+  
+  if (anosExperiencia == null) {
+    return 'Los años de experiencia son obligatorios';
+  }
+  
+  if (cargo == null || cargo.trim().isEmpty) {
+    return 'El cargo es obligatorio';
+  }
+  
+  if (categorias.isEmpty) {
+    return 'Debes seleccionar al menos una categoría';
+  }
+  
+  // Validar teléfono colombiano
+  if (!RegExp(r'^3\d{9}$').hasMatch(telefono)) {
+    return 'El teléfono debe iniciar con 3 y tener 10 dígitos';
+  }
+  
+  // Validar correo
+  if (!RegExp(r'\S+@\S+\.\S+').hasMatch(correo)) {
+    return 'Ingresa un correo válido';
+  }
+  
+  // Validar contraseña (8-12 caracteres)
+  if (contrasena.length < 8 || contrasena.length > 12) {
+    return 'La contraseña debe tener entre 8 y 12 caracteres';
+  }
+  
+  // Validar años de experiencia (0-50)
+  if (anosExperiencia < 0 || anosExperiencia > 50) {
+    return 'Los años de experiencia deben estar entre 0 y 50';
+  }
+  
+  return null; // Todo válido
+}
+
+// ========== VALIDACIONES PARA CRONOGRAMAS Y PARTIDOS ==========
+  
+  /// Valida que una fecha no esté vacía
+  static String? validateFecha(String? value) {
+    if (value == null || value.isEmpty) {
+      return 'La fecha es requerida';
+    }
+    return null;
+  }
+
+  /// Valida que una ubicación no esté vacía
+  static String? validateUbicacion(String? value) {
+    if (value == null || value.isEmpty) {
+      return 'La ubicación es requerida';
+    }
+    if (value.length < 3) {
+      return 'La ubicación debe tener al menos 3 caracteres';
+    }
+    return null;
+  }
+
+  /// Valida que una sede esté seleccionada (opcional según el formulario)
+  static String? validateSede(String? value) {
+    // La sede puede ser opcional en algunos casos
+    if (value != null && value.isNotEmpty && value.length < 2) {
+      return 'El nombre de la sede debe tener al menos 2 caracteres';
+    }
+    return null;
+  }
+
+  /// Valida que una categoría esté seleccionada
+  static String? validateCategoria(int? value) {
+    if (value == null) {
+      return 'Debe seleccionar una categoría';
+    }
+    return null;
+  }
+
+  /// Valida que un equipo rival no esté vacío
+  static String? validateEquipoRival(String? value) {
+    if (value == null || value.isEmpty) {
+      return 'El equipo rival es requerido';
+    }
+    if (value.length < 2) {
+      return 'El nombre del equipo debe tener al menos 2 caracteres';
+    }
+    return null;
+  }
+
+  /// Valida que una formación sea válida
+  static String? validateFormacion(String? value) {
+    // La formación puede ser opcional según tu lógica de negocio
+    if (value != null && value.isNotEmpty && value.length < 3) {
+      return 'La formación debe tener al menos 3 caracteres';
+    }
+    return null;
+  }
+
+  /// Valida que una cancha no esté vacía (opcional)
+  static String? validateCancha(String? value) {
+    // La cancha es opcional, así que solo validamos si tiene contenido
+    if (value != null && value.isNotEmpty && value.length < 2) {
+      return 'El nombre de la cancha debe tener al menos 2 caracteres';
+    }
+    return null;
+  }
+
+  /// Valida que una descripción no exceda el límite (opcional)
+  static String? validateDescripcion(String? value, {int maxLength = 500}) {
+    if (value != null && value.length > maxLength) {
+      return 'La descripción no puede exceder $maxLength caracteres';
+    }
+    return null;
+  }
+
+  /// Valida formato de fecha YYYY-MM-DD
+  static String? validateFechaFormato(String? value) {
+    if (value == null || value.isEmpty) {
+      return 'La fecha es requerida';
+    }
+    
+    // Patrón para formato YYYY-MM-DD
+    final RegExp dateRegex = RegExp(r'^\d{4}-\d{2}-\d{2}$');
+    
+    if (!dateRegex.hasMatch(value)) {
+      return 'Formato de fecha inválido (debe ser YYYY-MM-DD)';
+    }
+    
+    // Validar que sea una fecha válida
+    try {
+      final parts = value.split('-');
+      final year = int.parse(parts[0]);
+      final month = int.parse(parts[1]);
+      final day = int.parse(parts[2]);
+      
+      final date = DateTime(year, month, day);
+      if (date.year != year || date.month != month || date.day != day) {
+        return 'Fecha inválida';
+      }
+    } catch (e) {
+      return 'Fecha inválida';
+    }
+    
+    return null;
+  }
+
+  /// Valida que una fecha sea futura (para eventos programados)
+  static String? validateFechaFutura(String? value) {
+    final errorFormato = validateFechaFormato(value);
+    if (errorFormato != null) return errorFormato;
+    
+    try {
+      final fecha = DateTime.parse(value!);
+      final hoy = DateTime.now();
+      
+      // Comparar solo las fechas sin hora
+      final fechaSoloFecha = DateTime(fecha.year, fecha.month, fecha.day);
+      final hoySoloFecha = DateTime(hoy.year, hoy.month, hoy.day);
+      
+      if (fechaSoloFecha.isBefore(hoySoloFecha)) {
+        return 'La fecha no puede ser anterior a hoy';
+      }
+    } catch (e) {
+      return 'Error al procesar la fecha';
+    }
+    
+    return null;
+  }
 }

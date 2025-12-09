@@ -107,4 +107,54 @@ class JugadorService {
       throw Exception('Error al eliminar jugador');
     }
   }
+  // Obtener jugadores filtrados por categorías del entrenador
+Future<List<Jugador>> fetchJugadoresByCategoriasEntrenador(List<int> idsCategorias) async {
+  try {
+    // Obtener todos los jugadores
+    final todosLosJugadores = await fetchJugadores();
+    
+    // Filtrar por las categorías del entrenador
+    final jugadoresFiltrados = todosLosJugadores
+        .where((jugador) => idsCategorias.contains(jugador.idCategorias))
+        .toList();
+    
+    return jugadoresFiltrados;
+  } catch (e) {
+    throw Exception('Error al obtener jugadores del entrenador: $e');
+  }
+}
+
+// Obtener jugador por idPersona (para el usuario logueado)
+  Future<Jugador?> fetchJugadorByPersonaId(int idPersona) async {
+    try {
+      final response = await _apiService.get('/jugadores');
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        
+        List<dynamic> jugadoresList;
+        if (data is Map && data.containsKey('data')) {
+          jugadoresList = data['data'] as List;
+        } else {
+          jugadoresList = data as List;
+        }
+        
+        // Buscar el jugador que tenga el idPersonas coincidente
+        final jugadorData = jugadoresList.firstWhere(
+          (j) => j['idPersonas'] == idPersona,
+          orElse: () => null,
+        );
+        
+        if (jugadorData != null) {
+          return Jugador.fromJson(jugadorData);
+        }
+        
+        return null;
+      } else {
+        throw Exception('Error al obtener jugador: ${response.statusCode}');
+      }
+    } catch (e) {
+      throw Exception('Error al buscar jugador: $e');
+    }
+  }
 }

@@ -1,16 +1,14 @@
 import 'dart:convert';
-import 'package:http/http.dart' as http;
 import '../models/categoria_model.dart';
-import '../config/api_config.dart';
+import 'api_service.dart';
 
 class CategoriaService {
+  final ApiService _apiService = ApiService();
+
   // Obtener todas las categorías
   Future<List<Categoria>> getCategorias() async {
     try {
-      final response = await http.get(
-        Uri.parse('$baseUrl/categorias'),
-        headers: {'Content-Type': 'application/json'},
-      );
+      final response = await _apiService.get('/categorias');
 
       if (response.statusCode == 200) {
         final List<dynamic> jsonResponse = json.decode(response.body);

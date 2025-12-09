@@ -42,6 +42,46 @@ class EntrenadoresController extends Controller
         ], 200);
     }
 
+    // Obtener entrenador por ID de persona
+public function getByPersonaId($idPersona)
+{
+    $entrenador = Entrenadores::with(['persona.tiposDeDocumentos', 'categorias'])
+        ->where('idPersonas', $idPersona)
+        ->first();
+    
+    if (!$entrenador) {
+        return response()->json([
+            'message' => 'Entrenador no encontrado',
+            'status' => 404
+        ], 404);
+    }
+    
+    return response()->json([
+        'message' => 'Entrenador encontrado',
+        'data' => $entrenador,
+        'status' => 200
+    ], 200);
+}
+
+// Obtener categorías de un entrenador
+public function getCategoriasByEntrenador($idEntrenador)
+{
+    $entrenador = Entrenadores::with('categorias')->find($idEntrenador);
+    
+    if (!$entrenador) {
+        return response()->json([
+            'message' => 'Entrenador no encontrado',
+            'status' => 404
+        ], 404);
+    }
+    
+    return response()->json([
+        'message' => 'Categorías del entrenador',
+        'data' => $entrenador->categorias,
+        'status' => 200
+    ], 200);
+}
+
     public function store(Request $request)
     {
         $validator = Validator::make($request->all(), [
@@ -131,6 +171,39 @@ class EntrenadoresController extends Controller
 
         return response()->json([
             'message' => 'Entrenador eliminado correctamente',
+            'status' => 200
+        ], 200);
+    }
+
+    // Obtener las categorías del entrenador autenticado
+    public function misCategorias(Request $request)
+    {
+        // Obtener el usuario autenticado desde el JWT
+        $user = auth()->user();
+        
+        if (!$user) {
+            return response()->json([
+                'message' => 'No autenticado',
+                'status' => 401
+            ], 401);
+        }
+        
+        // Buscar el entrenador por idPersonas
+        $entrenador = Entrenadores::with('categorias')
+            ->where('idPersonas', $user->idPersonas)
+            ->first();
+        
+        if (!$entrenador) {
+            return response()->json([
+                'message' => 'Entrenador no encontrado para este usuario',
+                'status' => 404
+            ], 404);
+        }
+        
+        // Retornar solo las categorías
+        return response()->json([
+            'message' => 'Categorías del entrenador',
+            'data' => $entrenador->categorias,
             'status' => 200
         ], 200);
     }

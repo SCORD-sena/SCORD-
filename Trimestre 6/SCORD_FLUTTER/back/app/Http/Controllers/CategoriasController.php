@@ -102,4 +102,12 @@ class CategoriasController extends Controller
             'message' => 'Categoría eliminada con éxito'
         ], 200);
     }
+        public function jugadoresPorCategoria($id)
+{
+    $jugadores = \App\Models\Jugadores::where('idCategorias', $id)->get();
+
+    return response()->json([
+        'data' => $jugadores
+    ], 200);
+}
 }

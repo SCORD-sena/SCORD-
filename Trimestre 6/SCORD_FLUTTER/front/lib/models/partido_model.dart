@@ -1,10 +1,16 @@
 class Partido {
   final int idPartidos;
-  final String? rival;
+  final String? rival; // Mantener por compatibilidad
+  final String formacion;
+  final String equipoRival;
+  final int idCronogramas;
 
   Partido({
     required this.idPartidos,
     this.rival,
+    required this.formacion,
+    required this.equipoRival,
+    required this.idCronogramas,
   });
 
   factory Partido.fromJson(Map<String, dynamic> json) {
@@ -19,13 +25,19 @@ class Partido {
     return Partido(
       idPartidos: toInt(json['idPartidos'], 0),
       rival: json['Rival']?.toString(),
+      formacion: json['Formacion']?.toString() ?? '',
+      equipoRival: json['EquipoRival']?.toString() ?? json['Rival']?.toString() ?? '',
+      idCronogramas: toInt(json['idCronogramas'], 0),
     );
   }
 
   Map<String, dynamic> toJson() {
     return {
       'idPartidos': idPartidos,
-      'Rival': rival,
+      'Rival': rival ?? equipoRival,
+      'Formacion': formacion,
+      'EquipoRival': equipoRival,
+      'idCronogramas': idCronogramas,
     };
   }
 }
