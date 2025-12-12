@@ -1,0 +1,103 @@
+body {
+  margin: 0;
+  padding: 0;
+  font-family: Arial, sans-serif;
+  background: url(imagenes/tienda.webp) no-repeat center center fixed;
+  background-size: cover;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+}
+
+.tabla-login {
+  display: table;                    
+  border: 4px solid rgb(12, 12, 12);       
+  padding: 5px;                    
+  border-radius: 8px;               
+  background-color: rgba(226, 13, 13, 0.986); 
+}
+
+.login-container {
+  background: rgb(255, 255, 255);
+  width: 400px;
+  border-radius: 9px;
+  overflow: hidden;
+  box-shadow: 0 4px 15px rgba(245, 241, 241, 0.3);
+}
+
+.login-header {
+  background-color: rgb(194, 11, 11, 0.986); 
+  color: rgb(0, 0, 0);
+  padding: 10px;
+  text-align: center;
+}
+
+.login-header .icon {
+  display: block;
+  font-size: 30px;
+}
+
+.login-form {
+  display: flex;
+  flex-direction: column;
+  padding: 20px;
+}
+
+.login-form label {
+  font-size: 14px;
+  margin-bottom: 5px;
+}
+
+.login-form input {
+  padding: 10px;
+  margin-bottom: 15px;
+  border: 1px solid #494343;
+  border-radius: 3px;
+}
+
+.login-form button {
+  padding: 10px;
+  background-color: #c71d1d;
+  color: white;
+  border: none;
+  border-radius: 3px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+
+.login-form button:hover {
+  background-color: #ec5a5a;
+}
+
+.links {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 10px;
+}
+
+.links a {
+  font-size: 12px;
+  color: #0004ff;
+  text-decoration: none;
+}
+
+.links a:hover {
+  text-decoration: underline;
+}
+
+.mensaje {
+  text-align: center;
+  font-weight: bold;
+  padding: 10px;
+  color: rgb(255, 255, 255);
+}
+
+#resendCode {
+  background-color: #4CAF50;
+}
+
+#resendCode:hover {
+  background-color: #45a049;
+}

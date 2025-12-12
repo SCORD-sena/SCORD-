@@ -1,0 +1,195 @@
+/* InicioEntrenador.css - Estilo coherente con SCORD */
+
+body {
+  background-color: #f8f9fa;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+h1, h2, h5 {
+  letter-spacing: 1px;
+}
+
+/* Header */
+header {
+  animation: fadeDown 0.8s ease-in-out;
+}
+
+/* Navbar */
+.nav .nav-link {
+  color: #555;
+  font-weight: 500;
+  transition: color 0.3s ease, background-color 0.3s ease;
+  border-radius: 8px;
+  padding: 8px 12px;
+}
+
+.nav .nav-link:hover {
+  color: #fff;
+  background-color: #000000;
+}
+
+.nav .nav-link.text-danger {
+  font-weight: 600;
+  color: #e63946;
+}
+
+.nav .nav-link.text-danger:hover {
+  color: #fff;
+  background-color: #000000;
+}
+
+/* Bienvenida */
+h1 span {
+  color: #e63946;
+}
+
+/* Info usuario */
+.list-group-item strong {
+  color: #e63946;
+}
+
+.list-group-item {
+  font-size: 16px;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.list-group-item:last-child {
+  border-bottom: none;
+}
+
+/* Carrusel */
+.carousel-inner {
+  animation: fadeUp 1s ease-in-out;
+}
+
+.carousel-item h2 {
+  color: #e63946;
+}
+
+.carousel-item img {
+  height: 300px; /* Todas tendrán la misma altura */
+  width: auto; /* Mantiene la proporción */
+  object-fit: contain; /* O usa 'cover' si prefieres recorte más uniforme */
+  border-radius: 10px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  display: block;
+  margin: 0 auto;
+  background-color: #fff; /* Evita fondo negro en imágenes PNG o al usar 'contain' */
+}
+
+
+/* Footer */
+footer {
+  background-color: #1d1d1d !important;
+  color: #fff;
+  padding-top: 40px;
+  padding-bottom: 20px;
+  animation: fadeUp 0.8s ease-in-out;
+}
+
+footer h5 {
+  color: #ff7b8a;
+}
+
+footer hr {
+  border-color: #444;
+}
+
+/* Botones generales (si los usas) */
+.btn-danger {
+  background-color: #e63946;
+  border: none;
+  border-radius: 50px;
+  padding: 12px 24px;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.btn-danger:hover {
+  background-color: #d90429;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+/* Animaciones suaves */
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeDown {
+  from {
+    opacity: 0;
+    transform: translateY(-30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Hamburguesa con solo HTML + CSS (adaptado) */
+.menu_hamburguesa {
+  display: none;
+}
+.menu_hamburguesa:checked + .ul_links {
+  height: calc(100vh - var(--altura_header, 80px));
+}
+
+/* Rediseño adaptado */
+.labe_hamburguesa {
+  display: block;
+}
+.list_icon {
+  color: #e63946;
+  cursor: pointer;
+}
+.ul_links {
+  width: 100%;
+  background-color: #fff;
+  position: absolute;
+  top: 80px; /* altura del header */
+  left: 0;
+  height: 0;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  transition: all 0.3s ease;
+  z-index: 99;
+}
+
+.nav .nav-link:hover {
+  color: #e63946 !important;
+  background-color: #000000 !important;
+  border-radius: 8px;
+  font-weight: bold;
+  transition: all 0.3s ease;
+}
+
+
+
+/* Responsive: menú normal en pantallas grandes */
+@media (min-width: 992px) {
+  .labe_hamburguesa {
+    display: none;
+  }
+  .ul_links {
+    position: static;
+    width: auto;
+    height: auto !important;
+    flex-direction: row;
+    justify-content: flex-end;
+    background-color: transparent;
+    gap: 1rem;
+  }
+}
