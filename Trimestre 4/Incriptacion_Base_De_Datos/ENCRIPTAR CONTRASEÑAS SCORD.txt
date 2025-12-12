@@ -1,0 +1,24 @@
+/* ENCRIPTAR CONTRASEÑAS QUE ESTEN EN LA BASE DE DATOS YA ENCRIPTADAS */
+UPDATE personas
+SET contraseña = EncriptarSHA2_512(contraseña)
+WHERE LENGTH(contraseña) < 60;
+
+/*MOSTRAR CORREO, CONTRASEÑA Y LA LONGITUD DE LA CONTRASEÑA*/
+SELECT correo, contraseña, LENGTH(contraseña) AS longitud
+FROM personas
+ORDER BY longitud DESC;
+
+/*MOSTRAR USUARIO INGRESADO CON ENCRIPTACION */
+SELECT * FROM personas 
+WHERE correo = 'prueba@email.com' 
+AND contraseña = EncriptarSHA2_512('miclave123');
+
+/*INSERTAR USUARIO NUEVO CON ENCRIPTACION*/
+
+INSERT INTO personas ( NumeroDeDocumento, Nombre1, Apellido1,
+correo, contraseña, TipoDeRol, idTiposDeDocumentos, Nombre2,
+ Apellido2, Genero, Telefono, Direccion, FechaDeNacimiento) 
+VALUES ( 999999999, 'Prueba','SHA2','prueba@email.com', 
+EncriptarSHA2_512('miclave123'), 'Jugador', 1, '', '', 
+'Masculino', '3001234567', 'Calle falsa 123', 
+'2000-01-01');
