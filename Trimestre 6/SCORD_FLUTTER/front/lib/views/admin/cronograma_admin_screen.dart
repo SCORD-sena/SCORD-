@@ -116,6 +116,115 @@ class _CronogramaAdminScreenState extends State<CronogramaAdminScreen> {
   }
 
   // ============================================================
+  // HANDLERS PARTIDOS
+  // ============================================================
+
+  Future<void> _handleAgregarPartido() async {
+    if (!_formKeyPartido.currentState!.validate()) return;
+
+    if (_controller.categoriaPartidoSeleccionada == null) {
+      _showWarningDialog('Por favor seleccione una categoría');
+      return;
+    }
+
+    if (_controller.competenciaPartidoSeleccionada == null) {
+      _showWarningDialog('Por favor seleccione una competencia');
+      return;
+    }
+
+    try {
+      await _controller.agregarPartido();
+      if (mounted) {
+        setState(() {});
+        _showSuccessDialog('Partido agregado exitosamente');
+      }
+    } catch (e) {
+      if (mounted) {
+        _showErrorDialog('Error al agregar partido', e.toString());
+      }
+    }
+  }
+
+  Future<void> _handleActualizarPartido() async {
+    if (!_formKeyPartido.currentState!.validate()) return;
+
+    try {
+      await _controller.actualizarPartido();
+      if (mounted) {
+        setState(() {});
+        _showSuccessDialog('Partido actualizado exitosamente');
+      }
+    } catch (e) {
+      if (mounted) {
+        _showErrorDialog('Error al actualizar partido', e.toString());
+      }
+    }
+  }
+
+  Future<void> _handleEliminarPartido(int id) async {
+    final confirm = await _showConfirmDialog(
+      '¿Estás seguro?',
+      'Esta acción no se puede deshacer',
+    );
+
+    if (confirm == true) {
+      try {
+        await _controller.eliminarPartido(id);
+        if (mounted) {
+          setState(() {});
+          _showSuccessDialog('Partido eliminado exitosamente');
+        }
+      } catch (e) {
+        if (mounted) {
+          _showErrorDialog('Error al eliminar partido', e.toString());
+        }
+      }
+    }
+  }
+
+  // ✅ CORREGIDO: Ahora con await
+  Future<void> _handleEditarPartido(int idPartido) async {
+    final partido = _controller.partidosAPI.firstWhere(
+      (p) => p.idPartidos == idPartido,
+    );
+    
+    await _controller.editarPartido(partido); // ✅ Esperar a que carguen las competencias
+    
+    if (mounted) {
+      setState(() {});
+    }
+  }
+
+  // ✅ HANDLER ACTUALIZADO - Categoría Partido (optimizado)
+  Future<void> _handleCategoriaPartidoChanged(int? value) async { 
+    // No hacer setState aquí para evitar reconstrucción prematura
+    _controller.categoriaPartidoSeleccionada = value;
+    _controller.competenciaPartidoSeleccionada = null; // Resetear competencia
+
+    if (value != null) {
+      try {
+        await _controller.loadCompetenciasByCategoria(value);
+      } catch (e) {
+        if (mounted) {
+          _showErrorDialog('Error', 'No se pudieron cargar las competencias');
+        }
+      }
+    } else {
+      _controller.competenciasFiltradas = [];
+    }
+    
+    // Un solo setState al final
+    if (mounted) setState(() {});
+  }
+
+  // ✅ HANDLER - Competencia Partido
+  void _handleCompetenciaPartidoChanged(int? value) {
+    setState(() {
+      _controller.competenciaPartidoSeleccionada = value;
+    });
+  }
+
+  // ============================================================
   // HANDLERS ENTRENAMIENTOS
   // ============================================================
 
@@ -177,84 +286,36 @@ class _CronogramaAdminScreenState extends State<CronogramaAdminScreen> {
     }
   }
 
-  void _handleEditarEntrenamiento(int idCronograma) {
+  // ✅ CORREGIDO: Ahora con await
+  Future<void> _handleEditarEntrenamiento(int idCronograma) async {
     final cronograma = _controller.cronogramas.firstWhere(
       (c) => c.idCronogramas == idCronograma,
     );
-    setState(() {
-      _controller.editarEntrenamiento(cronograma);
-    });
-  }
-
-  // ============================================================
-  // HANDLERS PARTIDOS
-  // ============================================================
-
-  Future<void> _handleAgregarPartido() async {
-    if (!_formKeyPartido.currentState!.validate()) return;
-
-    if (_controller.categoriaPartidoSeleccionada == null) {
-      _showWarningDialog('Por favor seleccione una categoría');
-      return;
-    }
-
-    try {
-      await _controller.agregarPartido();
-      if (mounted) {
-        setState(() {});
-        _showSuccessDialog('Partido agregado exitosamente');
-      }
-    } catch (e) {
-      if (mounted) {
-        _showErrorDialog('Error al agregar partido', e.toString());
-      }
+    
+    await _controller.editarEntrenamiento(cronograma); // ✅ Esperar a que carguen las competencias
+    
+    if (mounted) {
+      setState(() {});
     }
   }
 
-  Future<void> _handleActualizarPartido() async {
-    if (!_formKeyPartido.currentState!.validate()) return;
+  // ✅ HANDLER - Categoría Entrenamiento (optimizado para evitar scroll jump)
+  Future<void> _handleCategoriaEntrenamientoChanged(int? value) async {
+    // No hacer setState aquí para evitar reconstrucción prematura
+    _controller.categoriaEntrenamientoSeleccionada = value;
 
-    try {
-      await _controller.actualizarPartido();
-      if (mounted) {
-        setState(() {});
-        _showSuccessDialog('Partido actualizado exitosamente');
-      }
-    } catch (e) {
-      if (mounted) {
-        _showErrorDialog('Error al actualizar partido', e.toString());
-      }
-    }
-  }
-
-  Future<void> _handleEliminarPartido(int id) async {
-    final confirm = await _showConfirmDialog(
-      '¿Estás seguro?',
-      'Esta acción no se puede deshacer',
-    );
-
-    if (confirm == true) {
+    if (value != null) {
       try {
-        await _controller.eliminarPartido(id);
-        if (mounted) {
-          setState(() {});
-          _showSuccessDialog('Partido eliminado exitosamente');
-        }
+        await _controller.loadCompetenciasByCategoria(value);
       } catch (e) {
         if (mounted) {
-          _showErrorDialog('Error al eliminar partido', e.toString());
+          _showErrorDialog('Error', 'No se pudieron cargar las competencias');
         }
       }
     }
-  }
-
-  void _handleEditarPartido(int idPartido) {
-    final partido = _controller.partidosAPI.firstWhere(
-      (p) => p.idPartidos == idPartido,
-    );
-    setState(() {
-      _controller.editarPartido(partido);
-    });
+    
+    // Un solo setState al final
+    if (mounted) setState(() {});
   }
 
   // ============================================================
@@ -302,10 +363,9 @@ class _CronogramaAdminScreenState extends State<CronogramaAdminScreen> {
       leading: Icon(icon, color: Colors.red),
       title: Text(title, style: const TextStyle(fontSize: 16)),
       onTap: () {
-        Navigator.of(context).pop(); // Cerrar drawer
+        Navigator.of(context).pop();
         
         if (routeName == '/Logout') {
-          // Lógica de logout
           Navigator.of(context).pushReplacementNamed('/');
         } else if (ModalRoute.of(context)?.settings.name != routeName) {
           Navigator.of(context).pushNamed(routeName);
@@ -367,32 +427,7 @@ class _CronogramaAdminScreenState extends State<CronogramaAdminScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Sección de Entrenamientos
-                  CronogramaEntrenamientosSection(
-                    controller: _controller,
-                    formKey: _formKeyEntrenamiento,
-                    onAgregar: _handleAgregarEntrenamiento,
-                    onActualizar: _handleActualizarEntrenamiento,
-                    onEliminar: _handleEliminarEntrenamiento,
-                    onEditar: _handleEditarEntrenamiento,
-                    onCancelar: _handleCancelarEdicion,
-                    onSearch: _handleSearchEntrenamiento,
-                    onPageChange: _handlePageChangeEntrenamiento,
-                    onCategoriaChanged: (value) {
-                      setState(() {
-                        _controller.categoriaEntrenamientoSeleccionada = value;
-                      });
-                    },
-                    onSedeChanged: (value) {
-                      setState(() {
-                        _controller.sedeEntrenamientoSeleccionada = value;
-                      });
-                    },
-                  ),
-
-                  const SizedBox(height: 48),
-
-                  // Sección de Partidos
+                  // PRIMERO: PARTIDOS
                   CronogramaPartidosSection(
                     controller: _controller,
                     formKey: _formKeyPartido,
@@ -403,9 +438,41 @@ class _CronogramaAdminScreenState extends State<CronogramaAdminScreen> {
                     onCancelar: _handleCancelarEdicion,
                     onSearch: _handleSearchPartido,
                     onPageChange: _handlePageChangePartido,
-                    onCategoriaChanged: (value) {
+                    onCategoriaChanged: _handleCategoriaPartidoChanged,
+                    onCompetenciaChanged: _handleCompetenciaPartidoChanged,
+                  ),
+                  
+                  // SEPARADOR VISUAL
+                  const SizedBox(height: 32),
+                  Container(
+                    height: 2,
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        colors: [
+                          Colors.red.withOpacity(0.1),
+                          Colors.red,
+                          Colors.red.withOpacity(0.1),
+                        ],
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 32),
+
+                  // SEGUNDO: ENTRENAMIENTOS
+                  CronogramaEntrenamientosSection(
+                    controller: _controller,
+                    formKey: _formKeyEntrenamiento,
+                    onAgregar: _handleAgregarEntrenamiento,
+                    onActualizar: _handleActualizarEntrenamiento,
+                    onEliminar: _handleEliminarEntrenamiento,
+                    onEditar: _handleEditarEntrenamiento,
+                    onCancelar: _handleCancelarEdicion,
+                    onSearch: _handleSearchEntrenamiento,
+                    onPageChange: _handlePageChangeEntrenamiento,
+                    onCategoriaChanged: _handleCategoriaEntrenamientoChanged,
+                    onSedeChanged: (value) {
                       setState(() {
-                        _controller.categoriaPartidoSeleccionada = value;
+                        _controller.sedeEntrenamientoSeleccionada = value;
                       });
                     },
                   ),

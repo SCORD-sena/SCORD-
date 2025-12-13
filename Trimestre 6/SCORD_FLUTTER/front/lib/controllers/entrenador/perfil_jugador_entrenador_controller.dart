@@ -105,10 +105,7 @@ class PerfilJugadorEntrenadorController extends ChangeNotifier {
       categorias = results[1] as List<Categoria>;
       tiposDocumento = results[2] as List<TipoDocumento>;
       
-      print('✅ Jugadores cargados (solo de categorías del entrenador): ${jugadores.length}');
-      print('✅ Categorías del entrenador: ${categoriasEntrenador.map((c) => c.descripcion).join(", ")}');
     } catch (e) {
-      print('❌ Error en fetchInitialData: $e');
       rethrow;
     } finally {
       loading = false;

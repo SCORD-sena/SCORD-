@@ -223,9 +223,6 @@ class CronogramaService {
         headers: headers,
       );
 
-      print('Response status: ${response.statusCode}');
-      print('Response body: ${response.body}');
-
       if (response.statusCode == 200) {
         final dynamic jsonResponse = json.decode(response.body);
         
@@ -244,8 +241,55 @@ class CronogramaService {
         throw Exception('Error al cargar categorías del entrenador: ${response.statusCode} - ${response.body}');
       }
     } catch (e) {
-      print('Error en getMisCategorias: $e');
       throw Exception('Error de conexión al obtener categorías: $e');
+    }
+  }
+  // ============================================================
+  // CRONOGRAMAS POR COMPETENCIA Y CATEGORÍA
+  // ============================================================
+
+  Future<List<Cronograma>> getCronogramasByCompetenciaYCategoria(
+    int idCompetencias,
+    int idCategorias,
+  ) async {
+    try {
+      final headers = await _getHeaders();
+      final response = await http.get(
+        Uri.parse('$baseUrl/cronogramas/competencia/$idCompetencias/categoria/$idCategorias'),
+        headers: headers,
+      );
+
+      if (response.statusCode == 200) {
+        final List data = json.decode(response.body);
+        return data.map((json) => Cronograma.fromJson(json)).toList();
+      } else {
+        throw Exception('Error al cargar cronogramas: ${response.statusCode}');
+      }
+    } catch (e) {
+      throw Exception('Error de conexión: $e');
+    }
+  }
+
+  // ============================================================
+  // PARTIDOS POR COMPETENCIA
+  // ============================================================
+
+  Future<List<Partido>> getPartidosByCompetencia(int idCompetencias) async {
+    try {
+      final headers = await _getHeaders();
+      final response = await http.get(
+        Uri.parse('$baseUrl/partidos/competencia/$idCompetencias'),
+        headers: headers,
+      );
+
+      if (response.statusCode == 200) {
+        final List data = json.decode(response.body);
+        return data.map((json) => Partido.fromJson(json)).toList();
+      } else {
+        throw Exception('Error al cargar partidos: ${response.statusCode}');
+      }
+    } catch (e) {
+      throw Exception('Error de conexión: $e');
     }
   }
 }

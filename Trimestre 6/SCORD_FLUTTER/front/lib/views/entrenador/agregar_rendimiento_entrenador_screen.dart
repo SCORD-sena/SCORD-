@@ -100,27 +100,49 @@ class _AgregarRendimientoEntrenadorScreenState extends State<AgregarRendimientoE
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            const Center(
-              child: Text(
-                'Agregar Registro Estadístico',
-                style: TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                  color: Color(0xffe63946)
+            // Título con icono
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: const Color(0xffe63946).withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: const Icon(
+                    Icons.add_chart,
+                    color: Color(0xffe63946),
+                    size: 32,
+                  ),
                 ),
-              ),
+                const SizedBox(width: 12),
+                const Text(
+                  'Agregar Registro Estadístico',
+                  style: TextStyle(
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                    color: Color(0xffe63946)
+                  ),
+                ),
+              ],
             ),
             const SizedBox(height: 20),
 
-            // Formulario de selección
+            // Formulario de selección con filtros
             FormularioSeleccionEntrenador(
               categorias: _controller.categoriasEntrenador, // ⭐ Solo sus categorías
               jugadoresFiltrados: _controller.jugadoresFiltrados,
-              partidos: _controller.partidos,
+              competenciasFiltradas: _controller.competenciasFiltradas,
+              partidosFiltrados: _controller.partidosFiltrados,
               categoriaSeleccionada: _controller.categoriaSeleccionada,
+              competenciaSeleccionada: _controller.competenciaSeleccionada,
               jugadorSeleccionado: _controller.jugadorSeleccionado,
               partidoSeleccionado: _controller.partidoSeleccionado,
+              isLoadingCompetencias: _controller.isLoadingCompetencias,
+              isLoadingPartidos: _controller.isLoadingPartidos,
               onCategoriaChanged: _controller.seleccionarCategoria,
+              onCompetenciaChanged: _controller.seleccionarCompetencia,
               onJugadorChanged: _controller.seleccionarJugador,
               onPartidoChanged: _controller.seleccionarPartido,
             ),
@@ -138,38 +160,59 @@ class _AgregarRendimientoEntrenadorScreenState extends State<AgregarRendimientoE
               tarjetasRojasController: _controller.tarjetasRojasController,
               arcoEnCeroController: _controller.arcoEnCeroController,
             ),
-            const SizedBox(height: 20),
+            const SizedBox(height: 24),
 
-            // Botones de acción
+            // Botones de acción con CURVAS
             Row(
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
-                ElevatedButton(
+                ElevatedButton.icon(
                   onPressed: _controller.loading ? null : _onGuardarPressed,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.green,
-                    padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
-                  ),
-                  child: Text(
+                  icon: _controller.loading
+                      ? const SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                          ),
+                        )
+                      : const Icon(Icons.save, size: 20),
+                  label: Text(
                     _controller.loading ? 'Guardando...' : 'Guardar',
                     style: const TextStyle(
                       color: Colors.white,
-                      fontWeight: FontWeight.bold
+                      fontWeight: FontWeight.bold,
+                      fontSize: 15,
+                    ),
+                  ),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.green,
+                    padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+                    elevation: 2,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(25), // 🎨 CURVAS
                     ),
                   ),
                 ),
                 const SizedBox(width: 16),
-                ElevatedButton(
+                ElevatedButton.icon(
                   onPressed: _controller.loading ? null : () => Navigator.pop(context),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xffe63946),
-                    padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
-                  ),
-                  child: const Text(
+                  icon: const Icon(Icons.cancel, size: 20),
+                  label: const Text(
                     'Cancelar',
                     style: TextStyle(
                       color: Colors.white,
-                      fontWeight: FontWeight.bold
+                      fontWeight: FontWeight.bold,
+                      fontSize: 15,
+                    ),
+                  ),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xffe63946),
+                    padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+                    elevation: 2,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(25), // 🎨 CURVAS
                     ),
                   ),
                 ),

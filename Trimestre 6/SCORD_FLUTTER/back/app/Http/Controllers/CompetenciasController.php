@@ -111,4 +111,20 @@ class CompetenciasController extends Controller
             'status' => 200
         ], 200);
     }
+
+    public function getCompetenciasByCategoria($idCategorias)
+    {
+        // 1. Buscar competencias que YA tienen cronogramas en esta categoría específica
+        $competenciasUsadas = Competencias::whereHas('cronogramas', function($query) use ($idCategorias) {
+            $query->where('idCategorias', $idCategorias);
+        })->distinct()->get();
+
+        // 2. Buscar competencias que NO han sido usadas en NINGUNA categoría todavía
+        $competenciasNuevas = Competencias::doesntHave('cronogramas')->get();
+
+        // 3. Combinar ambas listas (usadas en esta categoría + nuevas sin usar)
+        $competencias = $competenciasUsadas->merge($competenciasNuevas);
+
+        return response()->json($competencias, 200);
+    }
 }

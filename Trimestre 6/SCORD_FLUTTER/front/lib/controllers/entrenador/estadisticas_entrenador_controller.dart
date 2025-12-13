@@ -3,11 +3,15 @@ import 'dart:convert';
 import '../../models/categoria_model.dart';
 import '../../models/jugador_model.dart';
 import '../../models/rendimiento_model.dart';
+import '../../models/competencia_model.dart';
+import '../../models/partido_model.dart';
 import '../../services/rendimiento_service.dart';
 import '../../services/api_service.dart';
 import '../../services/auth_service.dart';
 import '../../services/entrenador_service.dart';
 import '../../services/jugador_service.dart';
+import '../../services/competencia_service.dart';
+import '../../services/cronograma_service.dart';
 import '../../utils/validator.dart';
 
 class EstadisticasEntrenadorController extends ChangeNotifier {
@@ -16,17 +20,29 @@ class EstadisticasEntrenadorController extends ChangeNotifier {
   final AuthService _authService = AuthService();
   final EntrenadorService _entrenadorService = EntrenadorService();
   final JugadorService _jugadorService = JugadorService();
+  final CompetenciaService _competenciaService = CompetenciaService();
+  final CronogramaService _cronogramaService = CronogramaService();
 
   // State
   List<Jugador> jugadores = [];
   List<Categoria> categorias = [];
   List<Categoria> categoriasEntrenador = []; // ⭐ Solo categorías del entrenador
+  List<Competencia> competencias = [];
+  List<Competencia> competenciasFiltradas = [];
+  List<Partido> partidos = [];
+  List<Partido> partidosFiltrados = [];
+  
   String? categoriaSeleccionadaId;
+  int? competenciaSeleccionada;
+  int? partidoSeleccionado;
+  
   Jugador? jugadorSeleccionado;
   List<Jugador> jugadoresFiltrados = [];
   EstadisticasTotales? estadisticasTotales;
   bool modoEdicion = false;
   bool loading = false;
+  bool isLoadingCompetencias = false;
+  bool isLoadingPartidos = false;
   UltimoRegistro? ultimoRegistro;
 
   Map<String, String> formData = {
@@ -41,7 +57,10 @@ class EstadisticasEntrenadorController extends ChangeNotifier {
     'arcoEnCero': "",
   };
 
-  // Inicialización
+  // ============================================================
+  // INICIALIZACIÓN
+  // ============================================================
+
   Future<void> inicializar() async {
     await cargarDatosIniciales();
   }
@@ -51,35 +70,28 @@ class EstadisticasEntrenadorController extends ChangeNotifier {
     notifyListeners();
 
     try {
-      // Obtener datos del entrenador logueado
       final persona = await _authService.obtenerUsuario();
       
       if (persona == null) {
         throw Exception('No se pudo obtener el usuario logueado');
       }
 
-      // Obtener el entrenador con sus categorías
       final entrenador = await _entrenadorService.getEntrenadorByPersonaId(persona.idPersonas);
       
       if (entrenador == null || entrenador.categorias == null || entrenador.categorias!.isEmpty) {
         throw Exception('El entrenador no tiene categorías asignadas');
       }
 
-      // Guardar las categorías del entrenador
       categoriasEntrenador = entrenador.categorias!;
-      
-      // Obtener IDs de las categorías del entrenador
       final idsCategorias = categoriasEntrenador.map((c) => c.idCategorias).toList();
-
-      // Obtener solo jugadores de las categorías del entrenador
       jugadores = await _jugadorService.fetchJugadoresByCategoriasEntrenador(idsCategorias);
       
       await fetchCategorias();
       
-      print('✅ Jugadores cargados (solo de categorías del entrenador): ${jugadores.length}');
-      print('✅ Categorías del entrenador: ${categoriasEntrenador.map((c) => c.descripcion).join(", ")}');
+      competencias = await _competenciaService.getCompetencias();
+      partidos = await _cronogramaService.getPartidos();
+      
     } catch (e) {
-      print('❌ Error en cargarDatosIniciales: $e');
       rethrow;
     } finally {
       loading = false;
@@ -87,7 +99,10 @@ class EstadisticasEntrenadorController extends ChangeNotifier {
     }
   }
 
-  // Filtrado de jugadores
+  // ============================================================
+  // FILTRADO
+  // ============================================================
+
   void filtrarJugadores(String? categoriaId) {
     if (categoriaId != null) {
       final id = int.tryParse(categoriaId);
@@ -104,7 +119,53 @@ class EstadisticasEntrenadorController extends ChangeNotifier {
     notifyListeners();
   }
 
-  // Fetch de categorías
+  Future<void> filtrarCompetenciasPorCategoria(int idCategoria) async {
+    isLoadingCompetencias = true;
+    notifyListeners();
+    
+    try {
+      final data = await _competenciaService.getCompetenciasByCategoria(idCategoria);
+      competenciasFiltradas = data;  
+      competenciaSeleccionada = null;
+      partidoSeleccionado = null;
+      partidosFiltrados = [];
+    } catch (e) {
+      competenciasFiltradas = [];
+    } finally {
+      isLoadingCompetencias = false;
+      notifyListeners();
+    }
+  }
+
+  Future<void> filtrarPartidosPorCompetencia(int idCompetencia) async {
+    isLoadingPartidos = true;
+    notifyListeners();
+    
+    try { 
+      final todosLosPartidos = await _cronogramaService.getPartidos();
+      final cronogramas = await _cronogramaService.getCronogramas();
+      final cronogramasDeCompetencia = cronogramas
+          .where((c) => c.idCompetencias == idCompetencia && c.tipoDeEventos == 'Partido')
+          .toList();    
+      partidosFiltrados = todosLosPartidos.where((partido) {
+        return cronogramasDeCompetencia.any(
+          (cronograma) => cronograma.idCronogramas == partido.idCronogramas
+        );
+      }).toList();
+      
+      partidoSeleccionado = null;
+    } catch (e) {
+      partidosFiltrados = [];
+    } finally {
+      isLoadingPartidos = false;
+      notifyListeners();
+    }
+  }
+
+  // ============================================================
+  // FETCH DE DATOS
+  // ============================================================
+
   Future<void> fetchCategorias() async {
     try {
       final res = await _apiService.get('/categorias');
@@ -114,7 +175,7 @@ class EstadisticasEntrenadorController extends ChangeNotifier {
         notifyListeners();
       }
     } catch (e) {
-      print('Error cargando categorías: $e');
+      rethrow;
     }
   }
 
@@ -133,7 +194,96 @@ class EstadisticasEntrenadorController extends ChangeNotifier {
     }
   }
 
-  // Edición
+  /// 🆕 Obtener estadísticas filtradas por competencia
+  Future<void> fetchEstadisticasPorCompetencia(int idJugador, int idCompetencia) async {
+    loading = true;
+    notifyListeners();
+    
+    try {
+      final estadisticas = await _rendimientoService.obtenerEstadisticasPorCompetencia(
+        idJugador, 
+        idCompetencia
+      );
+      
+      if (estadisticas != null) {
+        estadisticasTotales = estadisticas;
+      } else {
+        estadisticasTotales = EstadisticasTotales(
+          totales: {
+            'total_goles': 0,
+            'total_goles_cabeza': 0,
+            'total_minutos_jugados': 0,
+            'total_asistencias': 0,
+            'total_tiros_apuerta': 0,
+            'total_tarjetas_rojas': 0,
+            'total_tarjetas_amarillas': 0,
+            'total_arco_en_cero': 0,
+            'total_fueras_de_lugar': 0,
+            'total_partidos_jugados': 0,
+          },
+          promedios: {
+            'goles_por_partido': 0.0,
+            'asistencias_por_partido': 0.0,
+            'minutos_por_partido': 0.0,
+            'tiros_apuerta_por_partido': 0.0,
+          },
+        );
+      }
+    } catch (e) {
+      rethrow;
+    } finally {
+      loading = false;
+      notifyListeners();
+    }
+  }
+
+  /// 🆕 Obtener estadísticas de un partido específico
+  Future<void> fetchEstadisticasPorPartido(int idJugador, int idPartido) async {
+    loading = true;
+    notifyListeners();
+    
+    try {
+      final estadisticas = await _rendimientoService.obtenerEstadisticasPorPartido(
+        idJugador, 
+        idPartido
+      );
+      
+      if (estadisticas != null) {
+        estadisticasTotales = estadisticas;
+      } else {
+        estadisticasTotales = EstadisticasTotales(
+          totales: {
+            'total_goles': 0,
+            'total_goles_cabeza': 0,
+            'total_minutos_jugados': 0,
+            'total_asistencias': 0,
+            'total_tiros_apuerta': 0,
+            'total_tarjetas_rojas': 0,
+            'total_tarjetas_amarillas': 0,
+            'total_arco_en_cero': 0,
+            'total_fueras_de_lugar': 0,
+            'total_partidos_jugados': 0,
+          },
+          promedios: {
+            'goles_por_partido': 0.0,
+            'asistencias_por_partido': 0.0,
+            'minutos_por_partido': 0.0,
+            'tiros_apuerta_por_partido': 0.0,
+          },
+        );
+      }
+    } catch (e) {
+      rethrow;
+    } finally {
+      loading = false;
+      notifyListeners();
+    }
+  }
+
+  // ============================================================
+  // EDICIÓN
+  // ============================================================
+
   void activarEdicion() {
     if (jugadorSeleccionado == null) {
       throw Exception('No hay jugador seleccionado');
@@ -200,7 +350,15 @@ class EstadisticasEntrenadorController extends ChangeNotifier {
       );
 
       if (exito) {
-        await fetchEstadisticasTotales(jugadorSeleccionado!.idJugadores);
+        // 🆕 Recargar estadísticas según filtros activos
+        if (partidoSeleccionado != null) {
+          await fetchEstadisticasPorPartido(jugadorSeleccionado!.idJugadores, partidoSeleccionado!);
+        } else if (competenciaSeleccionada != null) {
+          await fetchEstadisticasPorCompetencia(jugadorSeleccionado!.idJugadores, competenciaSeleccionada!);
+        } else {
+          await fetchEstadisticasTotales(jugadorSeleccionado!.idJugadores);
+        }
+        
         cancelarEdicion();
         return true;
       } else {
@@ -247,7 +405,15 @@ class EstadisticasEntrenadorController extends ChangeNotifier {
         final exito = await _rendimientoService.eliminarRendimiento(registro.idRendimientos);
 
         if (exito) {
-          await fetchEstadisticasTotales(idJugador);
+          // 🆕 Recargar estadísticas según filtros activos
+          if (partidoSeleccionado != null) {
+            await fetchEstadisticasPorPartido(idJugador, partidoSeleccionado!);
+          } else if (competenciaSeleccionada != null) {
+            await fetchEstadisticasPorCompetencia(idJugador, competenciaSeleccionada!);
+          } else {
+            await fetchEstadisticasTotales(idJugador);
+          }
+          
           cancelarEdicion();
           return true;
         } else {
@@ -264,11 +430,22 @@ class EstadisticasEntrenadorController extends ChangeNotifier {
     }
   }
 
-  // Seleccionar jugador
-  void seleccionarJugador(int? idJugador) {
+  // ============================================================
+  // SELECCIONES
+  // ============================================================
+
+  Future<void> seleccionarJugador(int? idJugador) async {
     if (idJugador != null) {
       jugadorSeleccionado = jugadores.firstWhere((j) => j.idJugadores == idJugador);
-      fetchEstadisticasTotales(idJugador);
+      
+      // 🆕 Recargar estadísticas según filtros activos
+      if (partidoSeleccionado != null) {
+        await fetchEstadisticasPorPartido(idJugador, partidoSeleccionado!);
+      } else if (competenciaSeleccionada != null) {
+        await fetchEstadisticasPorCompetencia(idJugador, competenciaSeleccionada!);
+      } else {
+        await fetchEstadisticasTotales(idJugador);
+      }
     } else {
       jugadorSeleccionado = null;
       estadisticasTotales = null;
@@ -276,18 +453,80 @@ class EstadisticasEntrenadorController extends ChangeNotifier {
     notifyListeners();
   }
 
-  void seleccionarCategoria(String? categoriaId) {
+  Future<void> seleccionarCategoria(String? categoriaId) async {
     categoriaSeleccionadaId = categoriaId;
     filtrarJugadores(categoriaId);
+    
+    if (categoriaId != null) {
+      final id = int.tryParse(categoriaId);
+      if (id != null) {
+        await filtrarCompetenciasPorCategoria(id);
+      }
+    } else {
+      competenciasFiltradas = [];
+      competenciaSeleccionada = null;
+      partidosFiltrados = [];
+      partidoSeleccionado = null;
+      notifyListeners();
+    }
   }
 
-  // Actualizar campo del formulario
+  Future<void> seleccionarCompetencia(int? idCompetencia) async {
+    competenciaSeleccionada = idCompetencia;
+    
+    if (idCompetencia != null) {
+      await filtrarPartidosPorCompetencia(idCompetencia);
+      
+      // 🆕 Recargar estadísticas filtradas por competencia
+      if (jugadorSeleccionado != null) {
+        await fetchEstadisticasPorCompetencia(
+          jugadorSeleccionado!.idJugadores, 
+          idCompetencia
+        );
+      }
+    } else {
+      partidosFiltrados = [];
+      partidoSeleccionado = null;
+      
+      // 🆕 Volver a estadísticas totales
+      if (jugadorSeleccionado != null) {
+        await fetchEstadisticasTotales(jugadorSeleccionado!.idJugadores);
+      }
+      
+      notifyListeners();
+    }
+  }
+
+  Future<void> seleccionarPartido(int? idPartido) async {
+    partidoSeleccionado = idPartido;
+    
+    // 🆕 Recargar estadísticas del partido específico
+    if (idPartido != null && jugadorSeleccionado != null) {
+      await fetchEstadisticasPorPartido(
+        jugadorSeleccionado!.idJugadores, 
+        idPartido
+      );
+    } else if (competenciaSeleccionada != null && jugadorSeleccionado != null) {
+      await fetchEstadisticasPorCompetencia(
+        jugadorSeleccionado!.idJugadores, 
+        competenciaSeleccionada!
+      );
+    } else if (jugadorSeleccionado != null) {
+      await fetchEstadisticasTotales(jugadorSeleccionado!.idJugadores);
+    } else {
+      notifyListeners();
+    }
+  }
+
+  // ============================================================
+  // UTILIDADES
+  // ============================================================
+
   void actualizarCampo(String campo, String valor) {
     formData[campo] = valor;
     notifyListeners();
   }
 
-  // Helper para calcular edad
   String calcularEdad(DateTime? fechaNacimiento) { 
     if (fechaNacimiento == null) return "-";
     
@@ -302,8 +541,4 @@ class EstadisticasEntrenadorController extends ChangeNotifier {
     return edad.toString();
   }
 
-  @override
-  void dispose() {
-    super.dispose();
-  }
 }

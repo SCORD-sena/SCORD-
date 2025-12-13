@@ -3,19 +3,32 @@ import 'dart:convert';
 import '../../models/categoria_model.dart';
 import '../../models/jugador_model.dart';
 import '../../models/partido_model.dart';
+import '../../models/competencia_model.dart';
 import '../../services/rendimiento_service.dart';
 import '../../services/api_service.dart';
+import '../../services/competencia_service.dart';
+import '../../services/cronograma_service.dart';
 
 class AgregarRendimientoController extends ChangeNotifier {
   final RendimientoService _rendimientoService = RendimientoService();
   final ApiService _apiService = ApiService();
+  final CompetenciaService _competenciaService = CompetenciaService();
+  final CronogramaService _cronogramaService = CronogramaService();
 
   // State
   bool loading = false;
+  bool isLoadingCompetencias = false;
+  bool isLoadingPartidos = false;
+  
   List<Jugador> jugadores = [];
   List<Categoria> categorias = [];
+  List<Competencia> competencias = [];
+  List<Competencia> competenciasFiltradas = [];
   List<Partido> partidos = [];
+  List<Partido> partidosFiltrados = [];
+  
   String? categoriaSeleccionada;
+  int? competenciaSeleccionada;
   List<Jugador> jugadoresFiltrados = [];
   String? jugadorSeleccionado;
   String? partidoSeleccionado;
@@ -31,7 +44,10 @@ class AgregarRendimientoController extends ChangeNotifier {
   final TextEditingController tarjetasRojasController = TextEditingController(text: "0");
   final TextEditingController arcoEnCeroController = TextEditingController(text: "0");
 
-  // Inicialización
+  // ============================================================
+  // INICIALIZACIÓN
+  // ============================================================
+
   Future<void> inicializar() async {
     await cargarDatos();
   }
@@ -40,15 +56,10 @@ class AgregarRendimientoController extends ChangeNotifier {
     try {
       final jugadoresRes = await _apiService.get('/jugadores');
       final categoriasRes = await _apiService.get('/categorias');
-      final partidosRes = await _apiService.get('/partidos');
 
-      if (jugadoresRes.statusCode == 200 && 
-          categoriasRes.statusCode == 200 && 
-          partidosRes.statusCode == 200) {
-        
+      if (jugadoresRes.statusCode == 200 && categoriasRes.statusCode == 200) {
         final jugadoresData = json.decode(jugadoresRes.body);
         final categoriasData = json.decode(categoriasRes.body);
-        final partidosData = json.decode(partidosRes.body);
 
         List<dynamic> jugadoresList;
         if (jugadoresData is Map && jugadoresData.containsKey('data')) {
@@ -59,7 +70,10 @@ class AgregarRendimientoController extends ChangeNotifier {
 
         jugadores = jugadoresList.map((j) => Jugador.fromJson(j)).toList();
         categorias = (categoriasData as List).map((c) => Categoria.fromJson(c)).toList();
-        partidos = (partidosData as List).map((p) => Partido.fromJson(p)).toList();
+        
+        // Cargar competencias y partidos
+        competencias = await _competenciaService.getCompetencias();
+        partidos = await _cronogramaService.getPartidos();
         
         notifyListeners();
       }
@@ -68,7 +82,10 @@ class AgregarRendimientoController extends ChangeNotifier {
     }
   }
 
-  // Filtrado de jugadores
+  // ============================================================
+  // FILTRADO
+  // ============================================================
+
   void filtrarJugadores(String? categoriaId) {
     if (categoriaId != null) {
       final id = int.tryParse(categoriaId);
@@ -81,10 +98,87 @@ class AgregarRendimientoController extends ChangeNotifier {
     notifyListeners();
   }
 
-  // Selección
-  void seleccionarCategoria(String? value) {
+  Future<void> filtrarCompetenciasPorCategoria(int idCategoria) async {
+    isLoadingCompetencias = true;
+    notifyListeners();
+    
+    try {
+      competenciaSeleccionada = null;
+      partidoSeleccionado = null;
+      partidosFiltrados = [];
+    } catch (e) {
+      competenciasFiltradas = [];
+    } finally {
+      isLoadingCompetencias = false;
+      notifyListeners();
+    }
+  }
+
+  Future<void> filtrarPartidosPorCompetencia(int idCompetencia) async {
+    isLoadingPartidos = true;
+    notifyListeners();
+    
+    try {     
+      // Obtener todos los partidos
+      final todosLosPartidos = await _cronogramaService.getPartidos();
+      
+      // Obtener cronogramas de esta competencia
+      final cronogramas = await _cronogramaService.getCronogramas();
+      final cronogramasDeCompetencia = cronogramas
+          .where((c) => c.idCompetencias == idCompetencia && c.tipoDeEventos == 'Partido')
+          .toList();
+      
+      // Filtrar partidos que pertenecen a esos cronogramas
+      partidosFiltrados = todosLosPartidos.where((partido) {
+        return cronogramasDeCompetencia.any(
+          (cronograma) => cronograma.idCronogramas == partido.idCronogramas
+        );
+      }).toList();
+      
+      // Resetear selección de partido
+      partidoSeleccionado = null;
+    } catch (e) {
+      partidosFiltrados = [];
+    } finally {
+      isLoadingPartidos = false;
+      notifyListeners();
+    }
+  }
+
+  // ============================================================
+  // SELECCIÓN
+  // ============================================================
+
+  Future<void> seleccionarCategoria(String? value) async {
     categoriaSeleccionada = value;
     filtrarJugadores(value);
+    
+    // Filtrar competencias si hay categoría seleccionada
+    if (value != null) {
+      final id = int.tryParse(value);
+      if (id != null) {
+        await filtrarCompetenciasPorCategoria(id);
+      }
+    } else {
+      competenciasFiltradas = [];
+      competenciaSeleccionada = null;
+      partidosFiltrados = [];
+      partidoSeleccionado = null;
+      notifyListeners();
+    }
+  }
+
+  Future<void> seleccionarCompetencia(int? value) async {
+    competenciaSeleccionada = value;
+    
+    // Filtrar partidos si hay competencia seleccionada
+    if (value != null) {
+      await filtrarPartidosPorCompetencia(value);
+    } else {
+      partidosFiltrados = [];
+      partidoSeleccionado = null;
+      notifyListeners();
+    }
   }
 
   void seleccionarJugador(String? value) {
@@ -97,10 +191,17 @@ class AgregarRendimientoController extends ChangeNotifier {
     notifyListeners();
   }
 
-  // Validación
+  // ============================================================
+  // VALIDACIÓN
+  // ============================================================
+
   String? validarFormulario() {
     if (categoriaSeleccionada == null || categoriaSeleccionada!.isEmpty) {
       return 'Debes seleccionar una categoría';
+    }
+
+    if (competenciaSeleccionada == null) {
+      return 'Debes seleccionar una competencia';
     }
 
     if (jugadorSeleccionado == null || jugadorSeleccionado!.isEmpty) {
@@ -140,7 +241,10 @@ class AgregarRendimientoController extends ChangeNotifier {
     return null;
   }
 
-  // Crear estadística
+  // ============================================================
+  // CREAR ESTADÍSTICA
+  // ============================================================
+
   Future<bool> crearEstadistica() async {
     final error = validarFormulario();
     if (error != null) {
@@ -180,7 +284,10 @@ class AgregarRendimientoController extends ChangeNotifier {
     }
   }
 
-  // Limpiar recursos
+  // ============================================================
+  // DISPOSE
+  // ============================================================
+
   @override
   void dispose() {
     golesController.dispose();

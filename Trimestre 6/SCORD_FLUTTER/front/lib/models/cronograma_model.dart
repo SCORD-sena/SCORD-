@@ -6,7 +6,8 @@ class Cronograma {
   final String? canchaPartido; 
   final String? sedeEntrenamiento; 
   final String? descripcion; 
-  final int idCategorias; 
+  final int idCategorias;
+  final int? idCompetencias; // ✅ Nullable
  
   Cronograma({ 
     required this.idCronogramas, 
@@ -16,7 +17,8 @@ class Cronograma {
     this.canchaPartido, 
     this.sedeEntrenamiento, 
     this.descripcion, 
-    required this.idCategorias, 
+    required this.idCategorias,
+    this.idCompetencias, // ✅ Nullable
   }); 
  
   factory Cronograma.fromJson(Map<String, dynamic> json) { 
@@ -28,20 +30,22 @@ class Cronograma {
       canchaPartido: json['CanchaPartido'], 
       sedeEntrenamiento: json['SedeEntrenamiento'], 
       descripcion: json['Descripcion'], 
-      idCategorias: json['idCategorias'], 
+      idCategorias: json['idCategorias'],
+      idCompetencias: json['idCompetencias'], // Puede ser null
     ); 
   } 
  
   Map<String, dynamic> toJson() { 
-    return { 
+    return {
       'TipoDeEventos': tipoDeEventos, 
       'FechaDeEventos': fechaDeEventos, 
       'Ubicacion': ubicacion, 
       'CanchaPartido': canchaPartido, 
       'SedeEntrenamiento': sedeEntrenamiento ?? '', 
       'Descripcion': descripcion ?? '', 
-      'idCategorias': idCategorias, 
-    }; 
+      'idCategorias': idCategorias,
+      'idCompetencias': idCompetencias, // ✅ Envía null si es null, o el ID si existe
+    };
   } 
  
   Cronograma copyWith({ 
@@ -52,7 +56,8 @@ class Cronograma {
     String? canchaPartido, 
     String? sedeEntrenamiento, 
     String? descripcion, 
-    int? idCategorias, 
+    int? idCategorias,
+    int? idCompetencias,
   }) { 
     return Cronograma( 
       idCronogramas: idCronogramas ?? this.idCronogramas, 
@@ -62,7 +67,8 @@ class Cronograma {
       canchaPartido: canchaPartido ?? this.canchaPartido, 
       sedeEntrenamiento: sedeEntrenamiento ?? this.sedeEntrenamiento, 
       descripcion: descripcion ?? this.descripcion, 
-      idCategorias: idCategorias ?? this.idCategorias, 
+      idCategorias: idCategorias ?? this.idCategorias,
+      idCompetencias: idCompetencias ?? this.idCompetencias,
     ); 
   } 
 }

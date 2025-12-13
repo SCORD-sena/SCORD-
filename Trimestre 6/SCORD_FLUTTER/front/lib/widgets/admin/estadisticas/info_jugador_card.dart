@@ -1,26 +1,46 @@
 import 'package:flutter/material.dart';
 import '../../../models/categoria_model.dart';
 import '../../../models/jugador_model.dart';
+import '../../../models/competencia_model.dart';
+import '../../../models/partido_model.dart';
 
 class InfoJugadorCard extends StatelessWidget {
   final List<Categoria> categorias;
   final List<Jugador> jugadoresFiltrados;
+  final List<Competencia> competenciasFiltradas;
+  final List<Partido> partidosFiltrados;
+  
   final String? categoriaSeleccionadaId;
+  final int? competenciaSeleccionada;
+  final int? partidoSeleccionado;
   final Jugador? jugadorSeleccionado;
   final bool modoEdicion;
+  final bool isLoadingCompetencias;
+  final bool isLoadingPartidos;
+  
   final Function(String?) onCategoriaChanged;
   final Function(int?) onJugadorChanged;
+  final Function(int?) onCompetenciaChanged;
+  final Function(int?) onPartidoChanged;
   final String Function(DateTime?) calcularEdad;
 
   const InfoJugadorCard({
     super.key,
     required this.categorias,
     required this.jugadoresFiltrados,
+    required this.competenciasFiltradas,
+    required this.partidosFiltrados,
     required this.categoriaSeleccionadaId,
+    required this.competenciaSeleccionada,
+    required this.partidoSeleccionado,
     required this.jugadorSeleccionado,
     required this.modoEdicion,
+    required this.isLoadingCompetencias,
+    required this.isLoadingPartidos,
     required this.onCategoriaChanged,
     required this.onJugadorChanged,
+    required this.onCompetenciaChanged,
+    required this.onPartidoChanged,
     required this.calcularEdad,
   });
 
@@ -44,17 +64,44 @@ class InfoJugadorCard extends StatelessWidget {
 
     return Card(
       elevation: 3,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: Padding(
-        padding: const EdgeInsets.all(14.0),
+        padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
+            // 🎯 TÍTULO DE SECCIÓN
+            Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: const Color(0xffe63946).withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: const Icon(Icons.filter_list, color: Color(0xffe63946), size: 20),
+                ),
+                const SizedBox(width: 12),
+                const Text(
+                  'Filtros de Búsqueda',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: Color(0xffe63946),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+
+            // ✅ FILTRO 1: Categoría
             DropdownButtonFormField<String>(
-              decoration: const InputDecoration(
+              decoration: InputDecoration(
                 labelText: 'Seleccionar Categoría',
-                border: OutlineInputBorder(),
-                labelStyle: TextStyle(color: Color(0xffe63946), fontSize: 13),
-                contentPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                labelStyle: const TextStyle(color: Color(0xffe63946), fontSize: 13),
+                contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                prefixIcon: const Icon(Icons.group, color: Color(0xffe63946), size: 20),
               ),
               style: const TextStyle(fontSize: 13, color: Colors.black),
               value: categoriaSeleccionadaId,
@@ -68,12 +115,186 @@ class InfoJugadorCard extends StatelessWidget {
               onChanged: modoEdicion ? null : onCategoriaChanged,
             ),
             const SizedBox(height: 12),
+
+            // ✅ FILTRO 2: Competencia (filtrada por categoría)
+            if (isLoadingCompetencias)
+              const Center(
+                child: Padding(
+                  padding: EdgeInsets.all(12),
+                  child: CircularProgressIndicator(color: Color(0xffe63946)),
+                ),
+              )
+            else
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  DropdownButtonFormField<int>(
+                    decoration: InputDecoration(
+                      labelText: 'Seleccionar Competencia',
+                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                      labelStyle: const TextStyle(color: Color(0xffe63946), fontSize: 13),
+                      contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                      prefixIcon: const Icon(Icons.emoji_events, color: Color(0xffe63946), size: 20),
+                      hintText: categoriaSeleccionadaId == null
+                          ? 'Primero selecciona una categoría'
+                          : competenciasFiltradas.isEmpty
+                              ? 'No hay competencias'
+                              : 'Selecciona una competencia',
+                    ),
+                    style: const TextStyle(fontSize: 13, color: Colors.black),
+                    value: competenciaSeleccionada,
+                    items: [
+                      const DropdownMenuItem(value: null, child: Text("-- Selecciona competencia --")),
+                      ...competenciasFiltradas.map((comp) => DropdownMenuItem(
+                        value: comp.idCompetencias,
+                        child: Text('${comp.nombre} (${comp.ano})'),
+                      )),
+                    ],
+                    onChanged: (categoriaSeleccionadaId == null || modoEdicion || competenciasFiltradas.isEmpty)
+                        ? null
+                        : onCompetenciaChanged,
+                  ),
+                  
+                  // ⚠️ ALERTA: No hay competencias
+                  if (categoriaSeleccionadaId != null && competenciasFiltradas.isEmpty)
+                    Padding(
+                      padding: const EdgeInsets.only(top: 8),
+                      child: Container(
+                        padding: const EdgeInsets.all(10),
+                        decoration: BoxDecoration(
+                          color: Colors.orange.shade50,
+                          border: Border.all(color: Colors.orange.shade300),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Row(
+                          children: [
+                            Icon(Icons.warning_amber_rounded, color: Colors.orange.shade700, size: 18),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: Text(
+                                'No hay competencias para esta categoría',
+                                style: TextStyle(
+                                  color: Colors.orange.shade900,
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                ],
+              ),
+            const SizedBox(height: 12),
+
+            // ✅ FILTRO 3: Partido (filtrado por competencia)
+            if (isLoadingPartidos)
+              const Center(
+                child: Padding(
+                  padding: EdgeInsets.all(12),
+                  child: CircularProgressIndicator(color: Color(0xffe63946)),
+                ),
+              )
+            else
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  DropdownButtonFormField<int>(
+                    decoration: InputDecoration(
+                      labelText: 'Seleccionar Partido',
+                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                      labelStyle: const TextStyle(color: Color(0xffe63946), fontSize: 13),
+                      contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                      prefixIcon: const Icon(Icons.sports_soccer, color: Color(0xffe63946), size: 20),
+                      hintText: competenciaSeleccionada == null
+                          ? 'Primero selecciona una competencia'
+                          : partidosFiltrados.isEmpty
+                              ? 'No hay partidos'
+                              : 'Selecciona un partido',
+                    ),
+                    style: const TextStyle(fontSize: 13, color: Colors.black),
+                    value: partidoSeleccionado,
+                    items: [
+                      const DropdownMenuItem(value: null, child: Text("-- Selecciona partido --")),
+                      ...partidosFiltrados.map((partido) => DropdownMenuItem(
+                        value: partido.idPartidos,
+                        child: Text('vs ${partido.equipoRival} - ${partido.formacion}'),
+                      )),
+                    ],
+                    onChanged: (competenciaSeleccionada == null || modoEdicion || partidosFiltrados.isEmpty)
+                        ? null
+                        : onPartidoChanged,
+                  ),
+                  
+                  // ⚠️ ALERTA: No hay partidos
+                  if (competenciaSeleccionada != null && partidosFiltrados.isEmpty)
+                    Padding(
+                      padding: const EdgeInsets.only(top: 8),
+                      child: Container(
+                        padding: const EdgeInsets.all(10),
+                        decoration: BoxDecoration(
+                          color: Colors.orange.shade50,
+                          border: Border.all(color: Colors.orange.shade300),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Row(
+                          children: [
+                            Icon(Icons.warning_amber_rounded, color: Colors.orange.shade700, size: 18),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: Text(
+                                'No hay partidos para esta competencia',
+                                style: TextStyle(
+                                  color: Colors.orange.shade900,
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                ],
+              ),
+            
+            const SizedBox(height: 16),
+            const Divider(),
+            const SizedBox(height: 16),
+
+            // 🎯 TÍTULO DE SECCIÓN
+            Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: const Color(0xffe63946).withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: const Icon(Icons.person, color: Color(0xffe63946), size: 20),
+                ),
+                const SizedBox(width: 12),
+                const Text(
+                  'Seleccionar Jugador',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: Color(0xffe63946),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+
+            // ✅ FILTRO 4: Jugador (filtrado por categoría)
             DropdownButtonFormField<int>(
-              decoration: const InputDecoration(
-                labelText: 'Seleccionar Jugador',
-                border: OutlineInputBorder(),
-                labelStyle: TextStyle(color: Color(0xffe63946), fontSize: 13),
-                contentPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+              decoration: InputDecoration(
+                labelText: 'Jugador',
+                border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                labelStyle: const TextStyle(color: Color(0xffe63946), fontSize: 13),
+                contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                prefixIcon: const Icon(Icons.person_outline, color: Color(0xffe63946), size: 20),
               ),
               style: const TextStyle(fontSize: 13, color: Colors.black),
               value: jugadorSeleccionado?.idJugadores,
@@ -88,6 +309,10 @@ class InfoJugadorCard extends StatelessWidget {
               disabledHint: const Text("Selecciona un jugador"),
             ),
             const SizedBox(height: 16),
+            
+            const Divider(),
+            const SizedBox(height: 16),
+            
             const Center(child: Icon(Icons.person, size: 80, color: Colors.grey)),
             const SizedBox(height: 12),
 

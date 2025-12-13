@@ -184,4 +184,23 @@ Route::post('login', [AuthController::class, 'login']);
     Route::post('categorias', [CategoriasController::class, 'store'])->middleware('auth_administrador');
     Route::put('categorias/{id}', [CategoriasController::class, 'update'])->middleware('auth_administrador');
     Route::delete('categorias/{id}', [CategoriasController::class, 'destroy'])->middleware('auth_administrador');
-//});
+
+
+    // Cronogramas por competencia y categoría
+    Route::get('cronogramas/competencia/{idCompetencias}/categoria/{idCategorias}', 
+    [cronogramasController::class, 'getCronogramasByCompetenciaYCategoria']);
+
+// Partidos por competencia
+    Route::get('partidos/competencia/{idCompetencias}', 
+    [PartidosController::class, 'getPartidosByCompetencia']);
+    Route::get('competencias/categoria/{idCategorias}', 
+    [CompetenciasController::class, 'getCompetenciasByCategoria']);
+
+    // Estadísticas filtradas por competencia
+Route::get('/rendimientos/jugador/{idJugadores}/competencia/{idCompetencia}', 
+    [RendimientosPartidosController::class, 'getStatsByCompetencia']);
+
+// Estadísticas de un partido específico
+Route::get('/rendimientos/jugador/{idJugadores}/partido/{idPartido}', 
+    [RendimientosPartidosController::class, 'getStatsByPartido']);
+///});

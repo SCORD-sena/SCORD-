@@ -312,4 +312,155 @@ class RendimientosPartidosController extends Controller
             'message' => 'Rendimiento de partido eliminado exitosamente'
         ], 200);
     }
+
+/**
+ * Obtener estadísticas de un jugador filtradas por competencia
+ */
+public function getStatsByCompetencia($idJugadores, $idCompetencia)
+{
+    try {
+        // Obtener estadísticas sumadas de todos los partidos de esa competencia
+        $stats = RendimientosPartidos::where('RendimientosPartidos.idJugadores', $idJugadores)
+            ->join('Partidos', 'RendimientosPartidos.idPartidos', '=', 'Partidos.idPartidos')
+            ->join('Cronogramas', 'Partidos.idCronogramas', '=', 'Cronogramas.idCronogramas')
+            ->where('Cronogramas.idCompetencias', $idCompetencia)
+            ->selectRaw('
+                COALESCE(SUM(RendimientosPartidos.Goles), 0) as total_goles,
+                COALESCE(SUM(RendimientosPartidos.GolesDeCabeza), 0) as total_goles_cabeza,
+                COALESCE(SUM(RendimientosPartidos.MinutosJugados), 0) as total_minutos_jugados,
+                COALESCE(SUM(RendimientosPartidos.Asistencias), 0) as total_asistencias,
+                COALESCE(SUM(RendimientosPartidos.TirosApuerta), 0) as total_tiros_apuerta,
+                COALESCE(SUM(RendimientosPartidos.TarjetasRojas), 0) as total_tarjetas_rojas,
+                COALESCE(SUM(RendimientosPartidos.TarjetasAmarillas), 0) as total_tarjetas_amarillas,
+                COALESCE(SUM(RendimientosPartidos.ArcoEnCero), 0) as total_arco_en_cero,
+                COALESCE(SUM(RendimientosPartidos.FuerasDeLugar), 0) as total_fueras_de_lugar,
+                COUNT(*) as total_partidos_jugados
+            ')
+            ->first();
+
+        // Calcular promedios
+        $partidosJugados = $stats->total_partidos_jugados;
+        
+        if ($partidosJugados > 0) {
+            $promedios = [
+                'goles_por_partido' => round($stats->total_goles / $partidosJugados, 2),
+                'asistencias_por_partido' => round($stats->total_asistencias / $partidosJugados, 2),
+                'minutos_por_partido' => round($stats->total_minutos_jugados / $partidosJugados, 2),
+                'tiros_apuerta_por_partido' => round($stats->total_tiros_apuerta / $partidosJugados, 2)
+            ];
+        } else {
+            $promedios = [
+                'goles_por_partido' => 0,
+                'asistencias_por_partido' => 0,
+                'minutos_por_partido' => 0,
+                'tiros_apuerta_por_partido' => 0
+            ];
+        }
+
+        return response()->json([
+            'success' => true,
+            'data' => [
+                'totales' => $stats,
+                'promedios' => $promedios,
+                'partidos_jugados' => $partidosJugados
+            ]
+        ], 200);
+
+    } catch (\Exception $e) {
+        \Log::error('Error en getStatsByCompetencia - Jugador: ' . $idJugadores . ' - Competencia: ' . $idCompetencia . ' - Error: ' . $e->getMessage());
+        
+        return response()->json([
+            'success' => false,
+            'message' => 'Error al obtener estadísticas por competencia',
+            'error' => $e->getMessage()
+        ], 500);
+    }
+}
+
+/**
+ * Obtener estadísticas de un jugador en un partido específico
+ * 
+ * @param int $idJugadores ID del jugador
+ * @param int $idPartido ID del partido
+ * @return \Illuminate\Http\JsonResponse
+ */
+public function getStatsByPartido($idJugadores, $idPartido)
+{
+    try {
+        // Obtener el rendimiento de ese partido específico
+        $rendimiento = RendimientosPartidos::where('idJugadores', $idJugadores)
+            ->where('idPartidos', $idPartido)
+            ->first();
+
+        if (!$rendimiento) {
+            // Si no existe rendimiento para ese partido, devolver estadísticas en 0
+            return response()->json([
+                'success' => true,
+                'data' => [
+                    'totales' => [
+                        'total_goles' => 0,
+                        'total_goles_cabeza' => 0,
+                        'total_minutos_jugados' => 0,
+                        'total_asistencias' => 0,
+                        'total_tiros_apuerta' => 0,
+                        'total_tarjetas_rojas' => 0,
+                        'total_tarjetas_amarillas' => 0,
+                        'total_arco_en_cero' => 0,
+                        'total_fueras_de_lugar' => 0,
+                        'total_partidos_jugados' => 0
+                    ],
+                    'promedios' => [
+                        'goles_por_partido' => 0,
+                        'asistencias_por_partido' => 0,
+                        'minutos_por_partido' => 0,
+                        'tiros_apuerta_por_partido' => 0
+                    ],
+                    'partidos_jugados' => 0,
+                    'mensaje' => 'El jugador no tiene estadísticas registradas en este partido'
+                ]
+            ], 200);
+        }
+
+        // Formatear datos como estadísticas totales para mantener consistencia
+        $totales = [
+            'total_goles' => $rendimiento->Goles ?? 0,
+            'total_goles_cabeza' => $rendimiento->GolesDeCabeza ?? 0,
+            'total_minutos_jugados' => $rendimiento->MinutosJugados ?? 0,
+            'total_asistencias' => $rendimiento->Asistencias ?? 0,
+            'total_tiros_apuerta' => $rendimiento->TirosApuerta ?? 0,
+            'total_tarjetas_rojas' => $rendimiento->TarjetasRojas ?? 0,
+            'total_tarjetas_amarillas' => $rendimiento->TarjetasAmarillas ?? 0,
+            'total_arco_en_cero' => $rendimiento->ArcoEnCero ?? 0,
+            'total_fueras_de_lugar' => $rendimiento->FuerasDeLugar ?? 0,
+            'total_partidos_jugados' => 1
+        ];
+
+        // Para un solo partido, los promedios son iguales a los valores
+        $promedios = [
+            'goles_por_partido' => $totales['total_goles'],
+            'asistencias_por_partido' => $totales['total_asistencias'],
+            'minutos_por_partido' => $totales['total_minutos_jugados'],
+            'tiros_apuerta_por_partido' => $totales['total_tiros_apuerta']
+        ];
+
+        return response()->json([
+            'success' => true,
+            'data' => [
+                'totales' => (object) $totales,
+                'promedios' => $promedios,
+                'partidos_jugados' => 1,
+                'rendimiento_id' => $rendimiento->IdRendimientos
+            ]
+        ], 200);
+
+    } catch (\Exception $e) {
+        \Log::error('Error en getStatsByPartido - Jugador: ' . $idJugadores . ' - Partido: ' . $idPartido . ' - Error: ' . $e->getMessage());
+        
+        return response()->json([
+            'success' => false,
+            'message' => 'Error al obtener estadísticas del partido',
+            'error' => $e->getMessage()
+        ], 500);
+    }
+}
 }

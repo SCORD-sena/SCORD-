@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import '/../controllers/jugador/inicio_jugador_controller.dart';
 import '/../widgets/jugador/inicio_jugador/jugador_info_personal_card.dart';
 import '/../widgets/jugador/inicio_jugador/jugador_info_deportiva_card.dart';
-import '/../widgets/jugador/inicio_jugador/jugador_estadisticas_card.dart';
 import '/../widgets/jugador/inicio_jugador/jugador_drawer_menu.dart';
 
 class InicioJugadorScreen extends StatefulWidget {
@@ -123,57 +122,13 @@ class _InicioJugadorScreenState extends State<InicioJugadorScreen> {
             ),
             const SizedBox(height: 24),
 
-            // Layout responsivo
-            LayoutBuilder(
-              builder: (context, constraints) {
-                if (constraints.maxWidth > 800) {
-                  // Desktop/Tablet: dos columnas
-                  return Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      // Columna izquierda
-                      Expanded(
-                        child: Column(
-                          children: [
-                            JugadorInfoPersonalCard(
-                              persona: _controller.jugadorPersona,
-                            ),
-                            const SizedBox(height: 16),
-                            JugadorInfoDeportivaCard(
-                              jugador: _controller.jugadorData,
-                            ),
-                          ],
-                        ),
-                      ),
-                      const SizedBox(width: 16),
-
-                      // Columna derecha
-                      Expanded(
-                        child: JugadorEstadisticasCard(
-                          estadisticas: _controller.estadisticas,
-                        ),
-                      ),
-                    ],
-                  );
-                } else {
-                  // Móvil: una columna
-                  return Column(
-                    children: [
-                      JugadorInfoPersonalCard(
-                        persona: _controller.jugadorPersona,
-                      ),
-                      const SizedBox(height: 16),
-                      JugadorInfoDeportivaCard(
-                        jugador: _controller.jugadorData,
-                      ),
-                      const SizedBox(height: 16),
-                      JugadorEstadisticasCard(
-                        estadisticas: _controller.estadisticas,
-                      ),
-                    ],
-                  );
-                }
-              },
+            // Cards de información
+            JugadorInfoPersonalCard(
+              persona: _controller.jugadorPersona,
+            ),
+            const SizedBox(height: 16),
+            JugadorInfoDeportivaCard(
+              jugador: _controller.jugadorData,
             ),
           ],
         ),

@@ -136,7 +136,6 @@ class InfoPersonalEntrenadorCard extends StatelessWidget {
 
   Widget _buildTipoDocumentoDropdown() {
     return DropdownButtonFormField<int>(
-      value: selectedTipoDocumentoId,
       hint: const Text('Tipo Doc.', style: TextStyle(fontSize: 13)),
       decoration: const InputDecoration(
         labelText: 'Tipo de Documento',
@@ -157,7 +156,6 @@ class InfoPersonalEntrenadorCard extends StatelessWidget {
 
   Widget _buildGeneroDropdown() {
     return DropdownButtonFormField<String>(
-      value: selectedGenero,
       hint: const Text('Género', style: TextStyle(fontSize: 13)),
       decoration: const InputDecoration(
         labelText: 'Género',

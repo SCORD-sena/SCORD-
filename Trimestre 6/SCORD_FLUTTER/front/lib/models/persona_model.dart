@@ -36,7 +36,6 @@ class Persona {
   });
 
   factory Persona.fromJson(Map<String, dynamic> json) {
-  print('🔍 Parseando JSON: $json');
   
   // Obtener idRoles de forma segura
   int? idRoles;
@@ -45,8 +44,6 @@ class Persona {
   } else if (json['Rol'] != null && json['Rol']['idRoles'] != null) {
     idRoles = int.tryParse(json['Rol']['idRoles'].toString());
   }
-  
-  print('🔍 idRoles obtenido: $idRoles');
 
   // ✅ OBTENER idTiposDeDocumentos correctamente
   int idTiposDeDocumentos;

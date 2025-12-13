@@ -19,6 +19,7 @@ import 'views/entrenador/agregar_rendimiento_entrenador_screen.dart';
 import 'views/entrenador/cronograma_entrenador_screen.dart';
 
 import 'views/jugador/inicio_jugador_screen.dart';
+import 'views/jugador/estadisticas_jugador_screen.dart';
 
 void main() {
   runApp(const MyApp());
@@ -58,6 +59,8 @@ class MyApp extends StatelessWidget {
 
         
         '/InicioJugador': (context) => const InicioJugadorScreen(),
+        '/EstadisticasJugador': (context) => const EstadisticasIndividualesScreen(),
+        
       },
     );
   }

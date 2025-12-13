@@ -41,7 +41,6 @@ class InicioEntrenadorController {
 
       // Verificar rol de entrenador (idRoles = 2)
       final rol = await _authService.obtenerRol();
-      print('🔍 Rol obtenido: $rol');
 
       if (rol != 2) {
         error = 'No tiene permisos de entrenador';
@@ -62,8 +61,6 @@ class InicioEntrenadorController {
         return;
       }
 
-      print('✅ Datos del entrenador cargados: ${entrenadorData!.nombreCompleto}');
-
       // Obtener categoría del entrenador desde el backend
       await _obtenerCategoriaEntrenador();
 
@@ -71,7 +68,6 @@ class InicioEntrenadorController {
       error = null;
       onLoadingChanged();
     } catch (e) {
-      print('❌ Error inicializando datos del entrenador: $e');
       error = 'Error al cargar los datos: $e';
       loading = false;
       onLoadingChanged();
@@ -88,9 +84,8 @@ class InicioEntrenadorController {
       );
 
       categoriaEntrenador = categoria;
-      print('✅ Categoría del entrenador: $categoriaEntrenador');
+
     } catch (e) {
-      print('⚠️ Error obteniendo categoría del entrenador: $e');
       categoriaEntrenador = 'No asignada';
     }
   }

@@ -1,15 +1,15 @@
 import 'dart:convert';
 import '../models/rendimiento_model.dart';
-import 'api_service.dart'; // ✅ AGREGADO
+import 'api_service.dart'; 
 
 class RendimientoService {
-  final ApiService _apiService = ApiService(); // ✅ AGREGADO
+  final ApiService _apiService = ApiService(); 
   
   /// Obtiene las estadísticas totales de un jugador
   Future<EstadisticasTotales?> obtenerEstadisticasTotales(int idJugador) async {
     try {
       final response = await _apiService.get(
-        '/rendimientospartidos/jugador/$idJugador/totales' // ✅ CAMBIADO
+        '/rendimientospartidos/jugador/$idJugador/totales' 
       );
 
       if (response.statusCode == 200) {
@@ -20,10 +20,55 @@ class RendimientoService {
       }
       return null;
     } catch (e) {
-      print('Error al obtener estadísticas totales: $e');
       return null;
     }
   }
+
+  /// 🆕 Obtener estadísticas filtradas por competencia
+Future<EstadisticasTotales?> obtenerEstadisticasPorCompetencia(
+  int idJugador, 
+  int idCompetencia
+) async {
+  try { 
+    final response = await _apiService.get(
+      '/rendimientos/jugador/$idJugador/competencia/$idCompetencia'
+    );
+    
+    if (response.statusCode == 200) {
+      final data = json.decode(response.body);
+      
+      if (data['success'] == true && data['data'] != null) {
+        return EstadisticasTotales.fromJson(data['data']);
+      }
+    }
+    return null;
+  } catch (e) {
+    return null;
+  }
+}
+
+/// 🆕 Obtener estadísticas de un partido específico
+Future<EstadisticasTotales?> obtenerEstadisticasPorPartido(
+  int idJugador, 
+  int idPartido
+) async {
+  try {
+    final response = await _apiService.get(
+      '/rendimientos/jugador/$idJugador/partido/$idPartido'
+    );
+    
+    if (response.statusCode == 200) {
+      final data = json.decode(response.body);
+      
+      if (data['success'] == true && data['data'] != null) {
+        return EstadisticasTotales.fromJson(data['data']);
+      }
+    }
+    return null;
+  } catch (e) {
+    return null;
+  }
+}
 
   /// Obtiene el último registro de rendimiento de un jugador
   Future<UltimoRegistro?> obtenerUltimoRegistro(int idJugador) async {
@@ -40,7 +85,6 @@ class RendimientoService {
       }
       return null;
     } catch (e) {
-      print('Error al obtener último registro: $e');
       return null;
     }
   }
@@ -55,7 +99,6 @@ class RendimientoService {
 
       return response.statusCode == 200 || response.statusCode == 201;
     } catch (e) {
-      print('Error al crear rendimiento: $e');
       return false;
     }
   }
@@ -70,7 +113,6 @@ class RendimientoService {
 
       return response.statusCode == 200;
     } catch (e) {
-      print('Error al actualizar rendimiento: $e');
       return false;
     }
   }
@@ -84,7 +126,6 @@ class RendimientoService {
 
       return response.statusCode == 200;
     } catch (e) {
-      print('Error al eliminar rendimiento: $e');
       return false;
     }
   }

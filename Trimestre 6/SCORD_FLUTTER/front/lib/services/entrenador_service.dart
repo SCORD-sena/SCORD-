@@ -58,19 +58,16 @@ Future<Entrenador?> getEntrenadorByPersonaId(int idPersona) async {
       final entrenadorData = jsonResponse['data'];
       
       if (entrenadorData == null) {
-        print('⚠️ No hay data en la respuesta');
         return null;
       }
       
       return Entrenador.fromJson(entrenadorData);
     } else if (response.statusCode == 404) {
-      print('⚠️ No se encontró entrenador para la persona $idPersona');
       return null;
     } else {
       throw Exception('Error al obtener entrenador: ${response.statusCode}');
     }
   } catch (e) {
-    print('❌ Error obteniendo entrenador: $e');
     return null;
   }
 }
@@ -87,7 +84,6 @@ Future<Entrenador?> getEntrenadorByPersonaId(int idPersona) async {
     
     return 'No asignada';
   } catch (e) {
-    print('❌ Error obteniendo categoría: $e');
     return 'No disponible';
   }
 }

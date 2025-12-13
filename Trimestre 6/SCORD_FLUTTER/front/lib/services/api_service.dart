@@ -9,18 +9,11 @@ class ApiService {
   // GET con autenticación
   Future<http.Response> get(String endpoint) async {
     final headers = await _authService.obtenerHeaders();
-    final url = Uri.parse('$baseUrl$endpoint');
-    
-    print('🌐 GET: $url');
-    print('📋 Headers: $headers');
-    
+    final url = Uri.parse('$baseUrl$endpoint');   
     final response = await http.get(url, headers: headers);
-    
-    print('✅ Status: ${response.statusCode}');
+
     if (response.statusCode != 200) {
-      print('❌ Error body: ${response.body}');
     }
-    
     return response;
   }
 
@@ -28,20 +21,12 @@ class ApiService {
   Future<http.Response> post(String endpoint, Map<String, dynamic> data) async {
     final headers = await _authService.obtenerHeaders();
     final url = Uri.parse('$baseUrl$endpoint');
-    
-    print('🌐 POST: $url');
-    print('📋 Headers: $headers');
-    print('📦 Body: ${jsonEncode(data)}');
-    
     final response = await http.post(
       url,
       headers: headers,
       body: jsonEncode(data),
     );
-    
-    print('✅ Status: ${response.statusCode}');
     if (response.statusCode >= 400) {
-      print('❌ Error body: ${response.body}');
     }
     
     return response;

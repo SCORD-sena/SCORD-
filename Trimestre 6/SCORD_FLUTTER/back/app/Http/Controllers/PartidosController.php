@@ -117,4 +117,22 @@ class PartidosController extends Controller
             'message' => 'información del partido eliminada exitosamente'
         ], 200);
     }
+    /**
+ * Obtener partidos por competencia (a través de cronogramas)
+ */
+public function getPartidosByCompetencia($idCompetencias)
+{
+    $partidos = Partidos::whereHas('cronograma', function($query) use ($idCompetencias) {
+        $query->where('idCompetencias', $idCompetencias);
+    })->with('cronograma')->get();
+
+    if ($partidos->isEmpty()) {
+        return response()->json([
+            'message' => 'No se encontraron partidos para esta competencia',
+            'status' => 404
+        ], 404);
+    }
+
+    return response()->json($partidos, 200);
+}
 }

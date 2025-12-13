@@ -2,10 +2,13 @@ import 'package:flutter/material.dart';
 import '../../models/cronograma_model.dart';
 import '../../models/partido_model.dart';
 import '../../models/categoria_model.dart';
+import '../../models/competencia_model.dart';
 import '../../services/cronograma_service.dart';
+import '../../services/competencia_service.dart';
 
 class CronogramaAdminController {
   final CronogramaService _service = CronogramaService();
+  final CompetenciaService _competenciaService = CompetenciaService();
 
   // Datos
   List<Cronograma> cronogramas = [];
@@ -13,10 +16,13 @@ class CronogramaAdminController {
   List<Cronograma> partidos = [];
   List<Partido> partidosAPI = [];
   List<Categoria> categorias = [];
+  List<Competencia> competencias = [];
+  List<Competencia> competenciasFiltradas = [];
 
   // Estados de carga
   bool isLoading = true;
   bool isLoadingCategorias = true;
+  bool isLoadingCompetencias = true;
 
   // Búsqueda y paginación - Entrenamientos
   String searchTermEntrenamiento = '';
@@ -45,6 +51,7 @@ class CronogramaAdminController {
   final TextEditingController equipoRivalController = TextEditingController();
   final TextEditingController formacionController = TextEditingController();
   int? categoriaPartidoSeleccionada;
+  int? competenciaPartidoSeleccionada;
 
   // ============================================================
   // CARGAR DATOS
@@ -57,9 +64,8 @@ class CronogramaAdminController {
         loadCronogramas(),
         loadPartidos(),
         loadCategorias(),
+        loadCompetencias(),
       ]);
-    } catch (e) {
-      rethrow;
     } finally {
       isLoading = false;
     }
@@ -80,10 +86,34 @@ class CronogramaAdminController {
   Future<void> loadCategorias() async {
     isLoadingCategorias = true;
     try {
-      final data = await _service.getCategorias();
-      categorias = data;
+      categorias = await _service.getCategorias();
     } finally {
       isLoadingCategorias = false;
+    }
+  }
+
+  Future<void> loadCompetencias() async {
+    isLoadingCompetencias = true;
+    try {
+      competencias = await _competenciaService.getCompetencias();
+    } finally {
+      isLoadingCompetencias = false;
+    }
+  }
+
+  // ============================================================
+  // COMPETENCIAS FILTRADAS
+  // ============================================================
+
+  Future<void> loadCompetenciasByCategoria(int idCategorias) async {
+    isLoadingCompetencias = true;
+    try {
+      final data = await _competenciaService.getCompetenciasByCategoria(idCategorias);
+      competenciasFiltradas = data;
+    } catch (e) {
+      competenciasFiltradas = [];
+    } finally {
+      isLoadingCompetencias = false;
     }
   }
 
@@ -104,6 +134,7 @@ class CronogramaAdminController {
       sedeEntrenamiento: sedeEntrenamientoSeleccionada,
       descripcion: descripcionEntrenamientoController.text,
       idCategorias: categoriaEntrenamientoSeleccionada!,
+      idCompetencias: null,
     );
 
     await _service.createCronograma(cronograma);
@@ -114,6 +145,10 @@ class CronogramaAdminController {
   Future<void> actualizarEntrenamiento() async {
     if (editingId == null) return;
 
+    if (categoriaEntrenamientoSeleccionada == null) {
+      throw Exception('Por favor seleccione una categoría');
+    }
+
     final cronograma = Cronograma(
       idCronogramas: editingId!,
       tipoDeEventos: 'Entrenamiento',
@@ -122,26 +157,12 @@ class CronogramaAdminController {
       sedeEntrenamiento: sedeEntrenamientoSeleccionada,
       descripcion: descripcionEntrenamientoController.text,
       idCategorias: categoriaEntrenamientoSeleccionada!,
+      idCompetencias: null,
     );
 
     await _service.updateCronograma(editingId!, cronograma);
     await loadCronogramas();
     cancelarEdicion();
-  }
-
-  Future<void> eliminarEntrenamiento(int id) async {
-    await _service.deleteCronograma(id);
-    await loadCronogramas();
-  }
-
-  void editarEntrenamiento(Cronograma cronograma) {
-    editingId = cronograma.idCronogramas;
-    editingType = 'Entrenamiento';
-    fechaEntrenamientoController.text = cronograma.fechaDeEventos;
-    ubicacionEntrenamientoController.text = cronograma.ubicacion;
-    descripcionEntrenamientoController.text = cronograma.descripcion ?? '';
-    sedeEntrenamientoSeleccionada = cronograma.sedeEntrenamiento;
-    categoriaEntrenamientoSeleccionada = cronograma.idCategorias;
   }
 
   // ============================================================
@@ -152,8 +173,10 @@ class CronogramaAdminController {
     if (categoriaPartidoSeleccionada == null) {
       throw Exception('Por favor seleccione una categoría');
     }
+    if (competenciaPartidoSeleccionada == null) {
+      throw Exception('Por favor seleccione una competencia');
+    }
 
-    // Crear cronograma
     final cronograma = Cronograma(
       idCronogramas: 0,
       tipoDeEventos: 'Partido',
@@ -163,15 +186,14 @@ class CronogramaAdminController {
       sedeEntrenamiento: '',
       descripcion: 'Partido vs ${equipoRivalController.text}',
       idCategorias: categoriaPartidoSeleccionada!,
+      idCompetencias: competenciaPartidoSeleccionada!,
     );
 
     await _service.createCronograma(cronograma);
 
-    // Recargar para obtener el ID del cronograma creado
     await loadCronogramas();
     final nuevoCronograma = cronogramas.lastWhere((c) => c.tipoDeEventos == 'Partido');
 
-    // Crear partido
     final partido = Partido(
       idPartidos: 0,
       formacion: formacionController.text,
@@ -190,7 +212,6 @@ class CronogramaAdminController {
 
     final partidoActual = partidosAPI.firstWhere((p) => p.idPartidos == editingId);
 
-    // Actualizar cronograma
     final cronograma = Cronograma(
       idCronogramas: partidoActual.idCronogramas,
       tipoDeEventos: 'Partido',
@@ -200,11 +221,11 @@ class CronogramaAdminController {
       sedeEntrenamiento: '',
       descripcion: 'Partido vs ${equipoRivalController.text}',
       idCategorias: categoriaPartidoSeleccionada!,
+      idCompetencias: competenciaPartidoSeleccionada!,
     );
 
     await _service.updateCronograma(partidoActual.idCronogramas, cronograma);
 
-    // Actualizar partido
     final partido = Partido(
       idPartidos: editingId!,
       formacion: formacionController.text,
@@ -224,7 +245,8 @@ class CronogramaAdminController {
     await loadCronogramas();
   }
 
-  void editarPartido(Partido partido) {
+  // ✅ CORREGIDO: Future<void> async
+  Future<void> editarPartido(Partido partido) async {
     final cronograma = cronogramas.firstWhere((c) => c.idCronogramas == partido.idCronogramas);
 
     editingId = partido.idPartidos;
@@ -235,10 +257,35 @@ class CronogramaAdminController {
     equipoRivalController.text = partido.equipoRival;
     formacionController.text = partido.formacion;
     categoriaPartidoSeleccionada = cronograma.idCategorias;
+
+    // Cargar competencias primero
+    await loadCompetenciasByCategoria(cronograma.idCategorias);
+    
+    // Asignar la competencia después de cargar
+    competenciaPartidoSeleccionada = cronograma.idCompetencias;
+  }
+
+  Future<void> eliminarEntrenamiento(int id) async {
+    await _service.deleteCronograma(id);
+    await loadCronogramas();
+  }
+
+  // ✅ CORREGIDO: Future<void> async
+  Future<void> editarEntrenamiento(Cronograma cronograma) async {
+    editingId = cronograma.idCronogramas;
+    editingType = 'Entrenamiento';
+    fechaEntrenamientoController.text = cronograma.fechaDeEventos;
+    ubicacionEntrenamientoController.text = cronograma.ubicacion;
+    descripcionEntrenamientoController.text = cronograma.descripcion ?? '';
+    sedeEntrenamientoSeleccionada = cronograma.sedeEntrenamiento;
+    categoriaEntrenamientoSeleccionada = cronograma.idCategorias;
+    
+    // Cargar competencias
+    await loadCompetenciasByCategoria(cronograma.idCategorias);
   }
 
   // ============================================================
-  // FUNCIONES DE UTILIDAD
+  // UTILIDADES
   // ============================================================
 
   void limpiarFormularioEntrenamiento() {
@@ -256,6 +303,8 @@ class CronogramaAdminController {
     equipoRivalController.clear();
     formacionController.clear();
     categoriaPartidoSeleccionada = null;
+    competenciaPartidoSeleccionada = null;
+    competenciasFiltradas = [];
   }
 
   void cancelarEdicion() {
@@ -266,7 +315,7 @@ class CronogramaAdminController {
   }
 
   // ============================================================
-  // FILTRADO Y PAGINACIÓN
+  // FILTROS & PAGINACIÓN
   // ============================================================
 
   List<Cronograma> get filteredEntrenamientos {
@@ -299,6 +348,7 @@ class CronogramaAdminController {
           fechaDeEventos: '',
           ubicacion: '',
           idCategorias: 0,
+          idCompetencias: 0,
         ),
       );
 
@@ -307,12 +357,24 @@ class CronogramaAdminController {
         orElse: () => Categoria(idCategorias: 0, descripcion: ''),
       );
 
+      final competencia = competencias.firstWhere(
+        (c) => c.idCompetencias == cronograma.idCompetencias,
+        orElse: () => Competencia(
+          idCompetencias: 0,
+          nombre: '',
+          tipoCompetencia: '',
+          ano: 0,
+          idEquipos: 0,
+        ),
+      );
+
       final searchLower = searchTermPartido.toLowerCase();
       return p.formacion.toLowerCase().contains(searchLower) ||
           p.equipoRival.toLowerCase().contains(searchLower) ||
           cronograma.fechaDeEventos.toLowerCase().contains(searchLower) ||
           cronograma.ubicacion.toLowerCase().contains(searchLower) ||
-          categoria.descripcion.toLowerCase().contains(searchLower);
+          categoria.descripcion.toLowerCase().contains(searchLower) ||
+          competencia.nombre.toLowerCase().contains(searchLower);
     }).toList();
   }
 
@@ -334,8 +396,10 @@ class CronogramaAdminController {
     );
   }
 
-  int get totalPagesEntrenamiento => (filteredEntrenamientos.length / itemsPerPage).ceil();
-  int get totalPagesPartido => (filteredPartidos.length / itemsPerPage).ceil();
+  int get totalPagesEntrenamiento =>
+      (filteredEntrenamientos.length / itemsPerPage).ceil();
+  int get totalPagesPartido =>
+      (filteredPartidos.length / itemsPerPage).ceil();
 
   // ============================================================
   // DISPOSE

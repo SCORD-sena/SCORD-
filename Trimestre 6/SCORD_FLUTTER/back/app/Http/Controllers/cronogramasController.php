@@ -44,7 +44,8 @@ class cronogramasController extends Controller
             'Ubicacion' => 'required|string|max:50',
             'SedeEntrenamiento' => 'nullable|string|max:50',
             'Descripcion' => 'required|string|max:100',
-            'idCategorias' => 'required|integer|exists:categorias,idCategorias' // ✅ CAMBIADO
+            'idCategorias' => 'required|integer|exists:categorias,idCategorias',
+            'idCompetencias' => 'nullable|integer|exists:competencias,idCompetencias' // ✅ CORREGIDO: nullable sin required
         ]);
 
         if ($validator->fails()) {
@@ -61,7 +62,8 @@ class cronogramasController extends Controller
             'Ubicacion' => $request->Ubicacion,
             'SedeEntrenamiento' => $request->SedeEntrenamiento,
             'Descripcion' => $request->Descripcion,
-            'idCategorias' => $request->idCategorias
+            'idCategorias' => $request->idCategorias,
+            'idCompetencias' => $request->idCompetencias // Puede ser null para entrenamientos
         ]);
 
         $cronogramas->refresh();
@@ -90,7 +92,8 @@ class cronogramasController extends Controller
             'Ubicacion' => 'sometimes|string|max:50',
             'SedeEntrenamiento' => 'nullable|string|max:50',
             'Descripcion' => 'sometimes|string|max:100',
-            'idCategorias' => 'sometimes|integer|exists:categorias,idCategorias' // ✅ CAMBIADO
+            'idCategorias' => 'sometimes|integer|exists:categorias,idCategorias',
+            'idCompetencias' => 'nullable|integer|exists:competencias,idCompetencias' // ✅ CORREGIDO: nullable sin required
         ]);
 
         if ($validator->fails()) {
@@ -107,7 +110,8 @@ class cronogramasController extends Controller
             'Ubicacion',
             'SedeEntrenamiento',
             'Descripcion',
-            'idCategorias'
+            'idCategorias',
+            'idCompetencias'
         ]));
 
         return response()->json([
@@ -133,5 +137,24 @@ class cronogramasController extends Controller
             'message' => 'cronograma eliminado exitosamente',
             'status' => 200
         ], 200);
+    }
+
+    /**
+     * Obtener cronogramas filtrados por competencia y categoría
+     */
+    public function getCronogramasByCompetenciaYCategoria($idCompetencias, $idCategorias)
+    {
+        $cronogramas = cronogramas::where('idCompetencias', $idCompetencias)
+                                  ->where('idCategorias', $idCategorias)
+                                  ->get();
+
+        if ($cronogramas->isEmpty()) {
+            return response()->json([
+                'message' => 'No se encontraron cronogramas para esta competencia y categoría',
+                'status' => 404
+            ], 404);
+        }
+
+        return response()->json($cronogramas, 200);
     }
 }

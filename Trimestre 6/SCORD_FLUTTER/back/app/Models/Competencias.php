@@ -24,4 +24,9 @@ class Competencias extends Model
   {
     return $this->BelongsTo(Equipos::class,'idEquipos');
   }
+ 
+  public function cronogramas()
+  {
+    return $this->hasMany(cronogramas::class,'idCompetencias','idCompetencias');
+  }
 }

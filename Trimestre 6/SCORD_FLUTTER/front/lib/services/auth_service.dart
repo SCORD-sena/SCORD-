@@ -38,18 +38,14 @@ class AuthService {
           
           final payloadString = utf8.decode(base64Url.decode(normalized));
           final payloadMap = jsonDecode(payloadString) as Map<String, dynamic>;
-          
-          print('🔍 Token payload: $payloadMap');
           idPersonas = int.tryParse(payloadMap['sub']?.toString() ?? '');
-          print('🔍 idPersonas extraído del token: $idPersonas');
         }
       } catch (e) {
-        print('⚠️ Error decodificando token: $e');
+        rethrow;
       }
 
       // Guardar token
       await _guardarToken(token);
-      print('✅ Token guardado');
 
       final userOriginal = data["user"] as Map<String, dynamic>;
       final userLimpio = <String, dynamic>{};
@@ -58,7 +54,6 @@ class AuthService {
       if (idPersonas != null) {
         userLimpio['idPersonas'] = idPersonas;
       } else {
-        print('⚠️ No se pudo extraer idPersonas del token');
         userLimpio['idPersonas'] = 0; // Valor por defecto
       }
       
@@ -93,18 +88,12 @@ class AuthService {
         userLimpio['idRoles'] = rolId;
       }
       
-      print('🔍 Usuario limpio a guardar: $userLimpio');
-      
       final userJsonString = jsonEncode(userLimpio);
       await _guardarUsuario(userJsonString);
-      print('✅ Usuario guardado');
       
       await _guardarRol(rolId);
-      print('✅ Rol guardado: $rolId');
       
-    } catch (e, stackTrace) {
-      print('❌ ERROR al guardar datos de sesión: $e');
-      print('Stack trace: $stackTrace');
+    } catch (e) {
       throw Exception('Error al guardar los datos de sesión');
     }
   }
@@ -142,23 +131,16 @@ class AuthService {
     final prefs = await SharedPreferences.getInstance();
     final userJson = prefs.getString('user');
     
-    print('🔍 USER JSON RECUPERADO: $userJson');
-    
     if (userJson == null || userJson.isEmpty || userJson == 'null') {
-      print('❌ No hay datos de usuario guardados o son inválidos');
       return null;
     }
     
     final userMap = jsonDecode(userJson) as Map<String, dynamic>;
-    print('🔍 USER MAP decodificado: $userMap');
     
     final persona = Persona.fromJson(userMap);
-    print('✅ Persona creada: ${persona.nombreCompleto}, Rol: ${persona.idRoles}');
     
     return persona;
-  } catch (e, stackTrace) {
-    print('❌ ERROR en obtenerUsuario: $e');
-    print('Stack trace: $stackTrace');
+  } catch (e) {  
     return null;
   }
 }
@@ -166,7 +148,6 @@ class AuthService {
 Future<void> limpiarTodo() async {
   final prefs = await SharedPreferences.getInstance();
   await prefs.clear();
-  print('🧹 Todos los datos limpiados');
 }
 
   // Obtener rol
@@ -201,7 +182,6 @@ Future<void> limpiarTodo() async {
       }
       return null;
     } catch (e) {
-      print('Error obteniendo datos actualizados: $e');
       return null;
     }
   }
@@ -217,12 +197,10 @@ Future<void> limpiarTodo() async {
   // Obtener headers con token para otras peticiones
   Future<Map<String, String>> obtenerHeaders() async {
   final token = await obtenerToken();
-  print('🔍 Token para request: $token');
   final headers = {
     'Content-Type': 'application/json',
     'Authorization': 'Bearer $token',
   };
-  print('🔍 Headers: $headers');
   return headers;
 }
 }

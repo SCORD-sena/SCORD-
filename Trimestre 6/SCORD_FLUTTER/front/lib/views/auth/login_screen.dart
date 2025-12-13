@@ -36,8 +36,6 @@ Future<void> iniciarSesion() async {
       contrasena.text.trim(),
     );
 
-    print('🔍 RESPUESTA COMPLETA: $data');
-
     if (data["success"] == true) {
       final user = data["user"];
       
@@ -53,23 +51,13 @@ Future<void> iniciarSesion() async {
       } else if (user["Rol"] != null && user["Rol"]["idRoles"] != null) {
         rol = int.tryParse(user["Rol"]["idRoles"].toString());
       }
-
-      print('🔍 ROL OBTENIDO: $rol (tipo: ${rol.runtimeType})');
-
       if (rol == null) {
         throw Exception("No se pudo determinar el rol del usuario");
       }
 
       // ✅ AGREGADO: Esperar a que se guarden los datos
       await Future.delayed(const Duration(milliseconds: 300));
-      
-      // ✅ AGREGADO: Verificar que se guardaron correctamente
-      final tokenGuardado = await _authService.obtenerToken();
-      final usuarioGuardado = await _authService.obtenerUsuario();
-      
-      print('✅ Token guardado: ${tokenGuardado != null}');
-      print('✅ Usuario guardado: ${usuarioGuardado != null}');
-      print('✅ Rol del usuario guardado: ${usuarioGuardado?.idRoles}');
+
 
       // Navegación según el rol
       if (!mounted) return;
@@ -93,7 +81,6 @@ Future<void> iniciarSesion() async {
       });
     }
   } catch (e) {
-    print('❌ ERROR EN LOGIN: $e');
     setState(() {
       error = "Error de conexión. Intente nuevamente.";
     });
@@ -109,7 +96,6 @@ Future<void> iniciarSesion() async {
 Widget build(BuildContext context) {
   return Scaffold(
     body: Container(
-      // -------- FONDO UNIFICADO PARA TODO --------
       decoration: const BoxDecoration(
         image: DecorationImage(
           image: AssetImage("assets/FondoLoginFlutter.png"),
