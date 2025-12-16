@@ -1,0 +1,252 @@
+import 'package:flutter/material.dart';
+import '../../../models/jugador_model.dart';
+import '../../../models/competencia_model.dart';
+import '../../../models/partido_model.dart';
+
+class InfoJugadorConFiltros extends StatelessWidget {
+  final Jugador? jugadorData;
+  final List<Competencia> competenciasFiltradas;
+  final List<Partido> partidosFiltrados;
+  final int? competenciaSeleccionada;
+  final int? partidoSeleccionado;
+  final bool isLoadingPartidos;
+  final Function(int?) onCompetenciaChanged;
+  final Function(int?) onPartidoChanged;
+  final String Function(DateTime?) calcularEdad;
+
+  const InfoJugadorConFiltros({
+    super.key,
+    required this.jugadorData,
+    required this.competenciasFiltradas,
+    required this.partidosFiltrados,
+    required this.competenciaSeleccionada,
+    required this.partidoSeleccionado,
+    required this.isLoadingPartidos,
+    required this.onCompetenciaChanged,
+    required this.onPartidoChanged,
+    required this.calcularEdad,
+  });
+
+  Widget _buildInfoItem(String title, String value) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 6.0),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text('$title:', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
+          Flexible(child: Text(value, textAlign: TextAlign.right, style: const TextStyle(fontSize: 13))),
+        ],
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final persona = jugadorData?.persona;
+    final categoria = jugadorData?.categoria;
+
+    return Card(
+      elevation: 3,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            // 🎯 SECCIÓN DE FILTROS
+            Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: const Color(0xffe63946).withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: const Icon(Icons.filter_list, color: Color(0xffe63946), size: 20),
+                ),
+                const SizedBox(width: 12),
+                const Text(
+                  'Filtrar Estadísticas',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: Color(0xffe63946),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+
+            // ✅ FILTRO 1: Competencia
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                DropdownButtonFormField<int>(
+                  decoration: InputDecoration(
+                    labelText: 'Seleccionar Competencia',
+                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                    labelStyle: const TextStyle(color: Color(0xffe63946), fontSize: 13),
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                    prefixIcon: const Icon(Icons.emoji_events, color: Color(0xffe63946), size: 20),
+                    hintText: competenciasFiltradas.isEmpty
+                        ? 'No hay competencias'
+                        : 'Selecciona una competencia',
+                  ),
+                  style: const TextStyle(fontSize: 13, color: Colors.black),
+                  value: competenciaSeleccionada,
+                  items: [
+                    const DropdownMenuItem(value: null, child: Text("-- Todas las competencias --")),
+                    ...competenciasFiltradas.map((comp) => DropdownMenuItem(
+                      value: comp.idCompetencias,
+                      child: Text('${comp.nombre} (${comp.ano})'),
+                    )),
+                  ],
+                  onChanged: competenciasFiltradas.isEmpty ? null : onCompetenciaChanged,
+                ),
+                
+                // ⚠️ ALERTA: No hay competencias
+                if (competenciasFiltradas.isEmpty)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 8),
+                    child: Container(
+                      padding: const EdgeInsets.all(10),
+                      decoration: BoxDecoration(
+                        color: Colors.orange.shade50,
+                        border: Border.all(color: Colors.orange.shade300),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Row(
+                        children: [
+                          Icon(Icons.info_outline, color: Colors.orange.shade700, size: 18),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              'No hay competencias registradas para tu categoría',
+                              style: TextStyle(
+                                color: Colors.orange.shade900,
+                                fontSize: 12,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+              ],
+            ),
+            const SizedBox(height: 12),
+
+            // ✅ FILTRO 2: Partido
+            if (isLoadingPartidos)
+              const Center(
+                child: Padding(
+                  padding: EdgeInsets.all(12),
+                  child: CircularProgressIndicator(color: Color(0xffe63946)),
+                ),
+              )
+            else
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  DropdownButtonFormField<int>(
+                    decoration: InputDecoration(
+                      labelText: 'Seleccionar Partido',
+                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                      labelStyle: const TextStyle(color: Color(0xffe63946), fontSize: 13),
+                      contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                      prefixIcon: const Icon(Icons.sports_soccer, color: Color(0xffe63946), size: 20),
+                      hintText: competenciaSeleccionada == null
+                          ? 'Primero selecciona una competencia'
+                          : partidosFiltrados.isEmpty
+                              ? 'No hay partidos'
+                              : 'Selecciona un partido',
+                    ),
+                    style: const TextStyle(fontSize: 13, color: Colors.black),
+                    value: partidoSeleccionado,
+                    items: [
+                      const DropdownMenuItem(value: null, child: Text("-- Todos los partidos --")),
+                      ...partidosFiltrados.map((partido) => DropdownMenuItem(
+                        value: partido.idPartidos,
+                        child: Text('vs ${partido.equipoRival} - ${partido.formacion}'),
+                      )),
+                    ],
+                    onChanged: (competenciaSeleccionada == null || partidosFiltrados.isEmpty)
+                        ? null
+                        : onPartidoChanged,
+                  ),
+                  
+                  // ⚠️ ALERTA: No hay partidos
+                  if (competenciaSeleccionada != null && partidosFiltrados.isEmpty)
+                    Padding(
+                      padding: const EdgeInsets.only(top: 8),
+                      child: Container(
+                        padding: const EdgeInsets.all(10),
+                        decoration: BoxDecoration(
+                          color: Colors.orange.shade50,
+                          border: Border.all(color: Colors.orange.shade300),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Row(
+                          children: [
+                            Icon(Icons.info_outline, color: Colors.orange.shade700, size: 18),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: Text(
+                                'No hay partidos para esta competencia',
+                                style: TextStyle(
+                                  color: Colors.orange.shade900,
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                ],
+              ),
+            
+            const SizedBox(height: 16),
+            const Divider(),
+            const SizedBox(height: 16),
+            
+            // 🎯 INFORMACIÓN DEL JUGADOR
+            const Center(child: Icon(Icons.person, size: 80, color: Colors.grey)),
+            const SizedBox(height: 12),
+
+            const Center(
+              child: Text(
+                'Información Personal',
+                style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: Color(0xffe63946))
+              )
+            ),
+            const SizedBox(height: 8),
+            _buildInfoItem(
+              'Nombre',
+              persona != null
+                  ? "${persona.nombre1} ${persona.nombre2 ?? ''} ${persona.apellido1} ${persona.apellido2 ?? ''}".trim()
+                  : "-",
+            ),
+            _buildInfoItem('Edad', calcularEdad(persona?.fechaDeNacimiento)),
+            _buildInfoItem('Documento', persona?.numeroDeDocumento ?? "-"),
+
+            const Divider(height: 24),
+
+            const Center(
+              child: Text(
+                'Información Deportiva',
+                style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: Color(0xffe63946))
+              )
+            ),
+            const SizedBox(height: 8),
+            _buildInfoItem('Categoría', categoria?.descripcion ?? "-"),
+            _buildInfoItem('Dorsal', jugadorData?.dorsal.toString() ?? "-"),
+            _buildInfoItem('Posición', jugadorData?.posicion ?? "-"),
+          ],
+        ),
+      ),
+    );
+  }
+}
