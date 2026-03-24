@@ -1,0 +1,86 @@
+{
+  "id": "7c9b5605-f1d8-4ecd-aa4a-5ee019927113",
+  "version": "2.0",
+  "name": "Pruebas de software - Scord",
+  "url": "http://scord.duckdns.org/frontend",
+  "tests": [{
+    "id": "729f8051-730f-4cae-8b23-23b790494779",
+    "name": "Login exitoso con credenciales correctas",
+    "commands": [{
+      "id": "b5c535e0-3564-439a-bcc1-015ec5f00fca",
+      "comment": "",
+      "command": "open",
+      "target": "http://scord.duckdns.org/frontend/",
+      "targets": [],
+      "value": ""
+    }, {
+      "id": "a71ff7ae-38be-4467-98aa-93198f9a5e1e",
+      "comment": "",
+      "command": "setWindowSize",
+      "target": "1050x832",
+      "targets": [],
+      "value": ""
+    }, {
+      "id": "621eb7a3-f8a8-4732-a6d6-5b0bf2eac430",
+      "comment": "",
+      "command": "click",
+      "target": "css=flutter-view",
+      "targets": [
+        ["css=flutter-view", "css:finder"],
+        ["xpath=//flutter-view", "xpath:position"]
+      ],
+      "value": ""
+    }, {
+      "id": "2e356e49-82de-4583-9904-b181f9ba18c6",
+      "comment": "",
+      "command": "type",
+      "target": "css=.transparentTextEditing:nth-child(1) > .flt-text-editing",
+      "targets": [
+        ["css=.transparentTextEditing:nth-child(1) > .flt-text-editing", "css:finder"],
+        ["xpath=//input", "xpath:position"]
+      ],
+      "value": "sebas123@ejemplo.com"
+    }, {
+      "id": "28231335-e15a-4626-b6ca-883078067512",
+      "comment": "",
+      "command": "click",
+      "target": "css=flutter-view",
+      "targets": [
+        ["css=flutter-view", "css:finder"],
+        ["xpath=//flutter-view", "xpath:position"]
+      ],
+      "value": ""
+    }, {
+      "id": "c308301b-7d0d-47b5-ad00-1d41f9823672",
+      "comment": "",
+      "command": "type",
+      "target": "css=.transparentTextEditing:nth-child(2) > .flt-text-editing",
+      "targets": [
+        ["css=.transparentTextEditing:nth-child(2) > .flt-text-editing", "css:finder"],
+        ["xpath=//input[@type='password']", "xpath:attributes"],
+        ["xpath=//form[2]/input", "xpath:position"]
+      ],
+      "value": "12345678"
+    }, {
+      "id": "ac95be17-a517-433c-a657-a101596821dc",
+      "comment": "",
+      "command": "click",
+      "target": "css=flutter-view",
+      "targets": [
+        ["css=flutter-view", "css:finder"],
+        ["xpath=//flutter-view", "xpath:position"]
+      ],
+      "value": ""
+    }]
+  }],
+  "suites": [{
+    "id": "e7541856-0ab4-4e18-a37f-918bd9b360ed",
+    "name": "Default Suite",
+    "persistSession": false,
+    "parallel": false,
+    "timeout": 300,
+    "tests": ["729f8051-730f-4cae-8b23-23b790494779"]
+  }],
+  "urls": ["http://scord.duckdns.org/frontend"],
+  "plugins": []
+}
