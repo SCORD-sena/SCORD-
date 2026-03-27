@@ -1,0 +1,8 @@
+.env
+.env.*
+.env
+.env.*
+*.rar
+*.zip
+*.pdf
+node_modules/

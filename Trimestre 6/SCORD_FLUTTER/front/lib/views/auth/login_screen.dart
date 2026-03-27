@@ -36,8 +36,11 @@ Future<void> iniciarSesion() async {
       contrasena.text.trim(),
     );
 
+<<<<<<< HEAD
+=======
     print('🔍 RESPUESTA COMPLETA: $data');
 
+>>>>>>> 77fbf37e833f546a83348df26e99d07ab761018b
     if (data["success"] == true) {
       final user = data["user"];
       
@@ -53,15 +56,21 @@ Future<void> iniciarSesion() async {
       } else if (user["Rol"] != null && user["Rol"]["idRoles"] != null) {
         rol = int.tryParse(user["Rol"]["idRoles"].toString());
       }
+<<<<<<< HEAD
+=======
 
       print('🔍 ROL OBTENIDO: $rol (tipo: ${rol.runtimeType})');
 
+>>>>>>> 77fbf37e833f546a83348df26e99d07ab761018b
       if (rol == null) {
         throw Exception("No se pudo determinar el rol del usuario");
       }
 
       // ✅ AGREGADO: Esperar a que se guarden los datos
       await Future.delayed(const Duration(milliseconds: 300));
+<<<<<<< HEAD
+
+=======
       
       // ✅ AGREGADO: Verificar que se guardaron correctamente
       final tokenGuardado = await _authService.obtenerToken();
@@ -70,6 +79,7 @@ Future<void> iniciarSesion() async {
       print('✅ Token guardado: ${tokenGuardado != null}');
       print('✅ Usuario guardado: ${usuarioGuardado != null}');
       print('✅ Rol del usuario guardado: ${usuarioGuardado?.idRoles}');
+>>>>>>> 77fbf37e833f546a83348df26e99d07ab761018b
 
       // Navegación según el rol
       if (!mounted) return;
@@ -93,7 +103,10 @@ Future<void> iniciarSesion() async {
       });
     }
   } catch (e) {
+<<<<<<< HEAD
+=======
     print('❌ ERROR EN LOGIN: $e');
+>>>>>>> 77fbf37e833f546a83348df26e99d07ab761018b
     setState(() {
       error = "Error de conexión. Intente nuevamente.";
     });
@@ -109,7 +122,10 @@ Future<void> iniciarSesion() async {
 Widget build(BuildContext context) {
   return Scaffold(
     body: Container(
+<<<<<<< HEAD
+=======
       // -------- FONDO UNIFICADO PARA TODO --------
+>>>>>>> 77fbf37e833f546a83348df26e99d07ab761018b
       decoration: const BoxDecoration(
         image: DecorationImage(
           image: AssetImage("assets/FondoLoginFlutter.png"),
