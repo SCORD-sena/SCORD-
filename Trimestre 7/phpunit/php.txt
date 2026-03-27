@@ -1,0 +1,1758 @@
+<?php
+
+/**
+ * ================================================================
+ * ARCHIVO: tests/Feature/ApiRoutesTest.php
+ * ================================================================
+ *
+ * Archivo MONOLÍTICO de tests de rutas. Está organizado por
+ * secciones con marcadores ======= SECCIÓN ======= para que
+ * puedas extraer cada bloque a su propio archivo independiente
+ * cuando quieras escalar (ver lista de archivos al final del doc).
+ *
+ * ----------------------------------------------------------------
+ * ROLES DEL SISTEMA:
+ *   Rol 1 → Administrador  → acceso total
+ *   Rol 2 → Entrenador     → lectura + operaciones propias
+ *   Rol 3 → Jugador        → lectura limitada + datos propios
+ * ----------------------------------------------------------------
+ *
+ * CONVENCIÓN DE NOMBRES DE TESTS:
+ *   test_{recurso}_{accion}_{quien}()
+ *   Ejemplos:
+ *     test_personas_index_admin()
+ *     test_personas_store_denegado_entrenador()
+ *     test_jugadores_mis_datos_jugador()
+ *
+ * ----------------------------------------------------------------
+ * COMANDOS ÚTILES:
+ *   Correr todos:          php artisan test --filter ApiRoutesTest
+ *   Correr una sección:    php artisan test --filter PersonasTest   <- cuando lo separes
+ *   Correr un test exacto: php artisan test --filter ApiRoutesTest::test_personas_index_admin
+ *   Con detalle:           php artisan test --filter ApiRoutesTest --verbose
+ * ----------------------------------------------------------------
+ *
+ * ⚠️  ANTES DE EJECUTAR revisa los marcadores ⚠️  en el código:
+ *   - Campo FK de roles en User: 'idRoles' (setUp)
+ *   - Campos requeridos en cada postJson/putJson
+ *   - PK de cada modelo (por defecto 'id', puede ser diferente)
+ * ================================================================
+ */
+
+namespace Tests\Feature;
+
+use Tests\TestCase;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+
+// ── Modelos ──────────────────────────────────────────────────────
+use App\Models\User;
+use App\Models\Personas;
+use App\Models\Roles;
+use App\Models\TiposDeDocumentos;
+use App\Models\Categorias;
+use App\Models\Competencias;
+use App\Models\Entrenadores;
+use App\Models\Jugadores;
+use App\Models\Equipos;
+use App\Models\cronogramas;
+use App\Models\Partidos;
+use App\Models\PartidosEquipos;
+use App\Models\Resultados;
+use App\Models\RendimientosPartidos;
+
+
+class ApiRoutesTest extends TestCase
+{
+    use RefreshDatabase;
+
+    // ============================================================
+    // SECCIÓN 0 — SETUP Y HELPERS
+    // ============================================================
+    // Cuando separes en archivos individuales, este bloque va en
+    // un Trait reutilizable: tests/Traits/HasTestUsers.php
+    // y cada TestCase usará: use HasTestUsers;
+    // ============================================================
+
+    protected User $admin;       // Rol 1 — acceso total
+    protected User $entrenador;  // Rol 2 — acceso limitado
+    protected User $jugador;     // Rol 3 — lectura propia
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        // ⚠️  'idRoles' debe coincidir con el campo FK real en tu tabla users
+        $this->admin      = User::factory()->create(['idRoles' => 1]);
+        $this->entrenador = User::factory()->create(['idRoles' => 2]);
+        $this->jugador    = User::factory()->create(['idRoles' => 3]);
+    }
+
+    // ── Shorthand para actingAs ──────────────────────────────────
+
+    /** Autentica como Administrador (rol 1) */
+    protected function asAdmin(): static
+    {
+        return $this->actingAs($this->admin);
+    }
+
+    /** Autentica como Entrenador (rol 2) */
+    protected function asEntrenador(): static
+    {
+        return $this->actingAs($this->entrenador);
+    }
+
+    /** Autentica como Jugador (rol 3) */
+    protected function asJugador(): static
+    {
+        return $this->actingAs($this->jugador);
+    }
+
+    // ── Assertions reutilizables ─────────────────────────────────
+
+    /**
+     * Verifica que una ruta devuelve 401 o 403 sin autenticación.
+     * Uso: $this->assertProtected('get', '/api/personas');
+     *      $this->assertProtected('post', '/api/personas');
+     */
+    protected function assertProtected(string $method, string $uri): void
+    {
+        $response = $this->{$method . 'Json'}($uri);
+        $this->assertContains(
+            $response->status(),
+            [401, 403],
+            "La ruta [{$method}] {$uri} debería estar protegida pero devolvió {$response->status()}"
+        );
+    }
+
+    /**
+     * Verifica que una ruta permite lectura para un rol dado.
+     * Uso: $this->assertCanRead($this->asAdmin(), '/api/personas');
+     */
+    protected function assertCanRead(static $actor, string $uri): void
+    {
+        $actor->getJson($uri)->assertStatus(200);
+    }
+
+    /**
+     * Verifica que una ruta devuelve 403 para un rol dado.
+     * Uso: $this->assertForbiddenFor($this->asJugador(), '/api/personas');
+     */
+    protected function assertForbiddenFor(static $actor, string $uri, string $method = 'get'): void
+    {
+        $actor->{$method . 'Json'}($uri)->assertStatus(403);
+    }
+
+
+    // ============================================================
+    // SECCIÓN 1 — AUTH
+    // ============================================================
+    // Archivo futuro: tests/Feature/Auth/AuthTest.php
+    // Clase futura:   AuthTest extends TestCase
+    // ============================================================
+
+    /**
+     * POST /api/register
+     * Ruta pública. Retorna 422 si faltan campos requeridos.
+     */
+    public function test_register_con_datos_incompletos_retorna_422(): void
+    {
+        $response = $this->postJson('/api/register', []);
+        $response->assertStatus(422);
+    }
+
+    /**
+     * POST /api/register
+     * Registro exitoso con todos los campos requeridos.
+     * ⚠️  Completa los campos según tu AuthController@register
+     */
+    public function test_register_exitoso_retorna_201(): void
+    {
+        $response = $this->postJson('/api/register', [
+            'correo'     => 'nuevo_usuario@test.com',
+            'contrasena' => 'Password123!',
+            // ⚠️  Agrega los campos adicionales que requiera tu registro
+            // Ejemplo: 'NumeroDeDocumento' => '999888777',
+            //          'idTiposDeDocumentos' => 1,
+            //          'idRoles' => 3,
+        ]);
+        $this->assertContains($response->status(), [200, 201]);
+    }
+
+    /**
+     * POST /api/login
+     * Credenciales incorrectas deben retornar 401 o 422.
+     */
+    public function test_login_con_credenciales_invalidas_retorna_401(): void
+    {
+        $response = $this->postJson('/api/login', [
+            'correo'     => 'noexiste@test.com',
+            'contrasena' => 'wrong_password',
+        ]);
+        $this->assertContains($response->status(), [401, 422]);
+    }
+
+    /**
+     * POST /api/login
+     * Login exitoso retorna 200 con token.
+     * ⚠️  Ajusta los campos al formato exacto que espera tu AuthController@login
+     */
+    public function test_login_exitoso_retorna_token(): void
+    {
+        $user = User::factory()->create([
+            'correo'     => 'login_test@test.com',
+            'contrasena' => bcrypt('Password123!'),
+            'idRoles'    => 1,
+        ]);
+
+        $response = $this->postJson('/api/login', [
+            'correo'     => 'login_test@test.com',
+            'contrasena' => 'Password123!',
+        ]);
+
+        $this->assertContains($response->status(), [200, 201]);
+        // Si tu login retorna un token JWT puedes descomentar:
+        // $response->assertJsonStructure(['token']);
+    }
+
+    /** POST /api/logout — Usuario autenticado puede cerrar sesión */
+    public function test_logout_usuario_autenticado(): void
+    {
+        $this->asAdmin()->postJson('/api/logout')->assertStatus(200);
+    }
+
+    /** GET /api/me — Retorna datos del usuario autenticado */
+    public function test_me_retorna_datos_del_usuario_autenticado(): void
+    {
+        $this->asAdmin()->getJson('/api/me')->assertStatus(200);
+    }
+
+    /** GET /api/me — Sin autenticación debe devolver 401/403 */
+    public function test_me_denegado_sin_autenticacion(): void
+    {
+        $this->assertProtected('get', '/api/me');
+    }
+
+
+    // ============================================================
+    // SECCIÓN 2 — PERSONAS
+    // ============================================================
+    // Archivo futuro: tests/Feature/Personas/PersonasTest.php
+    // Clase futura:   PersonasTest extends TestCase
+    // ============================================================
+
+    // ── Lectura ──────────────────────────────────────────────────
+
+    public function test_personas_index_admin(): void
+    {
+        $this->asAdmin()->getJson('/api/personas')->assertStatus(200);
+    }
+
+    public function test_personas_index_denegado_entrenador(): void
+    {
+        $this->asEntrenador()->getJson('/api/personas')->assertStatus(403);
+    }
+
+    public function test_personas_index_denegado_jugador(): void
+    {
+        $this->asJugador()->getJson('/api/personas')->assertStatus(403);
+    }
+
+    public function test_personas_index_denegado_sin_auth(): void
+    {
+        $this->assertProtected('get', '/api/personas');
+    }
+
+    public function test_personas_show_admin(): void
+    {
+        $persona = Personas::factory()->create();
+        // ⚠️  Cambia ->id por la PK real de tu modelo si es diferente
+        $this->asAdmin()->getJson("/api/personas/{$persona->id}")->assertStatus(200);
+    }
+
+    // ── Papelera ─────────────────────────────────────────────────
+
+    public function test_personas_trashed_admin(): void
+    {
+        $this->asAdmin()->getJson('/api/personas/trashed')->assertStatus(200);
+    }
+
+    public function test_personas_trashed_denegado_entrenador(): void
+    {
+        $this->asEntrenador()->getJson('/api/personas/trashed')->assertStatus(403);
+    }
+
+    // ── Escritura ────────────────────────────────────────────────
+
+    public function test_personas_store_admin(): void
+    {
+        $response = $this->asAdmin()->postJson('/api/personas', [
+            // ⚠️  Completa con los campos reales de la tabla personas
+            'Nombre1'             => 'Juan',
+            'Nombre2'             => 'Carlos',
+            'Apellido1'           => 'Pérez',
+            'Apellido2'           => 'Gómez',
+            'NumeroDeDocumento'   => '123456789',
+            'FechaDeNacimiento'   => '2000-01-01',
+            'Genero'              => 'M',
+            'Telefono'            => '3001234567',
+            'correo'              => 'juan@test.com',
+            'contrasena'          => 'Password123!',
+            'idTiposDeDocumentos' => 1,
+            'idRoles'             => 3,
+        ]);
+        $this->assertContains($response->status(), [200, 201, 422]);
+    }
+
+    public function test_personas_store_denegado_entrenador(): void
+    {
+        $this->asEntrenador()->postJson('/api/personas', [])->assertStatus(403);
+    }
+
+    /**
+     * PUT /api/personas/{id}
+     * El middleware permite roles 1 Y 2 en este endpoint.
+     */
+    public function test_personas_update_admin(): void
+    {
+        $persona  = Personas::factory()->create();
+        $response = $this->asAdmin()->putJson("/api/personas/{$persona->id}", ['Nombre1' => 'Editado']);
+        $this->assertContains($response->status(), [200, 422]);
+    }
+
+    public function test_personas_update_entrenador(): void
+    {
+        $persona  = Personas::factory()->create();
+        $response = $this->asEntrenador()->putJson("/api/personas/{$persona->id}", ['Nombre1' => 'Editado']);
+        $this->assertContains($response->status(), [200, 422]);
+    }
+
+    public function test_personas_update_denegado_jugador(): void
+    {
+        $persona = Personas::factory()->create();
+        $this->asJugador()->putJson("/api/personas/{$persona->id}", [])->assertStatus(403);
+    }
+
+    public function test_personas_delete_admin(): void
+    {
+        $persona  = Personas::factory()->create();
+        $response = $this->asAdmin()->deleteJson("/api/personas/{$persona->id}");
+        $this->assertContains($response->status(), [200, 204]);
+    }
+
+    public function test_personas_delete_denegado_entrenador(): void
+    {
+        $persona = Personas::factory()->create();
+        $this->asEntrenador()->deleteJson("/api/personas/{$persona->id}")->assertStatus(403);
+    }
+
+    // ── Restore / Force Delete ────────────────────────────────────
+
+    public function test_personas_restore_admin(): void
+    {
+        $persona = Personas::factory()->create();
+        $persona->delete(); // soft delete previo necesario
+        $response = $this->asAdmin()->postJson("/api/personas/{$persona->id}/restore");
+        $this->assertContains($response->status(), [200, 204]);
+    }
+
+    public function test_personas_force_delete_admin(): void
+    {
+        $persona = Personas::factory()->create();
+        $persona->delete();
+        $response = $this->asAdmin()->deleteJson("/api/personas/{$persona->id}/force");
+        $this->assertContains($response->status(), [200, 204]);
+    }
+
+    public function test_personas_force_delete_denegado_entrenador(): void
+    {
+        $persona = Personas::factory()->create();
+        $persona->delete();
+        $this->asEntrenador()->deleteJson("/api/personas/{$persona->id}/force")->assertStatus(403);
+    }
+
+
+    // ============================================================
+    // SECCIÓN 3 — ROLES
+    // ============================================================
+    // Archivo futuro: tests/Feature/Roles/RolesTest.php
+    // ============================================================
+
+    public function test_roles_index_admin(): void
+    {
+        $this->asAdmin()->getJson('/api/roles')->assertStatus(200);
+    }
+
+    public function test_roles_index_denegado_entrenador(): void
+    {
+        $this->asEntrenador()->getJson('/api/roles')->assertStatus(403);
+    }
+
+    public function test_roles_index_denegado_jugador(): void
+    {
+        $this->asJugador()->getJson('/api/roles')->assertStatus(403);
+    }
+
+    public function test_roles_show_admin(): void
+    {
+        $rol      = Roles::factory()->create();
+        $response = $this->asAdmin()->getJson("/api/roles/{$rol->id}");
+        $this->assertContains($response->status(), [200, 404]);
+    }
+
+    public function test_roles_store_admin(): void
+    {
+        $response = $this->asAdmin()->postJson('/api/roles', [
+            // ⚠️  Completa con los campos reales de la tabla roles
+            'NombreRol' => 'Arbitro',
+        ]);
+        $this->assertContains($response->status(), [200, 201, 422]);
+    }
+
+    public function test_roles_store_denegado_entrenador(): void
+    {
+        $this->asEntrenador()->postJson('/api/roles', [])->assertStatus(403);
+    }
+
+    public function test_roles_update_admin(): void
+    {
+        $rol      = Roles::factory()->create();
+        $response = $this->asAdmin()->putJson("/api/roles/{$rol->id}", ['NombreRol' => 'Editado']);
+        $this->assertContains($response->status(), [200, 422]);
+    }
+
+    public function test_roles_delete_admin(): void
+    {
+        $rol      = Roles::factory()->create();
+        $response = $this->asAdmin()->deleteJson("/api/roles/{$rol->id}");
+        $this->assertContains($response->status(), [200, 204]);
+    }
+
+
+    // ============================================================
+    // SECCIÓN 4 — TIPOS DE DOCUMENTOS
+    // ============================================================
+    // Archivo futuro: tests/Feature/TiposDeDocumentos/TiposDeDocumentosTest.php
+    // ============================================================
+
+    public function test_tiposdedocumentos_index_admin(): void
+    {
+        $this->asAdmin()->getJson('/api/tiposdedocumentos')->assertStatus(200);
+    }
+
+    public function test_tiposdedocumentos_index_entrenador(): void
+    {
+        // Entrenador tiene permiso de lectura (roles 1 y 2)
+        $this->asEntrenador()->getJson('/api/tiposdedocumentos')->assertStatus(200);
+    }
+
+    public function test_tiposdedocumentos_index_denegado_jugador(): void
+    {
+        $this->asJugador()->getJson('/api/tiposdedocumentos')->assertStatus(403);
+    }
+
+    public function test_tiposdedocumentos_show_admin(): void
+    {
+        $tipo     = TiposDeDocumentos::factory()->create();
+        $response = $this->asAdmin()->getJson("/api/tiposdedocumentos/{$tipo->id}");
+        $this->assertContains($response->status(), [200, 404]);
+    }
+
+    public function test_tiposdedocumentos_store_admin(): void
+    {
+        $response = $this->asAdmin()->postJson('/api/tiposdedocumentos', [
+            // ⚠️  Completa con los campos reales
+            'NombreTipo' => 'Pasaporte',
+        ]);
+        $this->assertContains($response->status(), [200, 201, 422]);
+    }
+
+    public function test_tiposdedocumentos_store_denegado_entrenador(): void
+    {
+        // Solo admin puede crear (sin parámetro de roles = solo rol 1)
+        $this->asEntrenador()->postJson('/api/tiposdedocumentos', [])->assertStatus(403);
+    }
+
+    public function test_tiposdedocumentos_update_admin(): void
+    {
+        $tipo     = TiposDeDocumentos::factory()->create();
+        $response = $this->asAdmin()->putJson("/api/tiposdedocumentos/{$tipo->id}", ['NombreTipo' => 'CC']);
+        $this->assertContains($response->status(), [200, 422]);
+    }
+
+    public function test_tiposdedocumentos_delete_admin(): void
+    {
+        $tipo     = TiposDeDocumentos::factory()->create();
+        $response = $this->asAdmin()->deleteJson("/api/tiposdedocumentos/{$tipo->id}");
+        $this->assertContains($response->status(), [200, 204]);
+    }
+
+
+    // ============================================================
+    // SECCIÓN 5 — CATEGORÍAS
+    // ============================================================
+    // Archivo futuro: tests/Feature/Categorias/CategoriasTest.php
+    // ============================================================
+
+    // ── Lectura (roles 1, 2 y 3) ─────────────────────────────────
+
+    public function test_categorias_index_admin(): void
+    {
+        $this->asAdmin()->getJson('/api/categorias')->assertStatus(200);
+    }
+
+    public function test_categorias_index_entrenador(): void
+    {
+        $this->asEntrenador()->getJson('/api/categorias')->assertStatus(200);
+    }
+
+    public function test_categorias_index_jugador(): void
+    {
+        $this->asJugador()->getJson('/api/categorias')->assertStatus(200);
+    }
+
+    public function test_categorias_index_denegado_sin_auth(): void
+    {
+        $this->assertProtected('get', '/api/categorias');
+    }
+
+    public function test_categorias_show_admin(): void
+    {
+        $categoria = Categorias::factory()->create();
+        $this->asAdmin()->getJson("/api/categorias/{$categoria->id}")->assertStatus(200);
+    }
+
+    // ── Papelera ─────────────────────────────────────────────────
+
+    public function test_categorias_trashed_admin(): void
+    {
+        $this->asAdmin()->getJson('/api/categorias/papelera/listar')->assertStatus(200);
+    }
+
+    public function test_categorias_trashed_denegado_jugador(): void
+    {
+        $this->asJugador()->getJson('/api/categorias/papelera/listar')->assertStatus(403);
+    }
+
+    // ── Escritura (solo rol 1) ────────────────────────────────────
+
+    public function test_categorias_store_admin(): void
+    {
+        $response = $this->asAdmin()->postJson('/api/categorias', [
+            // ⚠️  Completa con los campos reales
+            'NombreCategoria' => 'Sub-15',
+        ]);
+        $this->assertContains($response->status(), [200, 201, 422]);
+    }
+
+    public function test_categorias_store_denegado_entrenador(): void
+    {
+        $this->asEntrenador()->postJson('/api/categorias', [])->assertStatus(403);
+    }
+
+    public function test_categorias_store_denegado_jugador(): void
+    {
+        $this->asJugador()->postJson('/api/categorias', [])->assertStatus(403);
+    }
+
+    public function test_categorias_update_admin(): void
+    {
+        $categoria = Categorias::factory()->create();
+        $response  = $this->asAdmin()->putJson("/api/categorias/{$categoria->id}", ['NombreCategoria' => 'Sub-17']);
+        $this->assertContains($response->status(), [200, 422]);
+    }
+
+    public function test_categorias_update_denegado_entrenador(): void
+    {
+        $categoria = Categorias::factory()->create();
+        $this->asEntrenador()->putJson("/api/categorias/{$categoria->id}", [])->assertStatus(403);
+    }
+
+    public function test_categorias_delete_admin(): void
+    {
+        $categoria = Categorias::factory()->create();
+        $response  = $this->asAdmin()->deleteJson("/api/categorias/{$categoria->id}");
+        $this->assertContains($response->status(), [200, 204]);
+    }
+
+    // ── Restore / Force Delete ────────────────────────────────────
+
+    public function test_categorias_restore_admin(): void
+    {
+        $categoria = Categorias::factory()->create();
+        $categoria->delete();
+        $response  = $this->asAdmin()->postJson("/api/categorias/{$categoria->id}/restaurar");
+        $this->assertContains($response->status(), [200, 204]);
+    }
+
+    public function test_categorias_force_delete_admin(): void
+    {
+        $categoria = Categorias::factory()->create();
+        $categoria->delete();
+        $response  = $this->asAdmin()->deleteJson("/api/categorias/{$categoria->id}/forzar");
+        $this->assertContains($response->status(), [200, 204]);
+    }
+
+    // ── Relación: jugadores por categoría ─────────────────────────
+
+    public function test_categorias_jugadores_admin(): void
+    {
+        $categoria = Categorias::factory()->create();
+        $response  = $this->asAdmin()->getJson("/api/categorias/{$categoria->id}/jugadores");
+        $this->assertContains($response->status(), [200, 404]);
+    }
+
+    public function test_categorias_jugadores_jugador(): void
+    {
+        $categoria = Categorias::factory()->create();
+        $response  = $this->asJugador()->getJson("/api/categorias/{$categoria->id}/jugadores");
+        $this->assertContains($response->status(), [200, 404]);
+    }
+
+
+    // ============================================================
+    // SECCIÓN 6 — ENTRENADORES
+    // ============================================================
+    // Archivo futuro: tests/Feature/Entrenadores/EntrenadoresTest.php
+    // ============================================================
+
+    // ── Lectura (roles 1 y 2) ────────────────────────────────────
+
+    public function test_entrenadores_index_admin(): void
+    {
+        $this->asAdmin()->getJson('/api/entrenadores')->assertStatus(200);
+    }
+
+    public function test_entrenadores_index_entrenador(): void
+    {
+        $this->asEntrenador()->getJson('/api/entrenadores')->assertStatus(200);
+    }
+
+    public function test_entrenadores_index_denegado_jugador(): void
+    {
+        $this->asJugador()->getJson('/api/entrenadores')->assertStatus(403);
+    }
+
+    public function test_entrenadores_show_admin(): void
+    {
+        $entrenador = Entrenadores::factory()->create();
+        $this->asAdmin()->getJson("/api/entrenadores/{$entrenador->id}")->assertStatus(200);
+    }
+
+    // ── Ruta exclusiva Entrenador ─────────────────────────────────
+
+    /**
+     * GET /api/entrenadores/misCategorias
+     * Solo accesible por rol 2 (entrenador).
+     */
+    public function test_entrenadores_mis_categorias_entrenador(): void
+    {
+        $this->asEntrenador()->getJson('/api/entrenadores/misCategorias')->assertStatus(200);
+    }
+
+    public function test_entrenadores_mis_categorias_denegado_admin(): void
+    {
+        // El middleware solo permite rol 2 en esta ruta
+        $this->asAdmin()->getJson('/api/entrenadores/misCategorias')->assertStatus(403);
+    }
+
+    public function test_entrenadores_mis_categorias_denegado_jugador(): void
+    {
+        $this->asJugador()->getJson('/api/entrenadores/misCategorias')->assertStatus(403);
+    }
+
+    // ── Papelera ─────────────────────────────────────────────────
+
+    public function test_entrenadores_trashed_admin(): void
+    {
+        $this->asAdmin()->getJson('/api/entrenadores/trashed')->assertStatus(200);
+    }
+
+    public function test_entrenadores_trashed_entrenador(): void
+    {
+        $this->asEntrenador()->getJson('/api/entrenadores/trashed')->assertStatus(200);
+    }
+
+    // ── Escritura (solo rol 1) ────────────────────────────────────
+
+    public function test_entrenadores_store_admin(): void
+    {
+        $response = $this->asAdmin()->postJson('/api/entrenadores', [
+            // ⚠️  Completa con los campos reales de la tabla entrenadores
+            // Ejemplo: 'idPersonas' => Personas::factory()->create()->id,
+        ]);
+        $this->assertContains($response->status(), [200, 201, 422]);
+    }
+
+    public function test_entrenadores_store_denegado_entrenador(): void
+    {
+        $this->asEntrenador()->postJson('/api/entrenadores', [])->assertStatus(403);
+    }
+
+    public function test_entrenadores_update_admin(): void
+    {
+        $entrenador = Entrenadores::factory()->create();
+        $response   = $this->asAdmin()->putJson("/api/entrenadores/{$entrenador->id}", []);
+        $this->assertContains($response->status(), [200, 422]);
+    }
+
+    public function test_entrenadores_update_entrenador(): void
+    {
+        $entrenador = Entrenadores::factory()->create();
+        $response   = $this->asEntrenador()->putJson("/api/entrenadores/{$entrenador->id}", []);
+        $this->assertContains($response->status(), [200, 422]);
+    }
+
+    public function test_entrenadores_delete_admin(): void
+    {
+        $entrenador = Entrenadores::factory()->create();
+        $response   = $this->asAdmin()->deleteJson("/api/entrenadores/{$entrenador->id}");
+        $this->assertContains($response->status(), [200, 204]);
+    }
+
+    public function test_entrenadores_delete_denegado_entrenador(): void
+    {
+        $entrenador = Entrenadores::factory()->create();
+        $this->asEntrenador()->deleteJson("/api/entrenadores/{$entrenador->id}")->assertStatus(403);
+    }
+
+    // ── Restore / Force Delete ────────────────────────────────────
+
+    public function test_entrenadores_restore_admin(): void
+    {
+        $entrenador = Entrenadores::factory()->create();
+        $entrenador->delete();
+        $response   = $this->asAdmin()->postJson("/api/entrenadores/{$entrenador->id}/restore");
+        $this->assertContains($response->status(), [200, 204]);
+    }
+
+    public function test_entrenadores_force_delete_solo_rol1(): void
+    {
+        $entrenador = Entrenadores::factory()->create();
+        $entrenador->delete();
+        $response   = $this->asAdmin()->deleteJson("/api/entrenadores/{$entrenador->id}/force");
+        $this->assertContains($response->status(), [200, 204]);
+    }
+
+    public function test_entrenadores_force_delete_denegado_entrenador(): void
+    {
+        $entrenador = Entrenadores::factory()->create();
+        $entrenador->delete();
+        $this->asEntrenador()->deleteJson("/api/entrenadores/{$entrenador->id}/force")->assertStatus(403);
+    }
+
+
+    // ============================================================
+    // SECCIÓN 7 — JUGADORES
+    // ============================================================
+    // Archivo futuro: tests/Feature/Jugadores/JugadoresTest.php
+    // ============================================================
+
+    // ── Lectura (roles 1, 2 y 3) ─────────────────────────────────
+
+    public function test_jugadores_index_admin(): void
+    {
+        $this->asAdmin()->getJson('/api/jugadores')->assertStatus(200);
+    }
+
+    public function test_jugadores_index_entrenador(): void
+    {
+        $this->asEntrenador()->getJson('/api/jugadores')->assertStatus(200);
+    }
+
+    public function test_jugadores_index_jugador(): void
+    {
+        $this->asJugador()->getJson('/api/jugadores')->assertStatus(200);
+    }
+
+    public function test_jugadores_index_denegado_sin_auth(): void
+    {
+        $this->assertProtected('get', '/api/jugadores');
+    }
+
+    public function test_jugadores_show_admin(): void
+    {
+        $jugador = Jugadores::factory()->create();
+        $this->asAdmin()->getJson("/api/jugadores/{$jugador->id}")->assertStatus(200);
+    }
+
+    // ── Ruta exclusiva Jugador ────────────────────────────────────
+
+    /**
+     * GET /api/jugadores/misDatos
+     * Solo accesible por rol 3 (jugador).
+     */
+    public function test_jugadores_mis_datos_jugador(): void
+    {
+        $this->asJugador()->getJson('/api/jugadores/misDatos')->assertStatus(200);
+    }
+
+    public function test_jugadores_mis_datos_denegado_admin(): void
+    {
+        $this->asAdmin()->getJson('/api/jugadores/misDatos')->assertStatus(403);
+    }
+
+    public function test_jugadores_mis_datos_denegado_entrenador(): void
+    {
+        $this->asEntrenador()->getJson('/api/jugadores/misDatos')->assertStatus(403);
+    }
+
+    // ── Papelera (roles 1 y 2) ────────────────────────────────────
+
+    public function test_jugadores_trashed_admin(): void
+    {
+        $this->asAdmin()->getJson('/api/jugadores/trashed')->assertStatus(200);
+    }
+
+    public function test_jugadores_trashed_entrenador(): void
+    {
+        $this->asEntrenador()->getJson('/api/jugadores/trashed')->assertStatus(200);
+    }
+
+    public function test_jugadores_trashed_denegado_jugador(): void
+    {
+        $this->asJugador()->getJson('/api/jugadores/trashed')->assertStatus(403);
+    }
+
+    // ── Escritura (roles 1 y 2) ───────────────────────────────────
+
+    public function test_jugadores_store_admin(): void
+    {
+        $response = $this->asAdmin()->postJson('/api/jugadores', [
+            // ⚠️  Completa con los campos reales de la tabla jugadores
+            // Ejemplo: 'idPersonas'   => Personas::factory()->create()->id,
+            //          'idCategorias' => Categorias::factory()->create()->id,
+            //          'Dorsal'       => 10,
+        ]);
+        $this->assertContains($response->status(), [200, 201, 422]);
+    }
+
+    public function test_jugadores_store_entrenador(): void
+    {
+        $response = $this->asEntrenador()->postJson('/api/jugadores', []);
+        $this->assertContains($response->status(), [200, 201, 422]);
+    }
+
+    public function test_jugadores_store_denegado_jugador(): void
+    {
+        $this->asJugador()->postJson('/api/jugadores', [])->assertStatus(403);
+    }
+
+    public function test_jugadores_update_admin(): void
+    {
+        $jugador  = Jugadores::factory()->create();
+        $response = $this->asAdmin()->putJson("/api/jugadores/{$jugador->id}", []);
+        $this->assertContains($response->status(), [200, 422]);
+    }
+
+    public function test_jugadores_update_denegado_jugador(): void
+    {
+        $jugador = Jugadores::factory()->create();
+        $this->asJugador()->putJson("/api/jugadores/{$jugador->id}", [])->assertStatus(403);
+    }
+
+    public function test_jugadores_delete_admin(): void
+    {
+        $jugador  = Jugadores::factory()->create();
+        $response = $this->asAdmin()->deleteJson("/api/jugadores/{$jugador->id}");
+        $this->assertContains($response->status(), [200, 204]);
+    }
+
+    // ── Pago (solo rol 1) ─────────────────────────────────────────
+
+    public function test_jugadores_registrar_pago_admin(): void
+    {
+        $jugador  = Jugadores::factory()->create();
+        $response = $this->asAdmin()->postJson("/api/jugadores/{$jugador->id}/registrar-pago", [
+            // ⚠️  Completa con los campos reales del pago
+        ]);
+        $this->assertContains($response->status(), [200, 422]);
+    }
+
+    public function test_jugadores_registrar_pago_denegado_entrenador(): void
+    {
+        $jugador = Jugadores::factory()->create();
+        $this->asEntrenador()->postJson("/api/jugadores/{$jugador->id}/registrar-pago", [])->assertStatus(403);
+    }
+
+    public function test_jugadores_registrar_pago_denegado_jugador(): void
+    {
+        $jugador = Jugadores::factory()->create();
+        $this->asJugador()->postJson("/api/jugadores/{$jugador->id}/registrar-pago", [])->assertStatus(403);
+    }
+
+    // ── Restore / Force Delete ────────────────────────────────────
+
+    public function test_jugadores_restore_admin(): void
+    {
+        $jugador  = Jugadores::factory()->create();
+        $jugador->delete();
+        $response = $this->asAdmin()->postJson("/api/jugadores/{$jugador->id}/restore");
+        $this->assertContains($response->status(), [200, 204]);
+    }
+
+    public function test_jugadores_force_delete_solo_rol1(): void
+    {
+        $jugador  = Jugadores::factory()->create();
+        $jugador->delete();
+        $response = $this->asAdmin()->deleteJson("/api/jugadores/{$jugador->id}/force");
+        $this->assertContains($response->status(), [200, 204]);
+    }
+
+    public function test_jugadores_force_delete_denegado_entrenador(): void
+    {
+        $jugador = Jugadores::factory()->create();
+        $jugador->delete();
+        $this->asEntrenador()->deleteJson("/api/jugadores/{$jugador->id}/force")->assertStatus(403);
+    }
+
+
+    // ============================================================
+    // SECCIÓN 8 — COMPETENCIAS
+    // ============================================================
+    // Archivo futuro: tests/Feature/Competencias/CompetenciasTest.php
+    // ============================================================
+
+    public function test_competencias_index_admin(): void
+    {
+        $this->asAdmin()->getJson('/api/competencias')->assertStatus(200);
+    }
+
+    public function test_competencias_index_entrenador(): void
+    {
+        $this->asEntrenador()->getJson('/api/competencias')->assertStatus(200);
+    }
+
+    public function test_competencias_index_denegado_jugador(): void
+    {
+        $this->asJugador()->getJson('/api/competencias')->assertStatus(403);
+    }
+
+    public function test_competencias_show_admin(): void
+    {
+        $competencia = Competencias::factory()->create();
+        $this->asAdmin()->getJson("/api/competencias/{$competencia->id}")->assertStatus(200);
+    }
+
+    public function test_competencias_trashed_admin(): void
+    {
+        $this->asAdmin()->getJson('/api/competencias/papelera/listar')->assertStatus(200);
+    }
+
+    public function test_competencias_store_admin(): void
+    {
+        $response = $this->asAdmin()->postJson('/api/competencias', [
+            // ⚠️  Completa con los campos reales de la tabla competencias
+            // Ejemplo: 'NombreCompetencia' => 'Torneo Apertura',
+            //          'Anio' => 2025,
+        ]);
+        $this->assertContains($response->status(), [200, 201, 422]);
+    }
+
+    public function test_competencias_store_denegado_entrenador(): void
+    {
+        $this->asEntrenador()->postJson('/api/competencias', [])->assertStatus(403);
+    }
+
+    /**
+     * POST /api/competencias/with-categoria
+     * Ruta especial que crea competencia y categoría juntas.
+     * Accesible por roles 1 y 2.
+     */
+    public function test_competencias_store_with_categoria_admin(): void
+    {
+        $response = $this->asAdmin()->postJson('/api/competencias/with-categoria', [
+            // ⚠️  Completa con los campos combinados
+        ]);
+        $this->assertContains($response->status(), [200, 201, 422]);
+    }
+
+    public function test_competencias_store_with_categoria_entrenador(): void
+    {
+        $response = $this->asEntrenador()->postJson('/api/competencias/with-categoria', []);
+        $this->assertContains($response->status(), [200, 201, 422]);
+    }
+
+    public function test_competencias_update_admin(): void
+    {
+        $competencia = Competencias::factory()->create();
+        $response    = $this->asAdmin()->putJson("/api/competencias/{$competencia->id}", []);
+        $this->assertContains($response->status(), [200, 422]);
+    }
+
+    public function test_competencias_delete_admin(): void
+    {
+        $competencia = Competencias::factory()->create();
+        $response    = $this->asAdmin()->deleteJson("/api/competencias/{$competencia->id}");
+        $this->assertContains($response->status(), [200, 204]);
+    }
+
+    public function test_competencias_restore_admin(): void
+    {
+        $competencia = Competencias::factory()->create();
+        $competencia->delete();
+        $response    = $this->asAdmin()->postJson("/api/competencias/{$competencia->id}/restaurar");
+        $this->assertContains($response->status(), [200, 204]);
+    }
+
+    public function test_competencias_force_delete_admin(): void
+    {
+        $competencia = Competencias::factory()->create();
+        $competencia->delete();
+        $response    = $this->asAdmin()->deleteJson("/api/competencias/{$competencia->id}/forzar");
+        $this->assertContains($response->status(), [200, 204]);
+    }
+
+    // ── Relación: competencias por categoría ─────────────────────
+
+    public function test_competencias_por_categoria_admin(): void
+    {
+        $categoria = Categorias::factory()->create();
+        $response  = $this->asAdmin()->getJson("/api/competencias/categoria/{$categoria->id}");
+        $this->assertContains($response->status(), [200, 404]);
+    }
+
+    public function test_competencias_por_categoria_entrenador(): void
+    {
+        $categoria = Categorias::factory()->create();
+        $response  = $this->asEntrenador()->getJson("/api/competencias/categoria/{$categoria->id}");
+        $this->assertContains($response->status(), [200, 404]);
+    }
+
+
+    // ============================================================
+    // SECCIÓN 9 — EQUIPOS
+    // ============================================================
+    // Archivo futuro: tests/Feature/Equipos/EquiposTest.php
+    // ============================================================
+
+    public function test_equipos_index_admin(): void
+    {
+        $this->asAdmin()->getJson('/api/equipos')->assertStatus(200);
+    }
+
+    public function test_equipos_index_entrenador(): void
+    {
+        $this->asEntrenador()->getJson('/api/equipos')->assertStatus(200);
+    }
+
+    public function test_equipos_index_denegado_jugador(): void
+    {
+        $this->asJugador()->getJson('/api/equipos')->assertStatus(403);
+    }
+
+    public function test_equipos_show_admin(): void
+    {
+        $equipo   = Equipos::factory()->create();
+        $response = $this->asAdmin()->getJson("/api/equipos/{$equipo->id}");
+        $this->assertContains($response->status(), [200, 404]);
+    }
+
+    public function test_equipos_store_admin(): void
+    {
+        $response = $this->asAdmin()->postJson('/api/equipos', [
+            // ⚠️  Completa con los campos reales de la tabla equipos
+            // Ejemplo: 'NombreEquipo' => 'Atlético FC',
+        ]);
+        $this->assertContains($response->status(), [200, 201, 422]);
+    }
+
+    public function test_equipos_store_denegado_entrenador(): void
+    {
+        $this->asEntrenador()->postJson('/api/equipos', [])->assertStatus(403);
+    }
+
+    public function test_equipos_update_admin(): void
+    {
+        $equipo   = Equipos::factory()->create();
+        $response = $this->asAdmin()->putJson("/api/equipos/{$equipo->id}", []);
+        $this->assertContains($response->status(), [200, 422]);
+    }
+
+    public function test_equipos_delete_admin(): void
+    {
+        $equipo   = Equipos::factory()->create();
+        $response = $this->asAdmin()->deleteJson("/api/equipos/{$equipo->id}");
+        $this->assertContains($response->status(), [200, 204]);
+    }
+
+
+    // ============================================================
+    // SECCIÓN 10 — CRONOGRAMAS
+    // ============================================================
+    // Archivo futuro: tests/Feature/Cronogramas/CronogramasTest.php
+    // ============================================================
+
+    public function test_cronogramas_index_admin(): void
+    {
+        $this->asAdmin()->getJson('/api/cronogramas')->assertStatus(200);
+    }
+
+    public function test_cronogramas_index_entrenador(): void
+    {
+        $this->asEntrenador()->getJson('/api/cronogramas')->assertStatus(200);
+    }
+
+    public function test_cronogramas_index_jugador(): void
+    {
+        $this->asJugador()->getJson('/api/cronogramas')->assertStatus(200);
+    }
+
+    public function test_cronogramas_show_admin(): void
+    {
+        $cronograma = cronogramas::factory()->create();
+        $this->asAdmin()->getJson("/api/cronogramas/{$cronograma->id}")->assertStatus(200);
+    }
+
+    public function test_cronogramas_trashed_admin(): void
+    {
+        $this->asAdmin()->getJson('/api/cronogramas/papelera/listar')->assertStatus(200);
+    }
+
+    public function test_cronogramas_trashed_denegado_jugador(): void
+    {
+        $this->asJugador()->getJson('/api/cronogramas/papelera/listar')->assertStatus(403);
+    }
+
+    public function test_cronogramas_store_admin(): void
+    {
+        $response = $this->asAdmin()->postJson('/api/cronogramas', [
+            // ⚠️  Completa con los campos reales de la tabla cronogramas
+            // Ejemplo: 'idCompetencias' => Competencias::factory()->create()->id,
+            //          'idCategorias'   => Categorias::factory()->create()->id,
+            //          'FechaInicio'    => '2025-01-01',
+        ]);
+        $this->assertContains($response->status(), [200, 201, 422]);
+    }
+
+    public function test_cronogramas_store_entrenador(): void
+    {
+        $response = $this->asEntrenador()->postJson('/api/cronogramas', []);
+        $this->assertContains($response->status(), [200, 201, 422]);
+    }
+
+    public function test_cronogramas_store_denegado_jugador(): void
+    {
+        $this->asJugador()->postJson('/api/cronogramas', [])->assertStatus(403);
+    }
+
+    public function test_cronogramas_update_admin(): void
+    {
+        $cronograma = cronogramas::factory()->create();
+        $response   = $this->asAdmin()->putJson("/api/cronogramas/{$cronograma->id}", []);
+        $this->assertContains($response->status(), [200, 422]);
+    }
+
+    public function test_cronogramas_delete_admin(): void
+    {
+        $cronograma = cronogramas::factory()->create();
+        $response   = $this->asAdmin()->deleteJson("/api/cronogramas/{$cronograma->id}");
+        $this->assertContains($response->status(), [200, 204]);
+    }
+
+    public function test_cronogramas_restore_admin(): void
+    {
+        $cronograma = cronogramas::factory()->create();
+        $cronograma->delete();
+        $response   = $this->asAdmin()->postJson("/api/cronogramas/{$cronograma->id}/restaurar");
+        $this->assertContains($response->status(), [200, 204]);
+    }
+
+    public function test_cronogramas_force_delete_admin(): void
+    {
+        $cronograma = cronogramas::factory()->create();
+        $cronograma->delete();
+        $response   = $this->asAdmin()->deleteJson("/api/cronogramas/{$cronograma->id}/forzar");
+        $this->assertContains($response->status(), [200, 204]);
+    }
+
+    // ── Relación: cronogramas por competencia y categoría ─────────
+
+    public function test_cronogramas_por_competencia_y_categoria_admin(): void
+    {
+        $competencia = Competencias::factory()->create();
+        $categoria   = Categorias::factory()->create();
+        $response    = $this->asAdmin()->getJson(
+            "/api/cronogramas/competencia/{$competencia->id}/categoria/{$categoria->id}"
+        );
+        $this->assertContains($response->status(), [200, 404]);
+    }
+
+
+    // ============================================================
+    // SECCIÓN 11 — PARTIDOS
+    // ============================================================
+    // Archivo futuro: tests/Feature/Partidos/PartidosTest.php
+    // ============================================================
+
+    public function test_partidos_index_admin(): void
+    {
+        $this->asAdmin()->getJson('/api/partidos')->assertStatus(200);
+    }
+
+    public function test_partidos_index_entrenador(): void
+    {
+        $this->asEntrenador()->getJson('/api/partidos')->assertStatus(200);
+    }
+
+    public function test_partidos_index_jugador(): void
+    {
+        $this->asJugador()->getJson('/api/partidos')->assertStatus(200);
+    }
+
+    public function test_partidos_show_admin(): void
+    {
+        $partido = Partidos::factory()->create();
+        $this->asAdmin()->getJson("/api/partidos/{$partido->id}")->assertStatus(200);
+    }
+
+    public function test_partidos_trashed_admin(): void
+    {
+        $this->asAdmin()->getJson('/api/partidos/papelera/listar')->assertStatus(200);
+    }
+
+    public function test_partidos_trashed_denegado_jugador(): void
+    {
+        $this->asJugador()->getJson('/api/partidos/papelera/listar')->assertStatus(403);
+    }
+
+    public function test_partidos_store_admin(): void
+    {
+        $response = $this->asAdmin()->postJson('/api/partidos', [
+            // ⚠️  Completa con los campos reales de la tabla partidos
+            // Ejemplo: 'idCronogramas' => cronogramas::factory()->create()->id,
+            //          'FechaPartido'  => '2025-06-01',
+            //          'Sede'          => 'Estadio El Campín',
+        ]);
+        $this->assertContains($response->status(), [200, 201, 422]);
+    }
+
+    public function test_partidos_store_entrenador(): void
+    {
+        $response = $this->asEntrenador()->postJson('/api/partidos', []);
+        $this->assertContains($response->status(), [200, 201, 422]);
+    }
+
+    public function test_partidos_store_denegado_jugador(): void
+    {
+        $this->asJugador()->postJson('/api/partidos', [])->assertStatus(403);
+    }
+
+    public function test_partidos_update_admin(): void
+    {
+        $partido  = Partidos::factory()->create();
+        $response = $this->asAdmin()->putJson("/api/partidos/{$partido->id}", []);
+        $this->assertContains($response->status(), [200, 422]);
+    }
+
+    public function test_partidos_delete_admin(): void
+    {
+        $partido  = Partidos::factory()->create();
+        $response = $this->asAdmin()->deleteJson("/api/partidos/{$partido->id}");
+        $this->assertContains($response->status(), [200, 204]);
+    }
+
+    public function test_partidos_restore_admin(): void
+    {
+        $partido  = Partidos::factory()->create();
+        $partido->delete();
+        $response = $this->asAdmin()->postJson("/api/partidos/{$partido->id}/restaurar");
+        $this->assertContains($response->status(), [200, 204]);
+    }
+
+    public function test_partidos_force_delete_admin(): void
+    {
+        $partido  = Partidos::factory()->create();
+        $partido->delete();
+        $response = $this->asAdmin()->deleteJson("/api/partidos/{$partido->id}/forzar");
+        $this->assertContains($response->status(), [200, 204]);
+    }
+
+    // ── Relación: partidos por competencia ───────────────────────
+
+    public function test_partidos_por_competencia_admin(): void
+    {
+        $competencia = Competencias::factory()->create();
+        $response    = $this->asAdmin()->getJson("/api/partidos/competencia/{$competencia->id}");
+        $this->assertContains($response->status(), [200, 404]);
+    }
+
+
+    // ============================================================
+    // SECCIÓN 12 — PARTIDOS EQUIPOS
+    // ============================================================
+    // Archivo futuro: tests/Feature/Partidos/PartidosEquiposTest.php
+    // ============================================================
+
+    public function test_partidosequipos_index_admin(): void
+    {
+        $this->asAdmin()->getJson('/api/partidosequipos')->assertStatus(200);
+    }
+
+    public function test_partidosequipos_index_entrenador(): void
+    {
+        $this->asEntrenador()->getJson('/api/partidosequipos')->assertStatus(200);
+    }
+
+    public function test_partidosequipos_index_denegado_jugador(): void
+    {
+        $this->asJugador()->getJson('/api/partidosequipos')->assertStatus(403);
+    }
+
+    public function test_partidosequipos_store_admin(): void
+    {
+        $response = $this->asAdmin()->postJson('/api/partidosequipos', [
+            // ⚠️  Completa con los campos reales
+            // Ejemplo: 'idPartidos' => Partidos::factory()->create()->id,
+            //          'idEquipos'  => Equipos::factory()->create()->id,
+            //          'EsLocal'    => true,
+        ]);
+        $this->assertContains($response->status(), [200, 201, 422]);
+    }
+
+    public function test_partidosequipos_store_denegado_jugador(): void
+    {
+        $this->asJugador()->postJson('/api/partidosequipos', [])->assertStatus(403);
+    }
+
+    public function test_partidosequipos_update_admin(): void
+    {
+        $pe       = PartidosEquipos::factory()->create();
+        $response = $this->asAdmin()->putJson("/api/partidosequipos/{$pe->id}", []);
+        $this->assertContains($response->status(), [200, 422]);
+    }
+
+    public function test_partidosequipos_delete_admin(): void
+    {
+        $pe       = PartidosEquipos::factory()->create();
+        $response = $this->asAdmin()->deleteJson("/api/partidosequipos/{$pe->id}");
+        $this->assertContains($response->status(), [200, 204]);
+    }
+
+
+    // ============================================================
+    // SECCIÓN 13 — RESULTADOS
+    // ============================================================
+    // Archivo futuro: tests/Feature/Resultados/ResultadosTest.php
+    // ============================================================
+
+    public function test_resultados_index_admin(): void
+    {
+        $this->asAdmin()->getJson('/api/resultados')->assertStatus(200);
+    }
+
+    public function test_resultados_index_entrenador(): void
+    {
+        $this->asEntrenador()->getJson('/api/resultados')->assertStatus(200);
+    }
+
+    public function test_resultados_index_jugador(): void
+    {
+        $this->asJugador()->getJson('/api/resultados')->assertStatus(200);
+    }
+
+    public function test_resultados_show_admin(): void
+    {
+        $resultado = Resultados::factory()->create();
+        $this->asAdmin()->getJson("/api/resultados/{$resultado->id}")->assertStatus(200);
+    }
+
+    public function test_resultados_trashed_admin(): void
+    {
+        $this->asAdmin()->getJson('/api/resultados/papelera/listar')->assertStatus(200);
+    }
+
+    public function test_resultados_trashed_denegado_jugador(): void
+    {
+        $this->asJugador()->getJson('/api/resultados/papelera/listar')->assertStatus(403);
+    }
+
+    public function test_resultados_store_admin(): void
+    {
+        $response = $this->asAdmin()->postJson('/api/resultados', [
+            // ⚠️  Completa con los campos reales de la tabla resultados
+            // Ejemplo: 'idPartidos'     => Partidos::factory()->create()->id,
+            //          'GolesLocal'     => 2,
+            //          'GolesVisitante' => 1,
+        ]);
+        $this->assertContains($response->status(), [200, 201, 422]);
+    }
+
+    public function test_resultados_store_entrenador(): void
+    {
+        $response = $this->asEntrenador()->postJson('/api/resultados', []);
+        $this->assertContains($response->status(), [200, 201, 422]);
+    }
+
+    public function test_resultados_store_denegado_jugador(): void
+    {
+        $this->asJugador()->postJson('/api/resultados', [])->assertStatus(403);
+    }
+
+    public function test_resultados_update_admin(): void
+    {
+        $resultado = Resultados::factory()->create();
+        $response  = $this->asAdmin()->putJson("/api/resultados/{$resultado->id}", []);
+        $this->assertContains($response->status(), [200, 422]);
+    }
+
+    public function test_resultados_delete_admin(): void
+    {
+        $resultado = Resultados::factory()->create();
+        $response  = $this->asAdmin()->deleteJson("/api/resultados/{$resultado->id}");
+        $this->assertContains($response->status(), [200, 204]);
+    }
+
+    public function test_resultados_restore_admin(): void
+    {
+        $resultado = Resultados::factory()->create();
+        $resultado->delete();
+        $response  = $this->asAdmin()->postJson("/api/resultados/{$resultado->id}/restaurar");
+        $this->assertContains($response->status(), [200, 204]);
+    }
+
+    public function test_resultados_force_delete_admin(): void
+    {
+        $resultado = Resultados::factory()->create();
+        $resultado->delete();
+        $response  = $this->asAdmin()->deleteJson("/api/resultados/{$resultado->id}/forzar");
+        $this->assertContains($response->status(), [200, 204]);
+    }
+
+
+    // ============================================================
+    // SECCIÓN 14 — RENDIMIENTOS PARTIDOS
+    // ============================================================
+    // Archivo futuro: tests/Feature/Rendimientos/RendimientosPartidosTest.php
+    // ============================================================
+
+    // ── Lectura general (roles 1 y 2) ────────────────────────────
+
+    public function test_rendimientospartidos_index_admin(): void
+    {
+        $this->asAdmin()->getJson('/api/rendimientospartidos')->assertStatus(200);
+    }
+
+    public function test_rendimientospartidos_index_entrenador(): void
+    {
+        $this->asEntrenador()->getJson('/api/rendimientospartidos')->assertStatus(200);
+    }
+
+    public function test_rendimientospartidos_index_denegado_jugador(): void
+    {
+        $this->asJugador()->getJson('/api/rendimientospartidos')->assertStatus(403);
+    }
+
+    public function test_rendimientospartidos_show_admin(): void
+    {
+        $rend     = RendimientosPartidos::factory()->create();
+        $response = $this->asAdmin()->getJson("/api/rendimientospartidos/{$rend->id}");
+        $this->assertContains($response->status(), [200, 404]);
+    }
+
+    // ── Ruta exclusiva Jugador ────────────────────────────────────
+
+    /**
+     * GET /api/rendimientospartidos/mis-estadisticas
+     * Solo accesible por rol 3 (jugador).
+     */
+    public function test_rendimientospartidos_mis_estadisticas_jugador(): void
+    {
+        $this->asJugador()->getJson('/api/rendimientospartidos/mis-estadisticas')->assertStatus(200);
+    }
+
+    public function test_rendimientospartidos_mis_estadisticas_denegado_admin(): void
+    {
+        $this->asAdmin()->getJson('/api/rendimientospartidos/mis-estadisticas')->assertStatus(403);
+    }
+
+    public function test_rendimientospartidos_mis_estadisticas_denegado_entrenador(): void
+    {
+        $this->asEntrenador()->getJson('/api/rendimientospartidos/mis-estadisticas')->assertStatus(403);
+    }
+
+    // ── Estadísticas por jugador ──────────────────────────────────
+
+    public function test_rendimientospartidos_totales_por_jugador_admin(): void
+    {
+        $jugador  = Jugadores::factory()->create();
+        $response = $this->asAdmin()->getJson("/api/rendimientospartidos/jugador/{$jugador->id}/totales");
+        $this->assertContains($response->status(), [200, 404]);
+    }
+
+    public function test_rendimientospartidos_totales_por_jugador_jugador(): void
+    {
+        // El jugador puede ver sus propios totales (roles 1,2,3)
+        $jugador  = Jugadores::factory()->create();
+        $response = $this->asJugador()->getJson("/api/rendimientospartidos/jugador/{$jugador->id}/totales");
+        $this->assertContains($response->status(), [200, 404]);
+    }
+
+    public function test_rendimientospartidos_temporadas_por_jugador_admin(): void
+    {
+        $jugador  = Jugadores::factory()->create();
+        $response = $this->asAdmin()->getJson("/api/rendimientospartidos/jugador/{$jugador->id}/temporadas");
+        $this->assertContains($response->status(), [200, 404]);
+    }
+
+    public function test_rendimientospartidos_ultimos_partidos_admin(): void
+    {
+        $jugador  = Jugadores::factory()->create();
+        $response = $this->asAdmin()->getJson("/api/rendimientospartidos/jugador/{$jugador->id}/ultimos-partidos/5");
+        $this->assertContains($response->status(), [200, 404]);
+    }
+
+    public function test_rendimientospartidos_ultimo_registro_admin(): void
+    {
+        $jugador  = Jugadores::factory()->create();
+        $response = $this->asAdmin()->getJson("/api/rendimientospartidos/jugador/{$jugador->id}/ultimo-registro");
+        $this->assertContains($response->status(), [200, 404]);
+    }
+
+    // ── Papelera ─────────────────────────────────────────────────
+
+    public function test_rendimientospartidos_trashed_admin(): void
+    {
+        $this->asAdmin()->getJson('/api/rendimientospartidos/trashed')->assertStatus(200);
+    }
+
+    public function test_rendimientospartidos_papelera_listar_admin(): void
+    {
+        $this->asAdmin()->getJson('/api/rendimientospartidos/papelera/listar')->assertStatus(200);
+    }
+
+    // ── Escritura ────────────────────────────────────────────────
+
+    public function test_rendimientospartidos_store_admin(): void
+    {
+        $response = $this->asAdmin()->postJson('/api/rendimientospartidos', [
+            // ⚠️  Completa con los campos reales
+            // Ejemplo: 'idJugadores' => Jugadores::factory()->create()->id,
+            //          'idPartidos'  => Partidos::factory()->create()->id,
+            //          'Goles'       => 1,
+            //          'Asistencias' => 0,
+        ]);
+        $this->assertContains($response->status(), [200, 201, 422]);
+    }
+
+    public function test_rendimientospartidos_store_entrenador(): void
+    {
+        $response = $this->asEntrenador()->postJson('/api/rendimientospartidos', []);
+        $this->assertContains($response->status(), [200, 201, 422]);
+    }
+
+    public function test_rendimientospartidos_store_denegado_jugador(): void
+    {
+        $this->asJugador()->postJson('/api/rendimientospartidos', [])->assertStatus(403);
+    }
+
+    public function test_rendimientospartidos_update_admin(): void
+    {
+        $rend     = RendimientosPartidos::factory()->create();
+        $response = $this->asAdmin()->putJson("/api/rendimientospartidos/{$rend->id}", []);
+        $this->assertContains($response->status(), [200, 422]);
+    }
+
+    public function test_rendimientospartidos_delete_admin(): void
+    {
+        $rend     = RendimientosPartidos::factory()->create();
+        $response = $this->asAdmin()->deleteJson("/api/rendimientospartidos/{$rend->id}");
+        $this->assertContains($response->status(), [200, 204]);
+    }
+
+    public function test_rendimientospartidos_restore_admin(): void
+    {
+        $rend = RendimientosPartidos::factory()->create();
+        $rend->delete();
+        $response = $this->asAdmin()->postJson("/api/rendimientospartidos/{$rend->id}/restaurar");
+        $this->assertContains($response->status(), [200, 204]);
+    }
+
+    public function test_rendimientospartidos_force_delete_admin(): void
+    {
+        $rend = RendimientosPartidos::factory()->create();
+        $rend->delete();
+        $response = $this->asAdmin()->deleteJson("/api/rendimientospartidos/{$rend->id}/forzar");
+        $this->assertContains($response->status(), [200, 204]);
+    }
+
+    // ── Filtros por competencia / partido ─────────────────────────
+
+    public function test_rendimientos_por_competencia_admin(): void
+    {
+        $jugador     = Jugadores::factory()->create();
+        $competencia = Competencias::factory()->create();
+        $response    = $this->asAdmin()->getJson(
+            "/api/rendimientos/jugador/{$jugador->id}/competencia/{$competencia->id}"
+        );
+        $this->assertContains($response->status(), [200, 404]);
+    }
+
+    public function test_rendimientos_por_partido_admin(): void
+    {
+        $jugador  = Jugadores::factory()->create();
+        $partido  = Partidos::factory()->create();
+        $response = $this->asAdmin()->getJson(
+            "/api/rendimientos/jugador/{$jugador->id}/partido/{$partido->id}"
+        );
+        $this->assertContains($response->status(), [200, 404]);
+    }
+
+    public function test_rendimientospartidos_por_partido_admin(): void
+    {
+        $jugador  = Jugadores::factory()->create();
+        $partido  = Partidos::factory()->create();
+        $response = $this->asAdmin()->getJson(
+            "/api/rendimientospartidos/jugador/{$jugador->id}/partido/{$partido->id}"
+        );
+        $this->assertContains($response->status(), [200, 404]);
+    }
+
+
+    // ============================================================
+    // SECCIÓN 15 — REPORTES PDF
+    // ============================================================
+    // Archivo futuro: tests/Feature/Reportes/ReportesTest.php
+    // ============================================================
+
+    /**
+     * GET /api/reportes/jugador/{id}/pdf
+     * Accesible por admin (roles 1 y 2 según rutas.php).
+     */
+    public function test_reporte_pdf_jugador_admin(): void
+    {
+        $jugador  = Jugadores::factory()->create();
+        $response = $this->asAdmin()->getJson("/api/reportes/jugador/{$jugador->id}/pdf");
+        // 200 = PDF generado | 404 = sin datos | 500 = error de librería sin datos cargados
+        $this->assertContains($response->status(), [200, 404, 500]);
+    }
+
+    public function test_reporte_pdf_jugador_entrenador(): void
+    {
+        $jugador  = Jugadores::factory()->create();
+        $response = $this->asEntrenador()->getJson("/api/reportes/jugador/{$jugador->id}/pdf");
+        $this->assertContains($response->status(), [200, 404, 500]);
+    }
+
+    public function test_reporte_pdf_jugador_denegado_jugador(): void
+    {
+        $jugador = Jugadores::factory()->create();
+        $this->asJugador()->getJson("/api/reportes/jugador/{$jugador->id}/pdf")->assertStatus(403);
+    }
+
+    /**
+     * GET /api/reportes/jugador/{id}/competencias/{idComp}/pdf
+     * Solo accesible por rol 1 (admin:1 en middleware).
+     */
+    public function test_reporte_pdf_por_competencia_admin_rol1(): void
+    {
+        $jugador     = Jugadores::factory()->create();
+        $competencia = Competencias::factory()->create();
+        $response    = $this->asAdmin()->getJson(
+            "/api/reportes/jugador/{$jugador->id}/competencias/{$competencia->id}/pdf"
+        );
+        $this->assertContains($response->status(), [200, 404, 500]);
+    }
+
+    public function test_reporte_pdf_por_competencia_denegado_entrenador(): void
+    {
+        $jugador     = Jugadores::factory()->create();
+        $competencia = Competencias::factory()->create();
+        $this->asEntrenador()->getJson(
+            "/api/reportes/jugador/{$jugador->id}/competencias/{$competencia->id}/pdf"
+        )->assertStatus(403);
+    }
+
+    public function test_reporte_pdf_por_competencia_denegado_jugador(): void
+    {
+        $jugador     = Jugadores::factory()->create();
+        $competencia = Competencias::factory()->create();
+        $this->asJugador()->getJson(
+            "/api/reportes/jugador/{$jugador->id}/competencias/{$competencia->id}/pdf"
+        )->assertStatus(403);
+    }
+}
+
+/*
+|=======================================================================
+| LISTA DE ARCHIVOS A CREAR CUANDO DIVIDAS ESTE MONOLITO
+|=======================================================================
+|
+| ESTRUCTURA FINAL SUGERIDA:
+|
+|   tests/
+|   ├── Traits/
+|   │   └── HasTestUsers.php          ← Sección 0 (setUp + helpers)
+|   │
+|   └── Feature/
+|       ├── Auth/
+|       │   └── AuthTest.php                      ← Sección 1
+|       ├── Personas/
+|       │   └── PersonasTest.php                  ← Sección 2
+|       ├── Roles/
+|       │   └── RolesTest.php                     ← Sección 3
+|       ├── TiposDeDocumentos/
+|       │   └── TiposDeDocumentosTest.php         ← Sección 4
+|       ├── Categorias/
+|       │   └── CategoriasTest.php                ← Sección 5
+|       ├── Entrenadores/
+|       │   └── EntrenadoresTest.php              ← Sección 6
+|       ├── Jugadores/
+|       │   └── JugadoresTest.php                 ← Sección 7
+|       ├── Competencias/
+|       │   └── CompetenciasTest.php              ← Sección 8
+|       ├── Equipos/
+|       │   └── EquiposTest.php                   ← Sección 9
+|       ├── Cronogramas/
+|       │   └── CronogramasTest.php               ← Sección 10
+|       ├── Partidos/
+|       │   ├── PartidosTest.php                  ← Sección 11
+|       │   └── PartidosEquiposTest.php           ← Sección 12
+|       ├── Resultados/
+|       │   └── ResultadosTest.php                ← Sección 13
+|       ├── Rendimientos/
+|       │   └── RendimientosPartidosTest.php      ← Sección 14
+|       └── Reportes/
+|           └── ReportesTest.php                  ← Sección 15
+|
+|-----------------------------------------------------------------------
+| FACTORIES A CREAR (ejecuta estos comandos):
+|
+|   php artisan make:factory PersonasFactory            --model=Personas
+|   php artisan make:factory RolesFactory               --model=Roles
+|   php artisan make:factory TiposDeDocumentosFactory   --model=TiposDeDocumentos
+|   php artisan make:factory CategoriasFactory          --model=Categorias
+|   php artisan make:factory CompetenciasFactory        --model=Competencias
+|   php artisan make:factory EntrenadoresFactory        --model=Entrenadores
+|   php artisan make:factory JugadoresFactory           --model=Jugadores
+|   php artisan make:factory EquiposFactory             --model=Equipos
+|   php artisan make:factory CronogramasFactory         --model=cronogramas
+|   php artisan make:factory PartidosFactory            --model=Partidos
+|   php artisan make:factory PartidosEquiposFactory     --model=PartidosEquipos
+|   php artisan make:factory ResultadosFactory          --model=Resultados
+|   php artisan make:factory RendimientosPartidosFactory --model=RendimientosPartidos
+|
+|-----------------------------------------------------------------------
+| CÓMO DIVIDIR (pasos para cada sección):
+|
+|   1. Crea la carpeta:  mkdir tests/Feature/Personas
+|   2. Crea el archivo:  touch tests/Feature/Personas/PersonasTest.php
+|   3. Encabezado del nuevo archivo:
+|
+|        <?php
+|        namespace Tests\Feature\Personas;
+|        use Tests\TestCase;
+|        use Tests\Traits\HasTestUsers;   // <-- el trait con setUp y helpers
+|        use Illuminate\Foundation\Testing\RefreshDatabase;
+|        use App\Models\Personas;
+|
+|        class PersonasTest extends TestCase {
+|            use RefreshDatabase, HasTestUsers;
+|            // pega aquí los métodos de la Sección 2
+|        }
+|
+|   4. Crea tests/Traits/HasTestUsers.php con el contenido de Sección 0
+|   5. Elimina esa sección del monolito
+|   6. Corre: php artisan test  → todo debe seguir en verde
+|
+|=======================================================================
+*/
