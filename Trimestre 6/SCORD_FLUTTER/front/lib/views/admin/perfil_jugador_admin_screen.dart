@@ -172,7 +172,11 @@ class _PerfilJugadorAdminScreenState extends State<PerfilJugadorAdminScreen> {
               ),
             ),
             _buildDrawerItem('Inicio', Icons.home, '/InicioAdmin'),
+<<<<<<< HEAD
             _buildDrawerItem('Cronograma', Icons.calendar_month, '/CronogramaAdmin'),
+=======
+            _buildDrawerItem('Cronograma', Icons.calendar_month, '/Cronograma'),
+>>>>>>> 77fbf37e833f546a83348df26e99d07ab761018b
             _buildDrawerItem('Perfil Jugador', Icons.person_pin, '/PerfilJugadorAdmin'),
             _buildDrawerItem('Estadísticas Jugadores', Icons.bar_chart, '/EstadisticasJugadores'),
             _buildDrawerItem('Perfil Entrenador', Icons.sports_gymnastics, '/PerfilEntrenadorAdmin'),

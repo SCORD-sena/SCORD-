@@ -312,6 +312,7 @@ class RendimientosPartidosController extends Controller
             'message' => 'Rendimiento de partido eliminado exitosamente'
         ], 200);
     }
+<<<<<<< HEAD
 
 /**
  * Obtener estadísticas de un jugador filtradas por competencia
@@ -463,4 +464,6 @@ public function getStatsByPartido($idJugadores, $idPartido)
         ], 500);
     }
 }
+=======
+>>>>>>> 77fbf37e833f546a83348df26e99d07ab761018b
 }

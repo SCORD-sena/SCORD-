@@ -100,6 +100,7 @@ class EntrenadorController {
       return 0;
     }
   }
+<<<<<<< HEAD
 
     // Crear entrenador completo (persona + entrenador)
   Future<bool> crearEntrenador({
@@ -130,4 +131,6 @@ class EntrenadorController {
       throw Exception('Error al crear entrenador: $e');
     }
   }
+=======
+>>>>>>> 77fbf37e833f546a83348df26e99d07ab761018b
 }

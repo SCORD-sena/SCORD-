@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'dart:convert';
+<<<<<<< HEAD
 import 'package:flutter/foundation.dart';
 import 'package:universal_html/html.dart' as html;
 import '../../models/categoria_model.dart';
@@ -21,10 +22,23 @@ class EstadisticasController extends ChangeNotifier {
   final ReporteService _reporteService = ReporteService();
   final CompetenciaService _competenciaService = CompetenciaService();
   final CronogramaService _cronogramaService = CronogramaService();
+=======
+import '../../models/categoria_model.dart';
+import '../../models/jugador_model.dart';
+import '../../models/rendimiento_model.dart';
+import '../../services/rendimiento_service.dart';
+import '../../services/api_service.dart';
+import '../../utils/validator.dart';
+
+class EstadisticasController extends ChangeNotifier {
+  final RendimientoService _rendimientoService = RendimientoService();
+  final ApiService _apiService = ApiService();
+>>>>>>> 77fbf37e833f546a83348df26e99d07ab761018b
 
   // State
   List<Jugador> jugadores = [];
   List<Categoria> categorias = [];
+<<<<<<< HEAD
   List<Competencia> competencias = [];
   List<Competencia> competenciasFiltradas = [];
   List<Partido> partidos = [];
@@ -34,13 +48,19 @@ class EstadisticasController extends ChangeNotifier {
   int? competenciaSeleccionada;
   int? partidoSeleccionado;
   
+=======
+  String? categoriaSeleccionadaId;
+>>>>>>> 77fbf37e833f546a83348df26e99d07ab761018b
   Jugador? jugadorSeleccionado;
   List<Jugador> jugadoresFiltrados = [];
   EstadisticasTotales? estadisticasTotales;
   bool modoEdicion = false;
   bool loading = false;
+<<<<<<< HEAD
   bool isLoadingCompetencias = false;
   bool isLoadingPartidos = false;
+=======
+>>>>>>> 77fbf37e833f546a83348df26e99d07ab761018b
   UltimoRegistro? ultimoRegistro;
 
   Map<String, String> formData = {
@@ -55,15 +75,20 @@ class EstadisticasController extends ChangeNotifier {
     'arcoEnCero': "",
   };
 
+<<<<<<< HEAD
   // ============================================================
   // INICIALIZACIÓN
   // ============================================================
 
+=======
+  // Inicialización
+>>>>>>> 77fbf37e833f546a83348df26e99d07ab761018b
   Future<void> inicializar() async {
     await cargarDatosIniciales();
   }
 
   Future<void> cargarDatosIniciales() async {
+<<<<<<< HEAD
     await Future.wait([
       fetchCategorias(),
       fetchJugadores(),
@@ -76,6 +101,13 @@ class EstadisticasController extends ChangeNotifier {
   // FILTRADO
   // ============================================================
 
+=======
+    await fetchCategorias();
+    await fetchJugadores();
+  }
+
+  // Filtrado de jugadores
+>>>>>>> 77fbf37e833f546a83348df26e99d07ab761018b
   void filtrarJugadores(String? categoriaId) {
     if (categoriaId != null) {
       final id = int.tryParse(categoriaId);
@@ -92,6 +124,7 @@ class EstadisticasController extends ChangeNotifier {
     notifyListeners();
   }
 
+<<<<<<< HEAD
   Future<void> filtrarCompetenciasPorCategoria(int idCategoria) async {
     isLoadingCompetencias = true;
     notifyListeners();
@@ -143,6 +176,9 @@ class EstadisticasController extends ChangeNotifier {
   // FETCH DE DATOS
   // ============================================================
 
+=======
+  // Fetch de datos
+>>>>>>> 77fbf37e833f546a83348df26e99d07ab761018b
   Future<void> fetchJugadores() async {
     try {
       final res = await _apiService.get('/jugadores');
@@ -165,6 +201,10 @@ class EstadisticasController extends ChangeNotifier {
             final jugador = Jugador.fromJson(data[i] as Map<String, dynamic>);
             jugadoresParsed.add(jugador);
           } catch (e) {
+<<<<<<< HEAD
+=======
+            print('Error parseando jugador en índice $i: $e');
+>>>>>>> 77fbf37e833f546a83348df26e99d07ab761018b
             continue;
           }
         }
@@ -177,6 +217,10 @@ class EstadisticasController extends ChangeNotifier {
         notifyListeners();
       }
     } catch (e) {
+<<<<<<< HEAD
+=======
+      print('Error cargando jugadores: $e');
+>>>>>>> 77fbf37e833f546a83348df26e99d07ab761018b
       rethrow;
     }
   }
@@ -190,6 +234,7 @@ class EstadisticasController extends ChangeNotifier {
         notifyListeners();
       }
     } catch (e) {
+<<<<<<< HEAD
       rethrow;
     }
   }
@@ -209,6 +254,9 @@ class EstadisticasController extends ChangeNotifier {
       notifyListeners();
     } catch (e) {
       rethrow;
+=======
+      print('Error cargando categorías: $e');
+>>>>>>> 77fbf37e833f546a83348df26e99d07ab761018b
     }
   }
 
@@ -227,6 +275,7 @@ class EstadisticasController extends ChangeNotifier {
     }
   }
 
+<<<<<<< HEAD
   /// 🆕 Obtener estadísticas filtradas por competencia
   Future<void> fetchEstadisticasPorCompetencia(int idJugador, int idCompetencia) async {
     loading = true;
@@ -317,6 +366,9 @@ class EstadisticasController extends ChangeNotifier {
   // EDICIÓN
   // ============================================================
 
+=======
+  // Edición
+>>>>>>> 77fbf37e833f546a83348df26e99d07ab761018b
   void activarEdicion() {
     if (jugadorSeleccionado == null) {
       throw Exception('No hay jugador seleccionado');
@@ -383,6 +435,7 @@ class EstadisticasController extends ChangeNotifier {
       );
 
       if (exito) {
+<<<<<<< HEAD
         // 🆕 Recargar estadísticas según filtros activos
         if (partidoSeleccionado != null) {
           await fetchEstadisticasPorPartido(jugadorSeleccionado!.idJugadores, partidoSeleccionado!);
@@ -392,6 +445,9 @@ class EstadisticasController extends ChangeNotifier {
           await fetchEstadisticasTotales(jugadorSeleccionado!.idJugadores);
         }
         
+=======
+        await fetchEstadisticasTotales(jugadorSeleccionado!.idJugadores);
+>>>>>>> 77fbf37e833f546a83348df26e99d07ab761018b
         cancelarEdicion();
         return true;
       } else {
@@ -438,6 +494,7 @@ class EstadisticasController extends ChangeNotifier {
         final exito = await _rendimientoService.eliminarRendimiento(registro.idRendimientos);
 
         if (exito) {
+<<<<<<< HEAD
           // 🆕 Recargar estadísticas según filtros activos
           if (partidoSeleccionado != null) {
             await fetchEstadisticasPorPartido(idJugador, partidoSeleccionado!);
@@ -447,6 +504,9 @@ class EstadisticasController extends ChangeNotifier {
             await fetchEstadisticasTotales(idJugador);
           }
           
+=======
+          await fetchEstadisticasTotales(idJugador);
+>>>>>>> 77fbf37e833f546a83348df26e99d07ab761018b
           cancelarEdicion();
           return true;
         } else {
@@ -463,6 +523,7 @@ class EstadisticasController extends ChangeNotifier {
     }
   }
 
+<<<<<<< HEAD
   // ============================================================
   // SELECCIONES
   // ============================================================
@@ -479,6 +540,13 @@ class EstadisticasController extends ChangeNotifier {
       } else {
         await fetchEstadisticasTotales(idJugador);
       }
+=======
+  // Seleccionar jugador
+  void seleccionarJugador(int? idJugador) {
+    if (idJugador != null) {
+      jugadorSeleccionado = jugadores.firstWhere((j) => j.idJugadores == idJugador);
+      fetchEstadisticasTotales(idJugador);
+>>>>>>> 77fbf37e833f546a83348df26e99d07ab761018b
     } else {
       jugadorSeleccionado = null;
       estadisticasTotales = null;
@@ -486,6 +554,7 @@ class EstadisticasController extends ChangeNotifier {
     notifyListeners();
   }
 
+<<<<<<< HEAD
   Future<void> seleccionarCategoria(String? categoriaId) async {
     categoriaSeleccionadaId = categoriaId;
     filtrarJugadores(categoriaId);
@@ -555,11 +624,23 @@ class EstadisticasController extends ChangeNotifier {
   // UTILIDADES
   // ============================================================
 
+=======
+  void seleccionarCategoria(String? categoriaId) {
+    categoriaSeleccionadaId = categoriaId;
+    filtrarJugadores(categoriaId);
+  }
+
+  // Actualizar campo del formulario
+>>>>>>> 77fbf37e833f546a83348df26e99d07ab761018b
   void actualizarCampo(String campo, String valor) {
     formData[campo] = valor;
     notifyListeners();
   }
 
+<<<<<<< HEAD
+=======
+  // Helper para calcular edad
+>>>>>>> 77fbf37e833f546a83348df26e99d07ab761018b
   String calcularEdad(DateTime? fechaNacimiento) { 
     if (fechaNacimiento == null) return "-";
     
@@ -574,6 +655,7 @@ class EstadisticasController extends ChangeNotifier {
     return edad.toString();
   }
 
+<<<<<<< HEAD
   // ============================================================
   // REPORTES PDF
   // ============================================================
@@ -623,5 +705,10 @@ class EstadisticasController extends ChangeNotifier {
       loading = false;
       notifyListeners();
     }
+=======
+  @override
+  void dispose() {
+    super.dispose();
+>>>>>>> 77fbf37e833f546a83348df26e99d07ab761018b
   }
 }

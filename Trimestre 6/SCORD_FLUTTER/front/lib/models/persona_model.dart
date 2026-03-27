@@ -36,6 +36,10 @@ class Persona {
   });
 
   factory Persona.fromJson(Map<String, dynamic> json) {
+<<<<<<< HEAD
+=======
+  print('🔍 Parseando JSON: $json');
+>>>>>>> 77fbf37e833f546a83348df26e99d07ab761018b
   
   // Obtener idRoles de forma segura
   int? idRoles;
@@ -44,6 +48,11 @@ class Persona {
   } else if (json['Rol'] != null && json['Rol']['idRoles'] != null) {
     idRoles = int.tryParse(json['Rol']['idRoles'].toString());
   }
+<<<<<<< HEAD
+=======
+  
+  print('🔍 idRoles obtenido: $idRoles');
+>>>>>>> 77fbf37e833f546a83348df26e99d07ab761018b
 
   // ✅ OBTENER idTiposDeDocumentos correctamente
   int idTiposDeDocumentos;
@@ -70,11 +79,17 @@ class Persona {
     fechaDeNacimiento: DateTime.parse(json['FechaDeNacimiento'] as String),
     correo: json['correo'] as String,
     epsSisben: json['EpsSisben'] as String?,
+<<<<<<< HEAD
     tiposDeDocumentos: json['tipos_de_documentos'] != null
     ? TipoDocumento.fromJson(json['tipos_de_documentos'])
     : (json['idTiposDeDocumentos'] is Map
         ? TipoDocumento.fromJson(json['idTiposDeDocumentos'])
         : null),
+=======
+    tiposDeDocumentos: json['idTiposDeDocumentos'] is Map
+        ? TipoDocumento.fromJson(json['idTiposDeDocumentos'])
+        : null,
+>>>>>>> 77fbf37e833f546a83348df26e99d07ab761018b
     idRoles: idRoles,
   );
 }

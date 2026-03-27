@@ -17,7 +17,11 @@ class InfoRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
+<<<<<<< HEAD
       padding: const EdgeInsets.symmetric(vertical: 6.0),
+=======
+      padding: const EdgeInsets.symmetric(vertical: 8.0),
+>>>>>>> 77fbf37e833f546a83348df26e99d07ab761018b
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -27,9 +31,14 @@ class InfoRow extends StatelessWidget {
             child: Text(
               label,
               style: const TextStyle(
+<<<<<<< HEAD
                 fontWeight: FontWeight.bold,
                 fontSize: 13,
                 color: Color(0xffe63946),
+=======
+                fontWeight: FontWeight.w600,
+                fontSize: 14,
+>>>>>>> 77fbf37e833f546a83348df26e99d07ab761018b
               ),
             ),
           ),
@@ -39,8 +48,13 @@ class InfoRow extends StatelessWidget {
                 ? editWidget!
                 : Text(
                     value,
+<<<<<<< HEAD
                     style: const TextStyle(fontSize: 13),
                     textAlign: TextAlign.right,
+=======
+                    style: const TextStyle(fontSize: 14),
+                    textAlign: TextAlign.end,
+>>>>>>> 77fbf37e833f546a83348df26e99d07ab761018b
                   ),
           ),
         ],

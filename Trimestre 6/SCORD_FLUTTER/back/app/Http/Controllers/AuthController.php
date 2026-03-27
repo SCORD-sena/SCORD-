@@ -149,6 +149,7 @@ class AuthController extends Controller
     }
 
     public function getUser()
+<<<<<<< HEAD
 {
     try {
         $personas = auth('api')->user();
@@ -204,6 +205,52 @@ class AuthController extends Controller
         ], 500);
     }
 }
+=======
+    {
+        try {
+            $personas = auth('api')->user();
+            
+            if (!$personas) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Usuario no encontrado',
+                ], 404);
+            }
+
+            // Obtener el usuario completo con las relaciones
+            $user = Personas::with(['tiposDeDocumentos', 'rol'])
+                ->where('idPersonas', $personas->IdPersonas)
+                ->first();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Usuario obtenido exitosamente',
+                'data' => [
+                    'NumeroDeDocumento' => $personas->NumeroDeDocumento,
+                    'Nombre1' => $personas->Nombre1,
+                    'Nombre2' => $personas->Nombre2,
+                    'Apellido1' => $personas->Apellido1,
+                    'Apellido2' => $personas->Apellido2,
+                    'correo' => $personas->correo,
+                    'Telefono' => $personas->Telefono,
+                    'Direccion' => $personas->Direccion,
+                    'FechaDeNacimiento' => $personas->FechaDeNacimiento,
+                    'Genero' => $personas->Genero,
+                    'EpsSisben' => $personas->EpsSisben,
+                    'TiposDeDocumentos' => $personas->tiposDeDocumentos,
+                    'Rol' => $personas->rol
+                ]
+            ], 200);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al obtener usuario',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
+    }
+>>>>>>> 77fbf37e833f546a83348df26e99d07ab761018b
 
     public function logout()
     {

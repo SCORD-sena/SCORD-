@@ -1,4 +1,5 @@
 import 'dart:convert';
+<<<<<<< HEAD
 import '../models/entrenador_model.dart';
 import 'api_service.dart';
 
@@ -9,6 +10,20 @@ class EntrenadorService {
   Future<List<Entrenador>> getEntrenadores() async {
     try {
       final response = await _apiService.get('/entrenadores');
+=======
+import 'package:http/http.dart' as http;
+import '../models/entrenador_model.dart';
+import '../config/api_config.dart';
+
+class EntrenadorService {
+  // Obtener todos los entrenadores
+  Future<List<Entrenador>> getEntrenadores() async {
+    try {
+      final response = await http.get(
+        Uri.parse('$baseUrl/entrenadores'),
+        headers: {'Content-Type': 'application/json'},
+      );
+>>>>>>> 77fbf37e833f546a83348df26e99d07ab761018b
 
       if (response.statusCode == 200) {
         final Map<String, dynamic> jsonResponse = json.decode(response.body);
@@ -30,6 +45,7 @@ class EntrenadorService {
     }
   }
 
+<<<<<<< HEAD
     // Crear entrenador
   Future<Map<String, dynamic>> createEntrenador(Map<String, dynamic> data) async {
     try {
@@ -40,12 +56,28 @@ class EntrenadorService {
       } else {
         final errorData = json.decode(response.body);
         throw Exception(errorData['message'] ?? 'Error al crear entrenador');
+=======
+  // Obtener un entrenador por ID
+  Future<Entrenador> getEntrenadorById(int id) async {
+    try {
+      final response = await http.get(
+        Uri.parse('$baseUrl/entrenadores/$id'),
+        headers: {'Content-Type': 'application/json'},
+      );
+
+      if (response.statusCode == 200) {
+        final jsonResponse = json.decode(response.body);
+        return Entrenador.fromJson(jsonResponse);
+      } else {
+        throw Exception('Error al cargar entrenador: ${response.statusCode}');
+>>>>>>> 77fbf37e833f546a83348df26e99d07ab761018b
       }
     } catch (e) {
       throw Exception('Error de conexión: $e');
     }
   }
 
+<<<<<<< HEAD
   // Obtener un entrenador por ID de persona
 Future<Entrenador?> getEntrenadorByPersonaId(int idPersona) async {
   try {
@@ -92,6 +124,16 @@ Future<Entrenador?> getEntrenadorByPersonaId(int idPersona) async {
   Future<bool> updateEntrenador(int id, Map<String, dynamic> data) async {
     try {
       final response = await _apiService.put('/entrenadores/$id', data);
+=======
+  // Actualizar entrenador
+  Future<bool> updateEntrenador(int id, Map<String, dynamic> data) async {
+    try {
+      final response = await http.put(
+        Uri.parse('$baseUrl/entrenadores/$id'),
+        headers: {'Content-Type': 'application/json'},
+        body: json.encode(data),
+      );
+>>>>>>> 77fbf37e833f546a83348df26e99d07ab761018b
 
       if (response.statusCode == 200 || response.statusCode == 204) {
         return true;
@@ -107,7 +149,14 @@ Future<Entrenador?> getEntrenadorByPersonaId(int idPersona) async {
   // Eliminar entrenador
   Future<bool> deleteEntrenador(int id) async {
     try {
+<<<<<<< HEAD
       final response = await _apiService.delete('/entrenadores/$id');
+=======
+      final response = await http.delete(
+        Uri.parse('$baseUrl/entrenadores/$id'),
+        headers: {'Content-Type': 'application/json'},
+      );
+>>>>>>> 77fbf37e833f546a83348df26e99d07ab761018b
 
       if (response.statusCode == 200 || response.statusCode == 204) {
         return true;

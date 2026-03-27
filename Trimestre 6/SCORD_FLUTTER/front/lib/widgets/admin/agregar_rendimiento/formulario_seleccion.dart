@@ -1,12 +1,16 @@
 import 'package:flutter/material.dart';
 import '../../../models/categoria_model.dart';
 import '../../../models/jugador_model.dart';
+<<<<<<< HEAD
 import '../../../models/competencia_model.dart';
+=======
+>>>>>>> 77fbf37e833f546a83348df26e99d07ab761018b
 import '../../../models/partido_model.dart';
 
 class FormularioSeleccion extends StatelessWidget {
   final List<Categoria> categorias;
   final List<Jugador> jugadoresFiltrados;
+<<<<<<< HEAD
   final List<Competencia> competenciasFiltradas;
   final List<Partido> partidosFiltrados;
   
@@ -20,6 +24,13 @@ class FormularioSeleccion extends StatelessWidget {
   
   final Function(String?) onCategoriaChanged;
   final Function(int?) onCompetenciaChanged;
+=======
+  final List<Partido> partidos;
+  final String? categoriaSeleccionada;
+  final String? jugadorSeleccionado;
+  final String? partidoSeleccionado;
+  final Function(String?) onCategoriaChanged;
+>>>>>>> 77fbf37e833f546a83348df26e99d07ab761018b
   final Function(String?) onJugadorChanged;
   final Function(String?) onPartidoChanged;
 
@@ -27,6 +38,7 @@ class FormularioSeleccion extends StatelessWidget {
     super.key,
     required this.categorias,
     required this.jugadoresFiltrados,
+<<<<<<< HEAD
     required this.competenciasFiltradas,
     required this.partidosFiltrados,
     required this.categoriaSeleccionada,
@@ -37,6 +49,13 @@ class FormularioSeleccion extends StatelessWidget {
     required this.isLoadingPartidos,
     required this.onCategoriaChanged,
     required this.onCompetenciaChanged,
+=======
+    required this.partidos,
+    required this.categoriaSeleccionada,
+    required this.jugadorSeleccionado,
+    required this.partidoSeleccionado,
+    required this.onCategoriaChanged,
+>>>>>>> 77fbf37e833f546a83348df26e99d07ab761018b
     required this.onJugadorChanged,
     required this.onPartidoChanged,
   });
@@ -45,12 +64,16 @@ class FormularioSeleccion extends StatelessWidget {
   Widget build(BuildContext context) {
     return Card(
       elevation: 4,
+<<<<<<< HEAD
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+=======
+>>>>>>> 77fbf37e833f546a83348df26e99d07ab761018b
       child: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+<<<<<<< HEAD
             Row(
               children: [
                 Container(
@@ -85,6 +108,28 @@ class FormularioSeleccion extends StatelessWidget {
               value: categoriaSeleccionada,
               items: [
                 const DropdownMenuItem(value: null, child: Text("-- Selecciona categoría --")),
+=======
+            const Text(
+              'Seleccionar Jugador y Partido',
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: Color(0xffe63946)
+              ),
+            ),
+            const SizedBox(height: 16),
+            
+            // Dropdown Categoría
+            DropdownButtonFormField<String>(
+              decoration: const InputDecoration(
+                labelText: 'Categoría *',
+                labelStyle: TextStyle(color: Color(0xffe63946)),
+                border: OutlineInputBorder(),
+              ),
+              value: categoriaSeleccionada,
+              items: [
+                const DropdownMenuItem(value: null, child: Text("Seleccionar categoría")),
+>>>>>>> 77fbf37e833f546a83348df26e99d07ab761018b
                 ...categorias.map((cat) => DropdownMenuItem(
                   value: cat.idCategorias.toString(),
                   child: Text(cat.descripcion),
@@ -94,6 +139,7 @@ class FormularioSeleccion extends StatelessWidget {
             ),
             const SizedBox(height: 16),
 
+<<<<<<< HEAD
             // ✅ FILTRO 2: Competencia (filtrada por categoría)
             if (isLoadingCompetencias)
               const Center(
@@ -238,6 +284,18 @@ class FormularioSeleccion extends StatelessWidget {
               value: jugadorSeleccionado,
               items: [
                 const DropdownMenuItem(value: null, child: Text("-- Selecciona jugador --")),
+=======
+            // Dropdown Jugador
+            DropdownButtonFormField<String>(
+              decoration: const InputDecoration(
+                labelText: 'Jugador *',
+                labelStyle: TextStyle(color: Color(0xffe63946)),
+                border: OutlineInputBorder(),
+              ),
+              value: jugadorSeleccionado,
+              items: [
+                const DropdownMenuItem(value: null, child: Text("Seleccionar jugador")),
+>>>>>>> 77fbf37e833f546a83348df26e99d07ab761018b
                 ...jugadoresFiltrados.map((jug) {
                   final nombre = '${jug.persona.nombre1} ${jug.persona.apellido1}';
                   return DropdownMenuItem(
@@ -248,6 +306,28 @@ class FormularioSeleccion extends StatelessWidget {
               ],
               onChanged: categoriaSeleccionada == null ? null : onJugadorChanged,
             ),
+<<<<<<< HEAD
+=======
+            const SizedBox(height: 16),
+
+            // Dropdown Partido
+            DropdownButtonFormField<String>(
+              decoration: const InputDecoration(
+                labelText: 'Partido *',
+                labelStyle: TextStyle(color: Color(0xffe63946)),
+                border: OutlineInputBorder(),
+              ),
+              value: partidoSeleccionado,
+              items: [
+                const DropdownMenuItem(value: null, child: Text("Seleccionar partido")),
+                ...partidos.map((partido) => DropdownMenuItem(
+                  value: partido.idPartidos.toString(),
+                  child: Text(partido.rival ?? 'Partido #${partido.idPartidos}'),
+                )),
+              ],
+              onChanged: onPartidoChanged,
+            ),
+>>>>>>> 77fbf37e833f546a83348df26e99d07ab761018b
           ],
         ),
       ),

@@ -38,14 +38,28 @@ class AuthService {
           
           final payloadString = utf8.decode(base64Url.decode(normalized));
           final payloadMap = jsonDecode(payloadString) as Map<String, dynamic>;
+<<<<<<< HEAD
           idPersonas = int.tryParse(payloadMap['sub']?.toString() ?? '');
         }
       } catch (e) {
         rethrow;
+=======
+          
+          print('🔍 Token payload: $payloadMap');
+          idPersonas = int.tryParse(payloadMap['sub']?.toString() ?? '');
+          print('🔍 idPersonas extraído del token: $idPersonas');
+        }
+      } catch (e) {
+        print('⚠️ Error decodificando token: $e');
+>>>>>>> 77fbf37e833f546a83348df26e99d07ab761018b
       }
 
       // Guardar token
       await _guardarToken(token);
+<<<<<<< HEAD
+=======
+      print('✅ Token guardado');
+>>>>>>> 77fbf37e833f546a83348df26e99d07ab761018b
 
       final userOriginal = data["user"] as Map<String, dynamic>;
       final userLimpio = <String, dynamic>{};
@@ -54,6 +68,10 @@ class AuthService {
       if (idPersonas != null) {
         userLimpio['idPersonas'] = idPersonas;
       } else {
+<<<<<<< HEAD
+=======
+        print('⚠️ No se pudo extraer idPersonas del token');
+>>>>>>> 77fbf37e833f546a83348df26e99d07ab761018b
         userLimpio['idPersonas'] = 0; // Valor por defecto
       }
       
@@ -88,12 +106,27 @@ class AuthService {
         userLimpio['idRoles'] = rolId;
       }
       
+<<<<<<< HEAD
       final userJsonString = jsonEncode(userLimpio);
       await _guardarUsuario(userJsonString);
       
       await _guardarRol(rolId);
       
     } catch (e) {
+=======
+      print('🔍 Usuario limpio a guardar: $userLimpio');
+      
+      final userJsonString = jsonEncode(userLimpio);
+      await _guardarUsuario(userJsonString);
+      print('✅ Usuario guardado');
+      
+      await _guardarRol(rolId);
+      print('✅ Rol guardado: $rolId');
+      
+    } catch (e, stackTrace) {
+      print('❌ ERROR al guardar datos de sesión: $e');
+      print('Stack trace: $stackTrace');
+>>>>>>> 77fbf37e833f546a83348df26e99d07ab761018b
       throw Exception('Error al guardar los datos de sesión');
     }
   }
@@ -131,16 +164,35 @@ class AuthService {
     final prefs = await SharedPreferences.getInstance();
     final userJson = prefs.getString('user');
     
+<<<<<<< HEAD
     if (userJson == null || userJson.isEmpty || userJson == 'null') {
+=======
+    print('🔍 USER JSON RECUPERADO: $userJson');
+    
+    if (userJson == null || userJson.isEmpty || userJson == 'null') {
+      print('❌ No hay datos de usuario guardados o son inválidos');
+>>>>>>> 77fbf37e833f546a83348df26e99d07ab761018b
       return null;
     }
     
     final userMap = jsonDecode(userJson) as Map<String, dynamic>;
+<<<<<<< HEAD
     
     final persona = Persona.fromJson(userMap);
     
     return persona;
   } catch (e) {  
+=======
+    print('🔍 USER MAP decodificado: $userMap');
+    
+    final persona = Persona.fromJson(userMap);
+    print('✅ Persona creada: ${persona.nombreCompleto}, Rol: ${persona.idRoles}');
+    
+    return persona;
+  } catch (e, stackTrace) {
+    print('❌ ERROR en obtenerUsuario: $e');
+    print('Stack trace: $stackTrace');
+>>>>>>> 77fbf37e833f546a83348df26e99d07ab761018b
     return null;
   }
 }
@@ -148,6 +200,10 @@ class AuthService {
 Future<void> limpiarTodo() async {
   final prefs = await SharedPreferences.getInstance();
   await prefs.clear();
+<<<<<<< HEAD
+=======
+  print('🧹 Todos los datos limpiados');
+>>>>>>> 77fbf37e833f546a83348df26e99d07ab761018b
 }
 
   // Obtener rol
@@ -182,6 +238,10 @@ Future<void> limpiarTodo() async {
       }
       return null;
     } catch (e) {
+<<<<<<< HEAD
+=======
+      print('Error obteniendo datos actualizados: $e');
+>>>>>>> 77fbf37e833f546a83348df26e99d07ab761018b
       return null;
     }
   }
@@ -197,10 +257,18 @@ Future<void> limpiarTodo() async {
   // Obtener headers con token para otras peticiones
   Future<Map<String, String>> obtenerHeaders() async {
   final token = await obtenerToken();
+<<<<<<< HEAD
+=======
+  print('🔍 Token para request: $token');
+>>>>>>> 77fbf37e833f546a83348df26e99d07ab761018b
   final headers = {
     'Content-Type': 'application/json',
     'Authorization': 'Bearer $token',
   };
+<<<<<<< HEAD
+=======
+  print('🔍 Headers: $headers');
+>>>>>>> 77fbf37e833f546a83348df26e99d07ab761018b
   return headers;
 }
 }

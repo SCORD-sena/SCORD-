@@ -3,15 +3,21 @@ import 'dart:convert';
 import '../../models/categoria_model.dart';
 import '../../models/jugador_model.dart';
 import '../../models/partido_model.dart';
+<<<<<<< HEAD
 import '../../models/competencia_model.dart';
 import '../../services/rendimiento_service.dart';
 import '../../services/api_service.dart';
 import '../../services/competencia_service.dart';
 import '../../services/cronograma_service.dart';
+=======
+import '../../services/rendimiento_service.dart';
+import '../../services/api_service.dart';
+>>>>>>> 77fbf37e833f546a83348df26e99d07ab761018b
 
 class AgregarRendimientoController extends ChangeNotifier {
   final RendimientoService _rendimientoService = RendimientoService();
   final ApiService _apiService = ApiService();
+<<<<<<< HEAD
   final CompetenciaService _competenciaService = CompetenciaService();
   final CronogramaService _cronogramaService = CronogramaService();
 
@@ -29,6 +35,15 @@ class AgregarRendimientoController extends ChangeNotifier {
   
   String? categoriaSeleccionada;
   int? competenciaSeleccionada;
+=======
+
+  // State
+  bool loading = false;
+  List<Jugador> jugadores = [];
+  List<Categoria> categorias = [];
+  List<Partido> partidos = [];
+  String? categoriaSeleccionada;
+>>>>>>> 77fbf37e833f546a83348df26e99d07ab761018b
   List<Jugador> jugadoresFiltrados = [];
   String? jugadorSeleccionado;
   String? partidoSeleccionado;
@@ -44,10 +59,14 @@ class AgregarRendimientoController extends ChangeNotifier {
   final TextEditingController tarjetasRojasController = TextEditingController(text: "0");
   final TextEditingController arcoEnCeroController = TextEditingController(text: "0");
 
+<<<<<<< HEAD
   // ============================================================
   // INICIALIZACIÓN
   // ============================================================
 
+=======
+  // Inicialización
+>>>>>>> 77fbf37e833f546a83348df26e99d07ab761018b
   Future<void> inicializar() async {
     await cargarDatos();
   }
@@ -56,10 +75,22 @@ class AgregarRendimientoController extends ChangeNotifier {
     try {
       final jugadoresRes = await _apiService.get('/jugadores');
       final categoriasRes = await _apiService.get('/categorias');
+<<<<<<< HEAD
 
       if (jugadoresRes.statusCode == 200 && categoriasRes.statusCode == 200) {
         final jugadoresData = json.decode(jugadoresRes.body);
         final categoriasData = json.decode(categoriasRes.body);
+=======
+      final partidosRes = await _apiService.get('/partidos');
+
+      if (jugadoresRes.statusCode == 200 && 
+          categoriasRes.statusCode == 200 && 
+          partidosRes.statusCode == 200) {
+        
+        final jugadoresData = json.decode(jugadoresRes.body);
+        final categoriasData = json.decode(categoriasRes.body);
+        final partidosData = json.decode(partidosRes.body);
+>>>>>>> 77fbf37e833f546a83348df26e99d07ab761018b
 
         List<dynamic> jugadoresList;
         if (jugadoresData is Map && jugadoresData.containsKey('data')) {
@@ -70,10 +101,14 @@ class AgregarRendimientoController extends ChangeNotifier {
 
         jugadores = jugadoresList.map((j) => Jugador.fromJson(j)).toList();
         categorias = (categoriasData as List).map((c) => Categoria.fromJson(c)).toList();
+<<<<<<< HEAD
         
         // Cargar competencias y partidos
         competencias = await _competenciaService.getCompetencias();
         partidos = await _cronogramaService.getPartidos();
+=======
+        partidos = (partidosData as List).map((p) => Partido.fromJson(p)).toList();
+>>>>>>> 77fbf37e833f546a83348df26e99d07ab761018b
         
         notifyListeners();
       }
@@ -82,10 +117,14 @@ class AgregarRendimientoController extends ChangeNotifier {
     }
   }
 
+<<<<<<< HEAD
   // ============================================================
   // FILTRADO
   // ============================================================
 
+=======
+  // Filtrado de jugadores
+>>>>>>> 77fbf37e833f546a83348df26e99d07ab761018b
   void filtrarJugadores(String? categoriaId) {
     if (categoriaId != null) {
       final id = int.tryParse(categoriaId);
@@ -98,6 +137,7 @@ class AgregarRendimientoController extends ChangeNotifier {
     notifyListeners();
   }
 
+<<<<<<< HEAD
   Future<void> filtrarCompetenciasPorCategoria(int idCategoria) async {
     isLoadingCompetencias = true;
     notifyListeners();
@@ -179,6 +219,12 @@ class AgregarRendimientoController extends ChangeNotifier {
       partidoSeleccionado = null;
       notifyListeners();
     }
+=======
+  // Selección
+  void seleccionarCategoria(String? value) {
+    categoriaSeleccionada = value;
+    filtrarJugadores(value);
+>>>>>>> 77fbf37e833f546a83348df26e99d07ab761018b
   }
 
   void seleccionarJugador(String? value) {
@@ -191,19 +237,26 @@ class AgregarRendimientoController extends ChangeNotifier {
     notifyListeners();
   }
 
+<<<<<<< HEAD
   // ============================================================
   // VALIDACIÓN
   // ============================================================
 
+=======
+  // Validación
+>>>>>>> 77fbf37e833f546a83348df26e99d07ab761018b
   String? validarFormulario() {
     if (categoriaSeleccionada == null || categoriaSeleccionada!.isEmpty) {
       return 'Debes seleccionar una categoría';
     }
 
+<<<<<<< HEAD
     if (competenciaSeleccionada == null) {
       return 'Debes seleccionar una competencia';
     }
 
+=======
+>>>>>>> 77fbf37e833f546a83348df26e99d07ab761018b
     if (jugadorSeleccionado == null || jugadorSeleccionado!.isEmpty) {
       return 'Debes seleccionar un jugador';
     }
@@ -241,10 +294,14 @@ class AgregarRendimientoController extends ChangeNotifier {
     return null;
   }
 
+<<<<<<< HEAD
   // ============================================================
   // CREAR ESTADÍSTICA
   // ============================================================
 
+=======
+  // Crear estadística
+>>>>>>> 77fbf37e833f546a83348df26e99d07ab761018b
   Future<bool> crearEstadistica() async {
     final error = validarFormulario();
     if (error != null) {
@@ -284,10 +341,14 @@ class AgregarRendimientoController extends ChangeNotifier {
     }
   }
 
+<<<<<<< HEAD
   // ============================================================
   // DISPOSE
   // ============================================================
 
+=======
+  // Limpiar recursos
+>>>>>>> 77fbf37e833f546a83348df26e99d07ab761018b
   @override
   void dispose() {
     golesController.dispose();

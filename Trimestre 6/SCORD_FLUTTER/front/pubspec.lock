@@ -25,6 +25,7 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.4.0"
+<<<<<<< HEAD
   charcode:
     dependency: transitive
     description:
@@ -33,6 +34,8 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.4.0"
+=======
+>>>>>>> 77fbf37e833f546a83348df26e99d07ab761018b
   clock:
     dependency: transitive
     description:
@@ -49,6 +52,7 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.19.1"
+<<<<<<< HEAD
   csslib:
     dependency: transitive
     description:
@@ -57,6 +61,8 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.0.2"
+=======
+>>>>>>> 77fbf37e833f546a83348df26e99d07ab761018b
   cupertino_icons:
     dependency: "direct main"
     description:
@@ -112,6 +118,7 @@ packages:
     description: flutter
     source: sdk
     version: "0.0.0"
+<<<<<<< HEAD
   html:
     dependency: transitive
     description:
@@ -120,6 +127,8 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.15.6"
+=======
+>>>>>>> 77fbf37e833f546a83348df26e99d07ab761018b
   http:
     dependency: "direct main"
     description:
@@ -208,6 +217,7 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.9.1"
+<<<<<<< HEAD
   path_provider:
     dependency: "direct main"
     description:
@@ -232,6 +242,8 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.5.1"
+=======
+>>>>>>> 77fbf37e833f546a83348df26e99d07ab761018b
   path_provider_linux:
     dependency: transitive
     description:
@@ -256,6 +268,7 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.3.0"
+<<<<<<< HEAD
   permission_handler:
     dependency: "direct main"
     description:
@@ -304,6 +317,8 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.2.1"
+=======
+>>>>>>> 77fbf37e833f546a83348df26e99d07ab761018b
   platform:
     dependency: transitive
     description:
@@ -437,6 +452,7 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.4.0"
+<<<<<<< HEAD
   universal_html:
     dependency: "direct main"
     description:
@@ -453,6 +469,8 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.3.1"
+=======
+>>>>>>> 77fbf37e833f546a83348df26e99d07ab761018b
   vector_math:
     dependency: transitive
     description:

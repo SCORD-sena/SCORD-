@@ -279,7 +279,10 @@ class PerfilJugadorController extends ChangeNotifier {
     }
     notifyListeners();
   }
+<<<<<<< HEAD
   
+=======
+>>>>>>> 77fbf37e833f546a83348df26e99d07ab761018b
 
   // Helpers
   String calcularEdad(DateTime? fechaNacimiento) {
@@ -298,6 +301,9 @@ class PerfilJugadorController extends ChangeNotifier {
     controllers.forEach((_, controller) => controller.dispose());
     super.dispose();
   }
+<<<<<<< HEAD
 
   
+=======
+>>>>>>> 77fbf37e833f546a83348df26e99d07ab761018b
 }

@@ -55,6 +55,12 @@ class InicioAdminController {
       // Verificar si hay usuario autenticado
       final token = await _authService.obtenerToken();
       final user = await _authService.obtenerUsuario();
+<<<<<<< HEAD
+=======
+      
+      print('🔍 TOKEN en InicioAdmin: $token');
+      print('🔍 USER DATA en InicioAdmin: ${user?.toJson()}');
+>>>>>>> 77fbf37e833f546a83348df26e99d07ab761018b
 
       if (token == null || user == null) {
         throw Exception('No hay sesión activa. Por favor inicia sesión.');
@@ -62,6 +68,10 @@ class InicioAdminController {
 
       // Verificar que el usuario sea administrador
       final rolId = user.idRoles ?? 0;
+<<<<<<< HEAD
+=======
+      print('🔍 ROL ID VERIFICADO en InicioAdmin: $rolId');
+>>>>>>> 77fbf37e833f546a83348df26e99d07ab761018b
       
       if (rolId != 1) {
         throw Exception('No tienes permisos de administrador');
@@ -73,11 +83,22 @@ class InicioAdminController {
         adminData = datosActualizados ?? user;
       } catch (apiError) {
         // Si falla la API, usar datos guardados
+<<<<<<< HEAD
         adminData = user;
       }
       
       
     } catch (e) {
+=======
+        print('⚠️ Usando datos guardados: $apiError');
+        adminData = user;
+      }
+      
+      print('✅ Admin data cargada: ${adminData?.nombreCompleto}');
+      
+    } catch (e) {
+      print('❌ ERROR en initializeAdminData: $e');
+>>>>>>> 77fbf37e833f546a83348df26e99d07ab761018b
       error = e.toString().replaceAll('Exception: ', '');
 
       // Redirigir al login si no hay sesión
@@ -97,6 +118,10 @@ class InicioAdminController {
       await _authService.logout();
       onNavigateToLogin();
     } catch (e) {
+<<<<<<< HEAD
+=======
+      print('❌ Error al cerrar sesión: $e');
+>>>>>>> 77fbf37e833f546a83348df26e99d07ab761018b
       error = 'Error al cerrar sesión';
     }
   }

@@ -118,6 +118,7 @@ class JugadoresController extends Controller
             'message' => 'Jugador eliminado correctamente'
         ], 200);
     }
+<<<<<<< HEAD
 
     /**
      * Obtener datos del jugador autenticado
@@ -196,4 +197,6 @@ class JugadoresController extends Controller
             ], 500);
         }
     }
+=======
+>>>>>>> 77fbf37e833f546a83348df26e99d07ab761018b
 }

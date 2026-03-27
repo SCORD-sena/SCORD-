@@ -42,6 +42,7 @@ class EntrenadoresController extends Controller
         ], 200);
     }
 
+<<<<<<< HEAD
     // Obtener entrenador por ID de persona
 public function getByPersonaId($idPersona)
 {
@@ -82,6 +83,8 @@ public function getCategoriasByEntrenador($idEntrenador)
     ], 200);
 }
 
+=======
+>>>>>>> 77fbf37e833f546a83348df26e99d07ab761018b
     public function store(Request $request)
     {
         $validator = Validator::make($request->all(), [
@@ -174,6 +177,7 @@ public function getCategoriasByEntrenador($idEntrenador)
             'status' => 200
         ], 200);
     }
+<<<<<<< HEAD
 
     // Obtener las categorías del entrenador autenticado
     public function misCategorias(Request $request)
@@ -207,4 +211,6 @@ public function getCategoriasByEntrenador($idEntrenador)
             'status' => 200
         ], 200);
     }
+=======
+>>>>>>> 77fbf37e833f546a83348df26e99d07ab761018b
 }

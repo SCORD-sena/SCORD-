@@ -111,6 +111,7 @@ class CompetenciasController extends Controller
             'status' => 200
         ], 200);
     }
+<<<<<<< HEAD
 
     public function getCompetenciasByCategoria($idCategorias)
     {
@@ -127,4 +128,6 @@ class CompetenciasController extends Controller
 
         return response()->json($competencias, 200);
     }
+=======
+>>>>>>> 77fbf37e833f546a83348df26e99d07ab761018b
 }

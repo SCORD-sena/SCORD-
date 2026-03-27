@@ -258,6 +258,7 @@ static String? validarFechaNacimiento(String? value) {
     return 'Fecha inválida';
   }
 }
+<<<<<<< HEAD
 
 // ============================================
 // VALIDADORES PARA AGREGAR ENTRENADOR
@@ -484,3 +485,6 @@ static String? validarFormularioAgregarEntrenador({
     return null;
   }
 }
+=======
+}
+>>>>>>> 77fbf37e833f546a83348df26e99d07ab761018b

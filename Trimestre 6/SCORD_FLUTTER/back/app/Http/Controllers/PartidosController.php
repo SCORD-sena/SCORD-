@@ -117,6 +117,7 @@ class PartidosController extends Controller
             'message' => 'información del partido eliminada exitosamente'
         ], 200);
     }
+<<<<<<< HEAD
     /**
  * Obtener partidos por competencia (a través de cronogramas)
  */
@@ -135,4 +136,6 @@ public function getPartidosByCompetencia($idCompetencias)
 
     return response()->json($partidos, 200);
 }
+=======
+>>>>>>> 77fbf37e833f546a83348df26e99d07ab761018b
 }

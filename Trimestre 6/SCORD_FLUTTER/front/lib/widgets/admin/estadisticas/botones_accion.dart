@@ -22,6 +22,7 @@ class BotonesAccion extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+<<<<<<< HEAD
     return Container(
       padding: const EdgeInsets.all(12.0),
       decoration: BoxDecoration(
@@ -83,11 +84,60 @@ class BotonesAccion extends StatelessWidget {
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(8),
                 ),
+=======
+    return Padding(
+      padding: const EdgeInsets.all(12.0),
+      child: Wrap(
+        spacing: 6,
+        runSpacing: 6,
+        alignment: WrapAlignment.center,
+        children: [
+          ElevatedButton.icon(
+            onPressed: onAgregar,
+            icon: const Icon(Icons.add, color: Colors.white, size: 16),
+            label: const Text(
+              'Agregar',
+              style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 12)
+            ),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.green,
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              minimumSize: const Size(0, 36),
+            ),
+          ),
+
+          if (!modoEdicion) ...[
+            ElevatedButton.icon(
+              onPressed: onEditar,
+              icon: const Icon(Icons.edit, color: Colors.white, size: 16),
+              label: const Text(
+                'Editar',
+                style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 12)
+              ),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.orange,
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                minimumSize: const Size(0, 36),
+              ),
+            ),
+            ElevatedButton.icon(
+              onPressed: onEliminar,
+              icon: const Icon(Icons.delete, color: Colors.white, size: 16),
+              label: const Text(
+                'Eliminar',
+                style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 12)
+              ),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.red,
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                minimumSize: const Size(0, 36),
+>>>>>>> 77fbf37e833f546a83348df26e99d07ab761018b
               ),
             ),
           ] else ...[
             ElevatedButton.icon(
               onPressed: loading ? null : onGuardar,
+<<<<<<< HEAD
               icon: loading
                   ? const SizedBox(
                       width: 18,
@@ -110,10 +160,28 @@ class BotonesAccion extends StatelessWidget {
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(8),
                 ),
+=======
+              icon: loading 
+                ? const SizedBox(
+                    width: 16, 
+                    height: 16, 
+                    child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2)
+                  ) 
+                : const Icon(Icons.save, color: Colors.white, size: 16),
+              label: Text(
+                loading ? "Guardando..." : "Guardar",
+                style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 12)
+              ),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.green,
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                minimumSize: const Size(0, 36),
+>>>>>>> 77fbf37e833f546a83348df26e99d07ab761018b
               ),
             ),
             ElevatedButton.icon(
               onPressed: loading ? null : onCancelar,
+<<<<<<< HEAD
               icon: const Icon(Icons.cancel, size: 18),
               label: const Text('Cancelar', style: TextStyle(fontSize: 13)),
               style: ElevatedButton.styleFrom(
@@ -127,6 +195,20 @@ class BotonesAccion extends StatelessWidget {
               ),
             ),
           ],
+=======
+              icon: const Icon(Icons.cancel, color: Colors.white, size: 16),
+              label: const Text(
+                'Cancelar',
+                style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 12)
+              ),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.blueGrey,
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                minimumSize: const Size(0, 36),
+              ),
+            ),
+          ]
+>>>>>>> 77fbf37e833f546a83348df26e99d07ab761018b
         ],
       ),
     );

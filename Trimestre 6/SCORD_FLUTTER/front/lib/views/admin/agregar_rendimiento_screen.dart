@@ -112,6 +112,7 @@ class _AgregarRendimientoScreenState extends State<AgregarRendimientoScreen> {
             ),
             const SizedBox(height: 20),
 
+<<<<<<< HEAD
            // Formulario de selección (Widget reutilizable)
 FormularioSeleccion(
   categorias: _controller.categorias,
@@ -130,6 +131,21 @@ FormularioSeleccion(
   onPartidoChanged: _controller.seleccionarPartido,
 ),
 const SizedBox(height: 20),
+=======
+            // Formulario de selección (Widget reutilizable)
+            FormularioSeleccion(
+              categorias: _controller.categorias,
+              jugadoresFiltrados: _controller.jugadoresFiltrados,
+              partidos: _controller.partidos,
+              categoriaSeleccionada: _controller.categoriaSeleccionada,
+              jugadorSeleccionado: _controller.jugadorSeleccionado,
+              partidoSeleccionado: _controller.partidoSeleccionado,
+              onCategoriaChanged: _controller.seleccionarCategoria,
+              onJugadorChanged: _controller.seleccionarJugador,
+              onPartidoChanged: _controller.seleccionarPartido,
+            ),
+            const SizedBox(height: 20),
+>>>>>>> 77fbf37e833f546a83348df26e99d07ab761018b
 
             // Formulario de estadísticas (Widget reutilizable)
             FormularioEstadisticas(

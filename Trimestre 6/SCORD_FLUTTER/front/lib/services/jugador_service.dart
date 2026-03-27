@@ -107,6 +107,7 @@ class JugadorService {
       throw Exception('Error al eliminar jugador');
     }
   }
+<<<<<<< HEAD
   // Obtener jugadores filtrados por categorías del entrenador
 Future<List<Jugador>> fetchJugadoresByCategoriasEntrenador(List<int> idsCategorias) async {
   try {
@@ -157,4 +158,6 @@ Future<List<Jugador>> fetchJugadoresByCategoriasEntrenador(List<int> idsCategori
       throw Exception('Error al buscar jugador: $e');
     }
   }
+=======
+>>>>>>> 77fbf37e833f546a83348df26e99d07ab761018b
 }

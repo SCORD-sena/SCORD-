@@ -1,12 +1,16 @@
 import 'package:flutter/material.dart';
 import '../../../models/categoria_model.dart';
 import '../../../models/jugador_model.dart';
+<<<<<<< HEAD
 import '../../../models/competencia_model.dart';
 import '../../../models/partido_model.dart';
+=======
+>>>>>>> 77fbf37e833f546a83348df26e99d07ab761018b
 
 class InfoJugadorCard extends StatelessWidget {
   final List<Categoria> categorias;
   final List<Jugador> jugadoresFiltrados;
+<<<<<<< HEAD
   final List<Competencia> competenciasFiltradas;
   final List<Partido> partidosFiltrados;
   
@@ -22,12 +26,20 @@ class InfoJugadorCard extends StatelessWidget {
   final Function(int?) onJugadorChanged;
   final Function(int?) onCompetenciaChanged;
   final Function(int?) onPartidoChanged;
+=======
+  final String? categoriaSeleccionadaId;
+  final Jugador? jugadorSeleccionado;
+  final bool modoEdicion;
+  final Function(String?) onCategoriaChanged;
+  final Function(int?) onJugadorChanged;
+>>>>>>> 77fbf37e833f546a83348df26e99d07ab761018b
   final String Function(DateTime?) calcularEdad;
 
   const InfoJugadorCard({
     super.key,
     required this.categorias,
     required this.jugadoresFiltrados,
+<<<<<<< HEAD
     required this.competenciasFiltradas,
     required this.partidosFiltrados,
     required this.categoriaSeleccionadaId,
@@ -41,6 +53,13 @@ class InfoJugadorCard extends StatelessWidget {
     required this.onJugadorChanged,
     required this.onCompetenciaChanged,
     required this.onPartidoChanged,
+=======
+    required this.categoriaSeleccionadaId,
+    required this.jugadorSeleccionado,
+    required this.modoEdicion,
+    required this.onCategoriaChanged,
+    required this.onJugadorChanged,
+>>>>>>> 77fbf37e833f546a83348df26e99d07ab761018b
     required this.calcularEdad,
   });
 
@@ -64,6 +83,7 @@ class InfoJugadorCard extends StatelessWidget {
 
     return Card(
       elevation: 3,
+<<<<<<< HEAD
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -102,6 +122,19 @@ class InfoJugadorCard extends StatelessWidget {
                 labelStyle: const TextStyle(color: Color(0xffe63946), fontSize: 13),
                 contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
                 prefixIcon: const Icon(Icons.group, color: Color(0xffe63946), size: 20),
+=======
+      child: Padding(
+        padding: const EdgeInsets.all(14.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            DropdownButtonFormField<String>(
+              decoration: const InputDecoration(
+                labelText: 'Seleccionar Categoría',
+                border: OutlineInputBorder(),
+                labelStyle: TextStyle(color: Color(0xffe63946), fontSize: 13),
+                contentPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+>>>>>>> 77fbf37e833f546a83348df26e99d07ab761018b
               ),
               style: const TextStyle(fontSize: 13, color: Colors.black),
               value: categoriaSeleccionadaId,
@@ -115,6 +148,7 @@ class InfoJugadorCard extends StatelessWidget {
               onChanged: modoEdicion ? null : onCategoriaChanged,
             ),
             const SizedBox(height: 12),
+<<<<<<< HEAD
 
             // ✅ FILTRO 2: Competencia (filtrada por categoría)
             if (isLoadingCompetencias)
@@ -295,6 +329,14 @@ class InfoJugadorCard extends StatelessWidget {
                 labelStyle: const TextStyle(color: Color(0xffe63946), fontSize: 13),
                 contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
                 prefixIcon: const Icon(Icons.person_outline, color: Color(0xffe63946), size: 20),
+=======
+            DropdownButtonFormField<int>(
+              decoration: const InputDecoration(
+                labelText: 'Seleccionar Jugador',
+                border: OutlineInputBorder(),
+                labelStyle: TextStyle(color: Color(0xffe63946), fontSize: 13),
+                contentPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+>>>>>>> 77fbf37e833f546a83348df26e99d07ab761018b
               ),
               style: const TextStyle(fontSize: 13, color: Colors.black),
               value: jugadorSeleccionado?.idJugadores,
@@ -309,10 +351,13 @@ class InfoJugadorCard extends StatelessWidget {
               disabledHint: const Text("Selecciona un jugador"),
             ),
             const SizedBox(height: 16),
+<<<<<<< HEAD
             
             const Divider(),
             const SizedBox(height: 16),
             
+=======
+>>>>>>> 77fbf37e833f546a83348df26e99d07ab761018b
             const Center(child: Icon(Icons.person, size: 80, color: Colors.grey)),
             const SizedBox(height: 12),
 
