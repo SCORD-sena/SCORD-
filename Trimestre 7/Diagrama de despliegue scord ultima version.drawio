@@ -1,0 +1,47 @@
+<mxfile host="app.diagrams.net" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36" version="29.6.6">
+  <diagram name="Página-1" id="alir0AnAtvNhvtGwy24o">
+    <mxGraphModel dx="1901" dy="1081" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="uy7eNRSifl6P_JV1BCiX-5" edge="1" parent="1" source="H5slVW1T9JgZI_gIzenq-1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;sketch=1;hachureGap=4;jiggle=2;curveFitting=1;orthogonalLoop=1;jettySize=auto;html=1;fontFamily=Architects Daughter;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DArchitects%2BDaughter;" target="H5slVW1T9JgZI_gIzenq-6">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="390" y="320" />
+              <mxPoint x="180" y="320" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="uy7eNRSifl6P_JV1BCiX-6" edge="1" parent="1" source="H5slVW1T9JgZI_gIzenq-1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;sketch=1;hachureGap=4;jiggle=2;curveFitting=1;orthogonalLoop=1;jettySize=auto;html=1;fontFamily=Architects Daughter;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DArchitects%2BDaughter;" target="H5slVW1T9JgZI_gIzenq-7">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="430" y="320" />
+              <mxPoint x="640" y="320" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="H5slVW1T9JgZI_gIzenq-1" parent="1" style="verticalAlign=top;align=center;spacingTop=8;spacingLeft=2;spacingRight=12;shape=cube;size=10;direction=south;fontStyle=4;html=1;whiteSpace=wrap;" value="SCORD" vertex="1">
+          <mxGeometry height="310" width="540" x="130" y="360" as="geometry" />
+        </mxCell>
+        <mxCell id="H5slVW1T9JgZI_gIzenq-6" parent="1" style="verticalAlign=top;align=left;spacingTop=8;spacingLeft=2;spacingRight=12;shape=cube;size=10;direction=south;fontStyle=4;html=1;whiteSpace=wrap;" value="&amp;lt;&amp;lt;ACTOR&amp;gt;&amp;gt;&lt;div&gt;Navegador web&lt;br&gt;&lt;/div&gt;&lt;div&gt;&amp;lt;&amp;lt;tecnologías&amp;gt;&amp;gt;&lt;/div&gt;&lt;div&gt;react native&amp;nbsp;&lt;/div&gt;" vertex="1">
+          <mxGeometry height="120" width="180" x="90" y="180" as="geometry" />
+        </mxCell>
+        <mxCell id="H5slVW1T9JgZI_gIzenq-7" parent="1" style="verticalAlign=top;align=left;spacingTop=8;spacingLeft=2;spacingRight=12;shape=cube;size=10;direction=south;fontStyle=4;html=1;whiteSpace=wrap;" value="&amp;lt;&amp;lt;ACTOR&amp;gt;&amp;gt;&lt;div&gt;Dispositivo movil&lt;/div&gt;&lt;div&gt;&amp;lt;&amp;lt;tecnologia&amp;gt;&amp;gt;&lt;/div&gt;&lt;div&gt;flutter&lt;/div&gt;&lt;div&gt;&lt;br&gt;&lt;/div&gt;" vertex="1">
+          <mxGeometry height="120" width="180" x="550" y="180" as="geometry" />
+        </mxCell>
+        <mxCell id="uy7eNRSifl6P_JV1BCiX-1" parent="1" style="verticalAlign=top;align=left;spacingTop=8;spacingLeft=2;spacingRight=12;shape=cube;size=10;direction=south;fontStyle=4;html=1;whiteSpace=wrap;sketch=1;hachureGap=4;jiggle=2;curveFitting=1;fontFamily=Times New Roman;" value="&lt;div&gt;&amp;lt;&amp;lt;artifact&amp;gt;&amp;gt;&lt;/div&gt;&lt;div&gt;Frontend Web&lt;/div&gt;&lt;div&gt;Tecnología: React.js&lt;/div&gt;&lt;div&gt;Lenguaje: React, javascript,css&lt;/div&gt;&lt;div&gt;&lt;br style=&quot;text-align: center;&quot;&gt;&lt;/div&gt;" vertex="1">
+          <mxGeometry height="120" width="180" x="160" y="390" as="geometry" />
+        </mxCell>
+        <mxCell id="uy7eNRSifl6P_JV1BCiX-3" parent="1" style="verticalAlign=top;align=left;spacingTop=8;spacingLeft=2;spacingRight=12;shape=cube;size=10;direction=south;fontStyle=4;html=1;whiteSpace=wrap;sketch=1;hachureGap=4;jiggle=2;curveFitting=1;fontFamily=Times New Roman;" value="&lt;div&gt;&amp;lt;&amp;lt;artifact&amp;gt;&amp;gt;&lt;/div&gt;&lt;div&gt;App Móvil&lt;/div&gt;&lt;div&gt;Tecnología: Flutter&lt;/div&gt;&lt;div&gt;Lenguaje: Dart&lt;/div&gt;&lt;div&gt;&lt;br style=&quot;text-align: center;&quot;&gt;&lt;/div&gt;" vertex="1">
+          <mxGeometry height="120" width="180" x="450" y="390" as="geometry" />
+        </mxCell>
+        <mxCell id="uy7eNRSifl6P_JV1BCiX-4" parent="1" style="verticalAlign=top;align=left;spacingTop=8;spacingLeft=2;spacingRight=12;shape=cube;size=10;direction=south;fontStyle=4;html=1;whiteSpace=wrap;sketch=1;hachureGap=4;jiggle=2;curveFitting=1;fontFamily=Times New Roman;" value="&lt;div&gt;&lt;span style=&quot;background-color: transparent; color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));&quot;&gt;&amp;lt;&amp;lt;artifact&amp;gt;&amp;gt;&lt;/span&gt;&lt;/div&gt;&lt;div&gt;Backend API&lt;/div&gt;&lt;div&gt;Framework: Laravel 12&lt;/div&gt;&lt;div&gt;&lt;div&gt;Servidor AWS acdemy (EC2)&lt;/div&gt;&lt;div&gt;PHP 8.x&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;br&gt;&lt;/div&gt;&lt;div&gt;&lt;br style=&quot;text-align: center;&quot;&gt;&lt;/div&gt;" vertex="1">
+          <mxGeometry height="125" width="180" x="450" y="522.5" as="geometry" />
+        </mxCell>
+        <mxCell id="uy7eNRSifl6P_JV1BCiX-7" parent="1" style="verticalAlign=top;align=left;spacingTop=8;spacingLeft=2;spacingRight=12;shape=cube;size=10;direction=south;fontStyle=4;html=1;whiteSpace=wrap;sketch=1;hachureGap=4;jiggle=2;curveFitting=1;fontFamily=Architects Daughter;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DArchitects%2BDaughter;" value="&lt;p&gt;&lt;span style=&quot;background-color: transparent; color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255)); font-family: &amp;quot;Times New Roman&amp;quot;;&quot;&gt;&amp;lt;&amp;lt;artifact&amp;gt;&amp;gt;&lt;br&gt;&lt;/span&gt;&lt;span style=&quot;font-family: &amp;quot;Times New Roman&amp;quot;; background-color: transparent; color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));&quot;&gt;Base de Datos SCORD&lt;br&gt;&lt;/span&gt;&lt;span style=&quot;font-family: &amp;quot;Times New Roman&amp;quot;; background-color: transparent; color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));&quot;&gt;Servicio de Base de Datos en la&amp;nbsp;Nube&lt;br&gt;&lt;/span&gt;&lt;span style=&quot;font-family: &amp;quot;Times New Roman&amp;quot;; background-color: transparent; color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));&quot;&gt;AWS academy (EC2)&lt;br&gt;&lt;/span&gt;&lt;span style=&quot;background-color: transparent; color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255)); font-family: &amp;quot;Times New Roman&amp;quot;;&quot;&gt;MySQL / PostgreSQL&lt;/span&gt;&lt;/p&gt;&lt;div&gt;&lt;br style=&quot;font-family: &amp;quot;Times New Roman&amp;quot;;&quot;&gt;&lt;/div&gt;" vertex="1">
+          <mxGeometry height="120" width="180" x="160" y="525" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Registro de Estadísticas - SCORD</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link rel="stylesheet" href="/Css/InicioEntrenador.css">
+</head>
+
+<body>
+
+  <header class="header bg-white shadow-sm py-3">
+  <nav class="navbar container d-flex align-items-center justify-content-between flex-wrap">
+    <!-- Logo y título -->
+    <div class="d-flex align-items-center">
+      <img src="/Img/logo.jpg" alt="Logo SCORD" class="me-2" style="height: 50px;" />
+      <h4 class="mb-0 text-danger fw-bold">SCORD</h4>
+    </div>
+
+    <!-- Icono hamburguesa -->
+    <label class="labe_hamburguesa d-md-none" for="menu_hamburguesa">
+      <svg xmlns="http://www.w3.org/2000/svg" width="35" height="35" fill="#e63946" viewBox="0 0 16 16">
+        <path fill-rule="evenodd"
+          d="M2.5 12a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5zm0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5zm0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5z" />
+      </svg>
+    </label>
+
+    <!-- Checkbox oculto -->
+    <input class="menu_hamburguesa d-none" type="checkbox" id="menu_hamburguesa" />
+
+    <!-- Menú de enlaces -->
+    <ul class="ul_links nav flex-md-row flex-column">
+      <li class="nav-item"><a href="InicioEntrenador.html" class="nav-link ">Inicio</a></li>
+        <li class="nav-item"><a href="CrEntrenador.html" class="nav-link text-black">Cronograma Entrenador</a></li>
+        <li class="nav-item"><a href="PerfilJugEntre.html" class="nav-link text-black">Perfil Jugador</a></li>
+        <li class="nav-item"><a href="EqEntrenador.html" class="nav-link text-black">Pizarra Táctica</a></li>
+        <li class="nav-item"><a href="EstJugadorEntrenador.html" class="nav-link text-black">Evaluar Jugadores</a></li>
+        <li class="nav-item"><a href="EstFormulario.html" class="nav-link text-danger">Registrar Estadísticas</a></li>
+        <li class="nav-item"><a href="CerrarSesion.html" class="nav-link btn btn-outline-danger btn-sm">Cerrar Sesión</a></li>
+  </nav>
+</header>
+
+  <!-- MAIN -->
+  <main class="container my-5">
+    <h2 class="text-center text-danger mb-4">Registrar Estadísticas del Partido (2007)</h2>
+
+    <form class="shadow p-4 rounded bg-light">
+      <div class="row g-3 mb-4">
+        <div class="col-md-6">
+          <label for="partido" class="form-label fw-semibold">Partido</label>
+          <select id="partido" class="form-select" required>
+            <option selected disabled>Selecciona un partido</option>
+            <option value="1">vs Golden Score - 10/05/2025</option>
+            <option value="2">vs Real Carvajal - 14/05/2025</option>
+            <option value="3">vs Millonarios C - 20/05/2025</option>
+          </select>
+        </div>
+        <div class="col-md-6">
+          <label for="jugador" class="form-label fw-semibold">Jugador</label>
+          <select id="jugador" class="form-select" required>
+            <option selected disabled>Selecciona un jugador</option>
+            <option>George Sánchez</option>
+            <option>Carlos Martínez</option>
+            <option>Juan Pérez</option>
+          </select>
+        </div>
+      </div>
+
+      <!--RELLENAR ESTADÍSTICAS DEL JUGADOR!-->
+      <div class="row g-3">
+        <div class="col-md-4">
+          <label class="form-label">Goles</label>
+          <input type="number" class="form-control" min="0" value="0" />
+        </div>
+        <div class="col-md-4">
+          <label class="form-label">Goles de Cabeza</label>
+          <input type="number" class="form-control" min="0" value="0" />
+        </div>
+        <div class="col-md-4">
+          <label class="form-label">Asistencias</label>
+          <input type="number" class="form-control" min="0" value="0" />
+        </div>
+
+        <div class="col-md-4">
+          <label class="form-label">Minutos Jugados</label>
+          <input type="number" class="form-control" min="0" max="90" value="0" />
+        </div>
+        <div class="col-md-4">
+          <label class="form-label">Tiros a Puerta</label>
+          <input type="number" class="form-control" min="0" value="0" />
+        </div>
+        <div class="col-md-4">
+          <label class="form-label">Fueras de Juego</label>
+          <input type="number" class="form-control" min="0" value="0" />
+        </div>
+
+        <div class="col-md-4">
+          <label class="form-label">Tarjetas Amarillas</label>
+          <input type="number" class="form-control" min="0" max="2" value="0" />
+        </div>
+        <div class="col-md-4">
+          <label class="form-label">Tarjetas Rojas</label>
+          <input type="number" class="form-control" min="0" max="1" value="0" />
+        </div>
+      </div>
+
+      <div class="text-center mt-4">
+        <button type="submit" class="btn btn-danger px-4">Guardar Estadísticas</button>
+      </div>
+    </form> 
+
+  </main>
+
+  <!-- FOOTER -->
+  <footer class="bg-dark text-white py-4 mt-auto">
+    <div class="container">
+      <div class="row text-center text-md-start justify-content-center">
+        <div class="col-md-4 mb-3">
+          <h3 class="text-danger">SCORD</h3>
+          <p>Sistema de control y organización deportiva</p>
+        </div>
+        <div class="col-md-4 mb-3">
+          <h3 class="text-danger">Escuela Quilmes</h3>
+          <p>Formando talentos para el futuro</p>
+        </div>
+      </div>
+      <hr class="border-light">
+      <p class="text-center mb-0 small">&copy; 2025 SCORD | Escuela de Fútbol Quilmes | Todos los derechos reservados</p>
+    </div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+
+</html>
