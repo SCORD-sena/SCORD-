@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "40874730099",
+    "project_id": "scord-20bff",
+    "storage_bucket": "scord-20bff.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:40874730099:android:bd7975e53f7b05de6e4006",
+        "android_client_info": {
+          "package_name": "co.scord.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBvzzLLWbIgxem33PbFcLENJqTI_l_adWc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

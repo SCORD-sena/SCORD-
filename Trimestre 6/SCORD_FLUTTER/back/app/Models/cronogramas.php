@@ -22,7 +22,12 @@ class cronogramas extends Model
         'Ubicacion',
         'SedeEntrenamiento',
         'Descripcion',
+<<<<<<< HEAD
+        'idCategorias',
+        'idCompetencias'
+=======
         'idCategorias'
+>>>>>>> 77fbf37e833f546a83348df26e99d07ab761018b
     ];
 
     // Relación: un cronograma tiene muchos partidos
@@ -35,4 +40,12 @@ class cronogramas extends Model
     {
         return $this->belongsTo(Categorias::class, 'idCategorias', 'idCategorias');
     }
+<<<<<<< HEAD
+    // Relación: un cronograma pertenece a una competencia
+    public function competencia(): BelongsTo
+    {
+        return $this->belongsTo(Competencias::class, 'idCompetencias', 'idCompetencias');
+    }  
+=======
+>>>>>>> 77fbf37e833f546a83348df26e99d07ab761018b
 }

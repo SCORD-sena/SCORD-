@@ -1,5 +1,28 @@
 import 'package:flutter/material.dart';
 import 'dart:convert';
+<<<<<<< HEAD
+import 'package:flutter/foundation.dart';
+import 'package:universal_html/html.dart' as html;
+import '../../models/categoria_model.dart';
+import '../../models/jugador_model.dart';
+import '../../models/rendimiento_model.dart';
+import '../../models/competencia_model.dart';
+import '../../models/partido_model.dart';
+import '../../services/rendimiento_service.dart';
+import '../../services/api_service.dart';
+import '../../services/competencia_service.dart';
+import '../../services/cronograma_service.dart';
+import '../../utils/validator.dart';
+import '../../services/reporte_service.dart';
+
+class EstadisticasController extends ChangeNotifier {
+  // Servicios
+  final RendimientoService _rendimientoService = RendimientoService();
+  final ApiService _apiService = ApiService();
+  final ReporteService _reporteService = ReporteService();
+  final CompetenciaService _competenciaService = CompetenciaService();
+  final CronogramaService _cronogramaService = CronogramaService();
+=======
 import '../../models/categoria_model.dart';
 import '../../models/jugador_model.dart';
 import '../../models/rendimiento_model.dart';
@@ -10,16 +33,34 @@ import '../../utils/validator.dart';
 class EstadisticasController extends ChangeNotifier {
   final RendimientoService _rendimientoService = RendimientoService();
   final ApiService _apiService = ApiService();
+>>>>>>> 77fbf37e833f546a83348df26e99d07ab761018b
 
   // State
   List<Jugador> jugadores = [];
   List<Categoria> categorias = [];
+<<<<<<< HEAD
+  List<Competencia> competencias = [];
+  List<Competencia> competenciasFiltradas = [];
+  List<Partido> partidos = [];
+  List<Partido> partidosFiltrados = [];
+  
   String? categoriaSeleccionadaId;
+  int? competenciaSeleccionada;
+  int? partidoSeleccionado;
+  
+=======
+  String? categoriaSeleccionadaId;
+>>>>>>> 77fbf37e833f546a83348df26e99d07ab761018b
   Jugador? jugadorSeleccionado;
   List<Jugador> jugadoresFiltrados = [];
   EstadisticasTotales? estadisticasTotales;
   bool modoEdicion = false;
   bool loading = false;
+<<<<<<< HEAD
+  bool isLoadingCompetencias = false;
+  bool isLoadingPartidos = false;
+=======
+>>>>>>> 77fbf37e833f546a83348df26e99d07ab761018b
   UltimoRegistro? ultimoRegistro;
 
   Map<String, String> formData = {
@@ -34,17 +75,39 @@ class EstadisticasController extends ChangeNotifier {
     'arcoEnCero': "",
   };
 
+<<<<<<< HEAD
+  // ============================================================
+  // INICIALIZACIÓN
+  // ============================================================
+
+=======
   // Inicialización
+>>>>>>> 77fbf37e833f546a83348df26e99d07ab761018b
   Future<void> inicializar() async {
     await cargarDatosIniciales();
   }
 
   Future<void> cargarDatosIniciales() async {
+<<<<<<< HEAD
+    await Future.wait([
+      fetchCategorias(),
+      fetchJugadores(),
+      fetchCompetencias(),
+      fetchPartidos(),
+    ]);
+  }
+
+  // ============================================================
+  // FILTRADO
+  // ============================================================
+
+=======
     await fetchCategorias();
     await fetchJugadores();
   }
 
   // Filtrado de jugadores
+>>>>>>> 77fbf37e833f546a83348df26e99d07ab761018b
   void filtrarJugadores(String? categoriaId) {
     if (categoriaId != null) {
       final id = int.tryParse(categoriaId);
@@ -61,7 +124,61 @@ class EstadisticasController extends ChangeNotifier {
     notifyListeners();
   }
 
+<<<<<<< HEAD
+  Future<void> filtrarCompetenciasPorCategoria(int idCategoria) async {
+    isLoadingCompetencias = true;
+    notifyListeners();
+    
+    try {
+      final data = await _competenciaService.getCompetenciasByCategoria(idCategoria);
+      competenciasFiltradas = data; 
+      // Resetear selección de competencia y partido
+      competenciaSeleccionada = null;
+      partidoSeleccionado = null;
+      partidosFiltrados = [];
+    } catch (e) {
+      competenciasFiltradas = [];
+    } finally {
+      isLoadingCompetencias = false;
+      notifyListeners();
+    }
+  }
+
+  Future<void> filtrarPartidosPorCompetencia(int idCompetencia) async {
+    isLoadingPartidos = true;
+    notifyListeners();
+    
+    try {
+      
+      final todosLosPartidos = await _cronogramaService.getPartidos();
+      final cronogramas = await _cronogramaService.getCronogramas();
+      final cronogramasDeCompetencia = cronogramas
+          .where((c) => c.idCompetencias == idCompetencia && c.tipoDeEventos == 'Partido')
+          .toList();
+      
+      partidosFiltrados = todosLosPartidos.where((partido) {
+        return cronogramasDeCompetencia.any(
+          (cronograma) => cronograma.idCronogramas == partido.idCronogramas
+        );
+      }).toList();
+      
+      
+      partidoSeleccionado = null;
+    } catch (e) {
+      partidosFiltrados = [];
+    } finally {
+      isLoadingPartidos = false;
+      notifyListeners();
+    }
+  }
+
+  // ============================================================
+  // FETCH DE DATOS
+  // ============================================================
+
+=======
   // Fetch de datos
+>>>>>>> 77fbf37e833f546a83348df26e99d07ab761018b
   Future<void> fetchJugadores() async {
     try {
       final res = await _apiService.get('/jugadores');
@@ -84,7 +201,10 @@ class EstadisticasController extends ChangeNotifier {
             final jugador = Jugador.fromJson(data[i] as Map<String, dynamic>);
             jugadoresParsed.add(jugador);
           } catch (e) {
+<<<<<<< HEAD
+=======
             print('Error parseando jugador en índice $i: $e');
+>>>>>>> 77fbf37e833f546a83348df26e99d07ab761018b
             continue;
           }
         }
@@ -97,7 +217,10 @@ class EstadisticasController extends ChangeNotifier {
         notifyListeners();
       }
     } catch (e) {
+<<<<<<< HEAD
+=======
       print('Error cargando jugadores: $e');
+>>>>>>> 77fbf37e833f546a83348df26e99d07ab761018b
       rethrow;
     }
   }
@@ -111,7 +234,29 @@ class EstadisticasController extends ChangeNotifier {
         notifyListeners();
       }
     } catch (e) {
+<<<<<<< HEAD
+      rethrow;
+    }
+  }
+
+  Future<void> fetchCompetencias() async {
+    try {
+      competencias = await _competenciaService.getCompetencias();
+      notifyListeners();
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  Future<void> fetchPartidos() async {
+    try {
+      partidos = await _cronogramaService.getPartidos();
+      notifyListeners();
+    } catch (e) {
+      rethrow;
+=======
       print('Error cargando categorías: $e');
+>>>>>>> 77fbf37e833f546a83348df26e99d07ab761018b
     }
   }
 
@@ -130,7 +275,100 @@ class EstadisticasController extends ChangeNotifier {
     }
   }
 
+<<<<<<< HEAD
+  /// 🆕 Obtener estadísticas filtradas por competencia
+  Future<void> fetchEstadisticasPorCompetencia(int idJugador, int idCompetencia) async {
+    loading = true;
+    notifyListeners();
+    
+    try {
+      final estadisticas = await _rendimientoService.obtenerEstadisticasPorCompetencia(
+        idJugador, 
+        idCompetencia
+      );
+      
+      if (estadisticas != null) {
+        estadisticasTotales = estadisticas;
+      } else {
+        estadisticasTotales = EstadisticasTotales(
+          totales: {
+            'total_goles': 0,
+            'total_goles_cabeza': 0,
+            'total_minutos_jugados': 0,
+            'total_asistencias': 0,
+            'total_tiros_apuerta': 0,
+            'total_tarjetas_rojas': 0,
+            'total_tarjetas_amarillas': 0,
+            'total_arco_en_cero': 0,
+            'total_fueras_de_lugar': 0,
+            'total_partidos_jugados': 0,
+          },
+          promedios: {
+            'goles_por_partido': 0.0,
+            'asistencias_por_partido': 0.0,
+            'minutos_por_partido': 0.0,
+            'tiros_apuerta_por_partido': 0.0,
+          },
+        );
+      }
+    } catch (e) {
+      rethrow;
+    } finally {
+      loading = false;
+      notifyListeners();
+    }
+  }
+
+  /// 🆕 Obtener estadísticas de un partido específico
+  Future<void> fetchEstadisticasPorPartido(int idJugador, int idPartido) async {
+    loading = true;
+    notifyListeners();
+    
+    try {
+      final estadisticas = await _rendimientoService.obtenerEstadisticasPorPartido(
+        idJugador, 
+        idPartido
+      );
+      
+      if (estadisticas != null) {
+        estadisticasTotales = estadisticas;
+      } else {
+        estadisticasTotales = EstadisticasTotales(
+          totales: {
+            'total_goles': 0,
+            'total_goles_cabeza': 0,
+            'total_minutos_jugados': 0,
+            'total_asistencias': 0,
+            'total_tiros_apuerta': 0,
+            'total_tarjetas_rojas': 0,
+            'total_tarjetas_amarillas': 0,
+            'total_arco_en_cero': 0,
+            'total_fueras_de_lugar': 0,
+            'total_partidos_jugados': 0,
+          },
+          promedios: {
+            'goles_por_partido': 0.0,
+            'asistencias_por_partido': 0.0,
+            'minutos_por_partido': 0.0,
+            'tiros_apuerta_por_partido': 0.0,
+          },
+        );
+      }
+    } catch (e) {
+      rethrow;
+    } finally {
+      loading = false;
+      notifyListeners();
+    }
+  }
+
+  // ============================================================
+  // EDICIÓN
+  // ============================================================
+
+=======
   // Edición
+>>>>>>> 77fbf37e833f546a83348df26e99d07ab761018b
   void activarEdicion() {
     if (jugadorSeleccionado == null) {
       throw Exception('No hay jugador seleccionado');
@@ -197,7 +435,19 @@ class EstadisticasController extends ChangeNotifier {
       );
 
       if (exito) {
+<<<<<<< HEAD
+        // 🆕 Recargar estadísticas según filtros activos
+        if (partidoSeleccionado != null) {
+          await fetchEstadisticasPorPartido(jugadorSeleccionado!.idJugadores, partidoSeleccionado!);
+        } else if (competenciaSeleccionada != null) {
+          await fetchEstadisticasPorCompetencia(jugadorSeleccionado!.idJugadores, competenciaSeleccionada!);
+        } else {
+          await fetchEstadisticasTotales(jugadorSeleccionado!.idJugadores);
+        }
+        
+=======
         await fetchEstadisticasTotales(jugadorSeleccionado!.idJugadores);
+>>>>>>> 77fbf37e833f546a83348df26e99d07ab761018b
         cancelarEdicion();
         return true;
       } else {
@@ -244,7 +494,19 @@ class EstadisticasController extends ChangeNotifier {
         final exito = await _rendimientoService.eliminarRendimiento(registro.idRendimientos);
 
         if (exito) {
+<<<<<<< HEAD
+          // 🆕 Recargar estadísticas según filtros activos
+          if (partidoSeleccionado != null) {
+            await fetchEstadisticasPorPartido(idJugador, partidoSeleccionado!);
+          } else if (competenciaSeleccionada != null) {
+            await fetchEstadisticasPorCompetencia(idJugador, competenciaSeleccionada!);
+          } else {
+            await fetchEstadisticasTotales(idJugador);
+          }
+          
+=======
           await fetchEstadisticasTotales(idJugador);
+>>>>>>> 77fbf37e833f546a83348df26e99d07ab761018b
           cancelarEdicion();
           return true;
         } else {
@@ -261,11 +523,30 @@ class EstadisticasController extends ChangeNotifier {
     }
   }
 
+<<<<<<< HEAD
+  // ============================================================
+  // SELECCIONES
+  // ============================================================
+
+  Future<void> seleccionarJugador(int? idJugador) async {
+    if (idJugador != null) {
+      jugadorSeleccionado = jugadores.firstWhere((j) => j.idJugadores == idJugador);
+      
+      // 🆕 Recargar estadísticas según filtros activos
+      if (partidoSeleccionado != null) {
+        await fetchEstadisticasPorPartido(idJugador, partidoSeleccionado!);
+      } else if (competenciaSeleccionada != null) {
+        await fetchEstadisticasPorCompetencia(idJugador, competenciaSeleccionada!);
+      } else {
+        await fetchEstadisticasTotales(idJugador);
+      }
+=======
   // Seleccionar jugador
   void seleccionarJugador(int? idJugador) {
     if (idJugador != null) {
       jugadorSeleccionado = jugadores.firstWhere((j) => j.idJugadores == idJugador);
       fetchEstadisticasTotales(idJugador);
+>>>>>>> 77fbf37e833f546a83348df26e99d07ab761018b
     } else {
       jugadorSeleccionado = null;
       estadisticasTotales = null;
@@ -273,18 +554,93 @@ class EstadisticasController extends ChangeNotifier {
     notifyListeners();
   }
 
+<<<<<<< HEAD
+  Future<void> seleccionarCategoria(String? categoriaId) async {
+    categoriaSeleccionadaId = categoriaId;
+    filtrarJugadores(categoriaId);
+    
+    if (categoriaId != null) {
+      final id = int.tryParse(categoriaId);
+      if (id != null) {
+        await filtrarCompetenciasPorCategoria(id);
+      }
+    } else {
+      competenciasFiltradas = [];
+      competenciaSeleccionada = null;
+      partidosFiltrados = [];
+      partidoSeleccionado = null;
+      notifyListeners();
+    }
+  }
+
+  Future<void> seleccionarCompetencia(int? idCompetencia) async {
+    competenciaSeleccionada = idCompetencia;
+    
+    if (idCompetencia != null) {
+      await filtrarPartidosPorCompetencia(idCompetencia);
+      
+      // 🆕 Recargar estadísticas filtradas por competencia
+      if (jugadorSeleccionado != null) {
+        await fetchEstadisticasPorCompetencia(
+          jugadorSeleccionado!.idJugadores, 
+          idCompetencia
+        );
+      }
+    } else {
+      partidosFiltrados = [];
+      partidoSeleccionado = null;
+      
+      // 🆕 Volver a estadísticas totales
+      if (jugadorSeleccionado != null) {
+        await fetchEstadisticasTotales(jugadorSeleccionado!.idJugadores);
+      }
+      
+      notifyListeners();
+    }
+  }
+
+  Future<void> seleccionarPartido(int? idPartido) async {
+    partidoSeleccionado = idPartido;
+    
+    // 🆕 Recargar estadísticas del partido específico
+    if (idPartido != null && jugadorSeleccionado != null) {
+      await fetchEstadisticasPorPartido(
+        jugadorSeleccionado!.idJugadores, 
+        idPartido
+      );
+    } else if (competenciaSeleccionada != null && jugadorSeleccionado != null) {
+      await fetchEstadisticasPorCompetencia(
+        jugadorSeleccionado!.idJugadores, 
+        competenciaSeleccionada!
+      );
+    } else if (jugadorSeleccionado != null) {
+      await fetchEstadisticasTotales(jugadorSeleccionado!.idJugadores);
+    } else {
+      notifyListeners();
+    }
+  }
+
+  // ============================================================
+  // UTILIDADES
+  // ============================================================
+
+=======
   void seleccionarCategoria(String? categoriaId) {
     categoriaSeleccionadaId = categoriaId;
     filtrarJugadores(categoriaId);
   }
 
   // Actualizar campo del formulario
+>>>>>>> 77fbf37e833f546a83348df26e99d07ab761018b
   void actualizarCampo(String campo, String valor) {
     formData[campo] = valor;
     notifyListeners();
   }
 
+<<<<<<< HEAD
+=======
   // Helper para calcular edad
+>>>>>>> 77fbf37e833f546a83348df26e99d07ab761018b
   String calcularEdad(DateTime? fechaNacimiento) { 
     if (fechaNacimiento == null) return "-";
     
@@ -299,8 +655,60 @@ class EstadisticasController extends ChangeNotifier {
     return edad.toString();
   }
 
+<<<<<<< HEAD
+  // ============================================================
+  // REPORTES PDF
+  // ============================================================
+
+  Future<String?> generarReporteJugador() async {
+    if (jugadorSeleccionado == null) {
+      throw Exception('No hay jugador seleccionado');
+    }
+
+    loading = true;
+    notifyListeners();
+
+    try {
+      final pdfBytes = await _reporteService.getReportePDFBytes(
+        jugadorSeleccionado!.idJugadores
+      );
+      
+      if (pdfBytes == null || pdfBytes.isEmpty) {
+        throw Exception('No se pudo generar el contenido del reporte (bytes nulos o vacíos)');
+      }
+
+      if (kIsWeb) {
+        final nombreArchivo = 'reporte_jugador.pdf'; 
+        final blob = html.Blob([pdfBytes]);
+        final url = html.Url.createObjectUrlFromBlob(blob);
+        
+        final anchor = html.document.createElement('a') as html.AnchorElement
+          ..href = url
+          ..style.display = 'none'
+          ..download = nombreArchivo;
+
+        html.document.body!.children.add(anchor);
+        anchor.click();
+        html.document.body!.children.remove(anchor);
+        html.Url.revokeObjectUrl(url); 
+
+        return 'El reporte PDF se ha descargado en el navegador.';
+      } else {
+        final rutaArchivo = await _reporteService.generarReportePDF(
+          jugadorSeleccionado!.idJugadores
+        );
+        return rutaArchivo;
+      }
+    } catch (e) {
+      rethrow;
+    } finally {
+      loading = false;
+      notifyListeners();
+    }
+=======
   @override
   void dispose() {
     super.dispose();
+>>>>>>> 77fbf37e833f546a83348df26e99d07ab761018b
   }
 }
