@@ -149,6 +149,63 @@ class AuthController extends Controller
     }
 
     public function getUser()
+<<<<<<< HEAD
+{
+    try {
+        $personas = auth('api')->user();
+        
+        if (!$personas) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Usuario no encontrado',
+            ], 404);
+        }
+
+        // Obtener el usuario completo con las relaciones, INCLUYENDO jugadores
+        $user = Personas::with(['tiposDeDocumentos', 'rol', 'jugadores.categoria'])
+            ->where('idPersonas', $personas->idPersonas)
+            ->first();
+
+        // Preparar respuesta base
+        $userData = [
+            'NumeroDeDocumento' => $user->NumeroDeDocumento,
+            'Nombre1' => $user->Nombre1,
+            'Nombre2' => $user->Nombre2,
+            'Apellido1' => $user->Apellido1,
+            'Apellido2' => $user->Apellido2,
+            'correo' => $user->correo,
+            'Telefono' => $user->Telefono,
+            'Direccion' => $user->Direccion,
+            'FechaDeNacimiento' => $user->FechaDeNacimiento,
+            'Genero' => $user->Genero,
+            'EpsSisben' => $user->EpsSisben,
+            'TiposDeDocumentos' => $user->tiposDeDocumentos,
+            'Rol' => $user->rol
+        ];
+
+        // Si el usuario es un jugador, agregar datos de jugador
+        // Como jugadores es HasMany, tomamos el primero
+        if ($user->jugadores->isNotEmpty()) {
+            $jugador = $user->jugadores->first();
+            $userData['idCategorias'] = $jugador->idCategorias;
+            $userData['Jugador'] = $jugador;
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Usuario obtenido exitosamente',
+            'data' => $userData
+        ], 200);
+
+    } catch (\Exception $e) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Error al obtener usuario',
+            'error' => $e->getMessage(),
+        ], 500);
+    }
+}
+=======
     {
         try {
             $personas = auth('api')->user();
@@ -193,6 +250,7 @@ class AuthController extends Controller
             ], 500);
         }
     }
+>>>>>>> 77fbf37e833f546a83348df26e99d07ab761018b
 
     public function logout()
     {

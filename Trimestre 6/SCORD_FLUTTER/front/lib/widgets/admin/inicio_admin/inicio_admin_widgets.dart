@@ -30,10 +30,17 @@ class AdminDrawerMenu extends StatelessWidget {
             ),
           ),
           _buildDrawerItem('Inicio', Icons.home, '/InicioAdmin'),
+<<<<<<< HEAD
+          _buildDrawerItem('Cronograma', Icons.calendar_month, '/CronogramaAdmin'),
+          _buildDrawerItem('Perfil Jugador', Icons.person_pin, '/PerfilJugadorAdmin'),
+          _buildDrawerItem('Estadísticas Jugadores', Icons.bar_chart, '/EstadisticasJugadores'),
+          _buildDrawerItem('Perfil Entrenador', Icons.sports_gymnastics, '/PerfilEntrenadorAdmin'),
+=======
           _buildDrawerItem('Cronograma', Icons.calendar_month, '/Cronograma'),
           _buildDrawerItem('Perfil Jugador', Icons.person_pin, '/PerfilJugadorAdmin'),
           _buildDrawerItem('Estadísticas Jugadores', Icons.bar_chart, '/EstadisticasJugadores'),
           _buildDrawerItem('Perfil Entrenador', Icons.sports_gymnastics, '/PerfilEntrenador'),
+>>>>>>> 77fbf37e833f546a83348df26e99d07ab761018b
           _buildDrawerItem('Evaluar Jugadores', Icons.rule, '/EvaluarJugadores'),
           const Divider(),
           ListTile(

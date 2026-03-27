@@ -3,12 +3,39 @@ import 'dart:convert';
 import '../../models/categoria_model.dart';
 import '../../models/jugador_model.dart';
 import '../../models/partido_model.dart';
+<<<<<<< HEAD
+import '../../models/competencia_model.dart';
 import '../../services/rendimiento_service.dart';
 import '../../services/api_service.dart';
+import '../../services/competencia_service.dart';
+import '../../services/cronograma_service.dart';
+=======
+import '../../services/rendimiento_service.dart';
+import '../../services/api_service.dart';
+>>>>>>> 77fbf37e833f546a83348df26e99d07ab761018b
 
 class AgregarRendimientoController extends ChangeNotifier {
   final RendimientoService _rendimientoService = RendimientoService();
   final ApiService _apiService = ApiService();
+<<<<<<< HEAD
+  final CompetenciaService _competenciaService = CompetenciaService();
+  final CronogramaService _cronogramaService = CronogramaService();
+
+  // State
+  bool loading = false;
+  bool isLoadingCompetencias = false;
+  bool isLoadingPartidos = false;
+  
+  List<Jugador> jugadores = [];
+  List<Categoria> categorias = [];
+  List<Competencia> competencias = [];
+  List<Competencia> competenciasFiltradas = [];
+  List<Partido> partidos = [];
+  List<Partido> partidosFiltrados = [];
+  
+  String? categoriaSeleccionada;
+  int? competenciaSeleccionada;
+=======
 
   // State
   bool loading = false;
@@ -16,6 +43,7 @@ class AgregarRendimientoController extends ChangeNotifier {
   List<Categoria> categorias = [];
   List<Partido> partidos = [];
   String? categoriaSeleccionada;
+>>>>>>> 77fbf37e833f546a83348df26e99d07ab761018b
   List<Jugador> jugadoresFiltrados = [];
   String? jugadorSeleccionado;
   String? partidoSeleccionado;
@@ -31,7 +59,14 @@ class AgregarRendimientoController extends ChangeNotifier {
   final TextEditingController tarjetasRojasController = TextEditingController(text: "0");
   final TextEditingController arcoEnCeroController = TextEditingController(text: "0");
 
+<<<<<<< HEAD
+  // ============================================================
+  // INICIALIZACIÓN
+  // ============================================================
+
+=======
   // Inicialización
+>>>>>>> 77fbf37e833f546a83348df26e99d07ab761018b
   Future<void> inicializar() async {
     await cargarDatos();
   }
@@ -40,6 +75,12 @@ class AgregarRendimientoController extends ChangeNotifier {
     try {
       final jugadoresRes = await _apiService.get('/jugadores');
       final categoriasRes = await _apiService.get('/categorias');
+<<<<<<< HEAD
+
+      if (jugadoresRes.statusCode == 200 && categoriasRes.statusCode == 200) {
+        final jugadoresData = json.decode(jugadoresRes.body);
+        final categoriasData = json.decode(categoriasRes.body);
+=======
       final partidosRes = await _apiService.get('/partidos');
 
       if (jugadoresRes.statusCode == 200 && 
@@ -49,6 +90,7 @@ class AgregarRendimientoController extends ChangeNotifier {
         final jugadoresData = json.decode(jugadoresRes.body);
         final categoriasData = json.decode(categoriasRes.body);
         final partidosData = json.decode(partidosRes.body);
+>>>>>>> 77fbf37e833f546a83348df26e99d07ab761018b
 
         List<dynamic> jugadoresList;
         if (jugadoresData is Map && jugadoresData.containsKey('data')) {
@@ -59,7 +101,14 @@ class AgregarRendimientoController extends ChangeNotifier {
 
         jugadores = jugadoresList.map((j) => Jugador.fromJson(j)).toList();
         categorias = (categoriasData as List).map((c) => Categoria.fromJson(c)).toList();
+<<<<<<< HEAD
+        
+        // Cargar competencias y partidos
+        competencias = await _competenciaService.getCompetencias();
+        partidos = await _cronogramaService.getPartidos();
+=======
         partidos = (partidosData as List).map((p) => Partido.fromJson(p)).toList();
+>>>>>>> 77fbf37e833f546a83348df26e99d07ab761018b
         
         notifyListeners();
       }
@@ -68,7 +117,14 @@ class AgregarRendimientoController extends ChangeNotifier {
     }
   }
 
+<<<<<<< HEAD
+  // ============================================================
+  // FILTRADO
+  // ============================================================
+
+=======
   // Filtrado de jugadores
+>>>>>>> 77fbf37e833f546a83348df26e99d07ab761018b
   void filtrarJugadores(String? categoriaId) {
     if (categoriaId != null) {
       final id = int.tryParse(categoriaId);
@@ -81,10 +137,94 @@ class AgregarRendimientoController extends ChangeNotifier {
     notifyListeners();
   }
 
+<<<<<<< HEAD
+  Future<void> filtrarCompetenciasPorCategoria(int idCategoria) async {
+    isLoadingCompetencias = true;
+    notifyListeners();
+    
+    try {
+      competenciaSeleccionada = null;
+      partidoSeleccionado = null;
+      partidosFiltrados = [];
+    } catch (e) {
+      competenciasFiltradas = [];
+    } finally {
+      isLoadingCompetencias = false;
+      notifyListeners();
+    }
+  }
+
+  Future<void> filtrarPartidosPorCompetencia(int idCompetencia) async {
+    isLoadingPartidos = true;
+    notifyListeners();
+    
+    try {     
+      // Obtener todos los partidos
+      final todosLosPartidos = await _cronogramaService.getPartidos();
+      
+      // Obtener cronogramas de esta competencia
+      final cronogramas = await _cronogramaService.getCronogramas();
+      final cronogramasDeCompetencia = cronogramas
+          .where((c) => c.idCompetencias == idCompetencia && c.tipoDeEventos == 'Partido')
+          .toList();
+      
+      // Filtrar partidos que pertenecen a esos cronogramas
+      partidosFiltrados = todosLosPartidos.where((partido) {
+        return cronogramasDeCompetencia.any(
+          (cronograma) => cronograma.idCronogramas == partido.idCronogramas
+        );
+      }).toList();
+      
+      // Resetear selección de partido
+      partidoSeleccionado = null;
+    } catch (e) {
+      partidosFiltrados = [];
+    } finally {
+      isLoadingPartidos = false;
+      notifyListeners();
+    }
+  }
+
+  // ============================================================
+  // SELECCIÓN
+  // ============================================================
+
+  Future<void> seleccionarCategoria(String? value) async {
+    categoriaSeleccionada = value;
+    filtrarJugadores(value);
+    
+    // Filtrar competencias si hay categoría seleccionada
+    if (value != null) {
+      final id = int.tryParse(value);
+      if (id != null) {
+        await filtrarCompetenciasPorCategoria(id);
+      }
+    } else {
+      competenciasFiltradas = [];
+      competenciaSeleccionada = null;
+      partidosFiltrados = [];
+      partidoSeleccionado = null;
+      notifyListeners();
+    }
+  }
+
+  Future<void> seleccionarCompetencia(int? value) async {
+    competenciaSeleccionada = value;
+    
+    // Filtrar partidos si hay competencia seleccionada
+    if (value != null) {
+      await filtrarPartidosPorCompetencia(value);
+    } else {
+      partidosFiltrados = [];
+      partidoSeleccionado = null;
+      notifyListeners();
+    }
+=======
   // Selección
   void seleccionarCategoria(String? value) {
     categoriaSeleccionada = value;
     filtrarJugadores(value);
+>>>>>>> 77fbf37e833f546a83348df26e99d07ab761018b
   }
 
   void seleccionarJugador(String? value) {
@@ -97,12 +237,26 @@ class AgregarRendimientoController extends ChangeNotifier {
     notifyListeners();
   }
 
+<<<<<<< HEAD
+  // ============================================================
+  // VALIDACIÓN
+  // ============================================================
+
+=======
   // Validación
+>>>>>>> 77fbf37e833f546a83348df26e99d07ab761018b
   String? validarFormulario() {
     if (categoriaSeleccionada == null || categoriaSeleccionada!.isEmpty) {
       return 'Debes seleccionar una categoría';
     }
 
+<<<<<<< HEAD
+    if (competenciaSeleccionada == null) {
+      return 'Debes seleccionar una competencia';
+    }
+
+=======
+>>>>>>> 77fbf37e833f546a83348df26e99d07ab761018b
     if (jugadorSeleccionado == null || jugadorSeleccionado!.isEmpty) {
       return 'Debes seleccionar un jugador';
     }
@@ -140,7 +294,14 @@ class AgregarRendimientoController extends ChangeNotifier {
     return null;
   }
 
+<<<<<<< HEAD
+  // ============================================================
+  // CREAR ESTADÍSTICA
+  // ============================================================
+
+=======
   // Crear estadística
+>>>>>>> 77fbf37e833f546a83348df26e99d07ab761018b
   Future<bool> crearEstadistica() async {
     final error = validarFormulario();
     if (error != null) {
@@ -180,7 +341,14 @@ class AgregarRendimientoController extends ChangeNotifier {
     }
   }
 
+<<<<<<< HEAD
+  // ============================================================
+  // DISPOSE
+  // ============================================================
+
+=======
   // Limpiar recursos
+>>>>>>> 77fbf37e833f546a83348df26e99d07ab761018b
   @override
   void dispose() {
     golesController.dispose();
