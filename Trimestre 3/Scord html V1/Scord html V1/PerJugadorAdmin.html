@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="PerfilJugador.css">
+    <title>Perfil Jugador - SCORD</title>
+</head>
+<body>
+    <header>
+        <div class="header">
+            <img src="balon_oro.png" alt="Logo"><h4>SCORD</h4>
+        </div>
+        <div class="contenedor-menu">
+            <nav class="navegacion">
+                <div class="menu">
+                    <h3 class="menu-titulo">Menú</h3>
+                    <div class="menu-links">
+                        <a href="AgregarUsu.html">Agregar Usuario</a>
+                        <a href="CrJugadorAdmin.html">Cronograma Jugador</a>
+                        <a href="CronogramaEntrenador.html">Cronograma Entrenador</a>
+                        <a href="PerfilAdmin.html">Perfil Administrador</a>
+                        <a href="PerJugadorAdmin.html">Perfil Jugador</a>
+                        <a href="PerfilEntrenador.html">Perfil Entrenador</a>
+                        <a href="Equipos.html">Equipos</a>
+                        <a href="EstJJugadorAdmin.html">Estadísticas Jugador</a>
+                        <a href="CerrarSesion.html">Cerrar Sesión</a>
+                    </div>
+                </div>    
+            </nav>
+        </div>
+    </header>
+    
+    <div class="contenedor-principal">
+        <div class="perfil-encabezado">
+            <div class="info-perfil">
+                <h1>Bienvenido(a) George Sanchez</h1>
+                <h2>Jugador</h2>
+            </div>
+            <div class="foto-perfil">
+                <img src="icono-perfil-usuario.png" alt="Foto de Perfil">
+            </div>
+        </div>
+        
+        <div class="contenedor-info">
+            <div class="info-personal">
+                <div class="seccion-encabezado">
+                    <h2>Información Personal</h2>
+                    <button class="boton-editar" onclick="habilitarEdicion('personal')">Editar</button>
+                </div>
+                <form id="form-personal">
+                    <ul class="info-lista">
+                        <li>
+                            <strong>Nombre:</strong>
+                            <span class="dato-valor">George Sanchez</span>
+                            <input type="text" class="campo-edicion" value="George Sanchez" disabled>
+                        </li>
+                        <li>
+                            <strong>Edad:</strong>
+                            <span class="dato-valor">17</span>
+                            <input type="number" class="campo-edicion" value="17" min="5" max="99" disabled>
+                        </li>
+                        <li>
+                            <strong>Documento:</strong>
+                            <span class="dato-valor">1029220893</span>
+                            <input type="text" class="campo-edicion" value="1029220893" disabled>
+                        </li>
+                        <li>
+                            <strong>Número de Contacto:</strong>
+                            <span class="dato-valor">3114792068</span>
+                            <input type="tel" class="campo-edicion" value="3114792068" disabled>
+                        </li>
+                    </ul>
+                    <div class="botones-edicion">
+                        <button type="button" class="boton-guardar" onclick="guardarCambios('personal')">Guardar</button>
+                        <button type="button" class="boton-cancelar" onclick="cancelarEdicion('personal')">Cancelar</button>
+                    </div>
+                </form>
+            </div>
+            
+            <div class="info-deportiva">
+                <div class="seccion-encabezado">
+                    <h2>Información Deportiva</h2>
+                    <button class="boton-editar" onclick="habilitarEdicion('deportiva')">Editar</button>
+                </div>
+                <form id="form-deportiva">
+                    <ul class="info-lista">
+                        <li>
+                            <strong>Nombre de equipo:</strong>
+                            <span class="dato-valor">Combo AG</span>
+                            <input type="text" class="campo-edicion" value="Combo AG" disabled>
+                        </li>
+                        <li>
+                            <strong>Categoría:</strong>
+                            <span class="dato-valor">2007</span>
+                            <input type="text" class="campo-edicion" value="2007" disabled>
+                        </li>
+                        <li>
+                            <strong>Dorsal:</strong>
+                            <span class="dato-valor">10</span>
+                            <input type="number" class="campo-edicion" value="10" min="1" max="99" disabled>
+                        </li>
+                        <li>
+                            <strong>Posición:</strong>
+                            <span class="dato-valor">MCO</span>
+                            <select class="campo-edicion" disabled>
+                                <option value="POR">POR</option>
+                                <option value="DEF">DEF</option>
+                                <option value="LAT">LAT</option>
+                                <option value="MCD">MCD</option>
+                                <option value="MC">MC</option>
+                                <option value="MCO" selected>MCO</option>
+                                <option value="EXT">EXT</option>
+                                <option value="DEL">DEL</option>
+                            </select>
+                        </li>
+                        <li>
+                            <strong>Sede:</strong>
+                            <span class="dato-valor">Cayetano Cañizales</span>
+                            <input type="text" class="campo-edicion" value="Cayetano Cañizales" disabled>
+                        </li>
+                    </ul>
+                    <div class="botones-edicion">
+                        <button type="button" class="boton-guardar" onclick="guardarCambios('deportiva')">Guardar</button>
+                        <button type="button" class="boton-cancelar" onclick="cancelarEdicion('deportiva')">Cancelar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        
+        <div class="estadisticas-basicas">
+            <h2>Estadísticas Temporada 24/25</h2>
+            <div class="estadisticas-grid">
+                <div class="estadistica-item">
+                    <span class="estadistica-valor">10</span>
+                    <span class="estadistica-nombre">Goles</span>
+                </div>
+                <div class="estadistica-item">
+                    <span class="estadistica-valor">24</span>
+                    <span class="estadistica-nombre">Asistencias</span>
+                </div>
+                <div class="estadistica-item">
+                    <span class="estadistica-valor">20</span>
+                    <span class="estadistica-nombre">Partidos</span>
+                </div>
+                <div class="estadistica-item">
+                    <span class="estadistica-valor">1750</span>
+                    <span class="estadistica-nombre">Minutos</span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="estadisticas-completas">
+            <h2>Estadísticas Detalladas</h2>
+            <div class="estadisticas-columnas">
+                <div class="columna">
+                    <ul class="estadisticas-lista">
+                        <li><span>Pases</span> <span class="valor">18</span></li>
+                        <li><span>Goles</span> <span class="valor">10</span></li>
+                        <li><span>Goles de Cabeza</span> <span class="valor">2</span></li>
+                        <li><span>Goles por partido</span> <span class="valor">0,51</span></li>
+                        <li><span>Asistencias</span> <span class="valor">24</span></li>
+                        <li><span>Tiros a puerta</span> <span class="valor">12</span></li>
+                    </ul>
+                </div>
+                <div class="columna">
+                    <ul class="estadisticas-lista">
+                        <li><span>Fueras de Juego</span> <span class="valor">20</span></li>
+                        <li><span>Partidos jugados</span> <span class="valor">20</span></li>
+                        <li><span>Minutos jugados</span> <span class="valor">1750</span></li>
+                        <li><span>Tarjeta Amarilla</span> <span class="valor">2</span></li>
+                        <li><span>Tarjeta roja</span> <span class="valor">0</span></li>
+                        <li><span>Arco en cero</span> <span class="valor">0</span></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <footer>
+        <div class="footer-contenido">
+            <div class="footer-info">
+                <div>
+                    <h3>SCORD</h3>
+                    <p>Sistema de control y organización deportiva</p>
+                </div>
+                <div>
+                    <h3>Escuela Fénix</h3>
+                    <p>Formando talentos para el futuro</p>
+                </div>
+            </div>
+            <div class="footer-derechos">
+                <p>&copy; 2025 SCORD | Escuela de Fútbol Fénix | Todos los derechos reservados</p>
+            </div>
+        </div>
+    </footer>
+</body>
+</html>

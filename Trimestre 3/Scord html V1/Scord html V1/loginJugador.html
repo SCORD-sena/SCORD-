@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="es">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="stylesheet" href="loginAdmin.css">
+        <title>Iniciar Sesión - SCORD</title>
+    </head>
+    <body>
+        <header>
+            <div class="header-container">
+                <div class="logo"><img src="balon_oro.png" alt="Logo SCORD"></div>
+                <div class="titulo"><h1>SCORD</h1></div>
+            </div>
+        </header>
+        
+        <main>
+            <div class="login-container">
+                <h2>Iniciar Sesión Jugador</h2>
+                
+                <div class="contenedor-rol">
+                    <nav class="navegacion">
+                        <div class="menu">
+                            <h3 class="menu-titulo">Rol</h3>
+                            <div class="menu-links">
+                                <a href="loginJugador.html">Jugador</a>
+                                <a href="loginEntrenador.html">Entrenador</a>
+                                <a href="loginAdmin.html" class="active">Admin.</a>
+                            </div>
+                        </div>    
+                    </nav>
+                </div>
+                
+                <div class="contenedor-login">
+                    <form action="InicioAdmin.html" method="get">
+                        <div class="campo">
+                            <label for="codigo">Código de usuario</label>
+                            <input type="text" id="codigo" name="codigo" placeholder="Digite su código" required>
+                        </div>
+                        
+                        <div class="campo">
+                            <label for="password">Contraseña</label>
+                            <input type="password" id="password" name="password" placeholder="Digite su contraseña" required>
+                            <div class="mostrar-password">
+                                <input type="checkbox" id="show-password">
+                                <label for="show-password">Mostrar contraseña</label>
+                            </div>
+                        </div>
+                        
+                        <div class="iniciar">
+                            <button type="submit">Iniciar Sesión</button>
+                        </div>
+                        
+                        <div class="opciones-adicionales">
+                            <a href="#" class="recuperar-password">¿Olvidó su contraseña?</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </main>
+        
+        <footer>
+            <div class="footer-contenido">
+                <div class="footer-info">
+                    <div>
+                        <h3>SCORD</h3>
+                        <p>Sistema de control y organización deportiva</p>
+                    </div>
+                    <div>
+                        <h3>Escuela Fénix</h3>
+                        <p>Formando talentos para el futuro</p>
+                    </div>
+                </div>
+                <div class="footer-derechos">
+                    <p>&copy; 2025 SCORD | Escuela de Fútbol Fénix | Todos los derechos reservados</p>
+                </div>
+            </div>
+        </footer>
+    </body>
+</html>
